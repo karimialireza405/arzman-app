@@ -202,19 +202,16 @@ export function calculatePortfolio(
         a.averageCost = 0;
       } else {
         // Selling part of a position preserves the remaining average cost
-        a.averageCost = a.costBasis / a.quantity;
+        a.costBasis = a.quantity * a.averageCost;
       }
     }
-    // Clean precision to prevent floating-point binary noise accumulation
-    a.quantity = Math.round(a.quantity * 1e8) / 1e8;
-    a.costBasis = Math.round(a.costBasis * 100) / 100;
-    a.averageCost = Math.round(a.averageCost * 100) / 100;
-    a.realizedPnl = Math.round(a.realizedPnl * 100) / 100;
+    // Keep accounting precision between transactions. Round only for display.
     assets.set(tx.currency, a);
   }
   return [...assets.values()];
 }
 export function valuation(asset: PortfolioAsset, price: number | null) {
+  if (asset.quantity === 0) return { value: 0, pnl: 0, pnlPercent: null, breakEven: 0 };
   if (price === null) return null;
   const value = Math.round(asset.quantity * price * 100) / 100;
   const pnl = Math.round((value - asset.costBasis) * 100) / 100;
@@ -225,13 +222,33 @@ export function valuation(asset: PortfolioAsset, price: number | null) {
     breakEven: asset.averageCost,
   };
 }
+/** A missing market price is unknown, never a zero-valued holding. */
+export function totalValuation(values: (ReturnType<typeof valuation>)[]) {
+  if (values.some((value) => value === null)) return null;
+  return values.reduce((sum, value) => sum + (value?.value ?? 0), 0);
+}
+/**
+ * Display freshness: can ArzMan vouch for the *trade time* behind this price?
+ * TGJU publishes a clock-only label ("۱۹:۵۹:۵۸"), which never establishes an
+ * exact trade timestamp, so live TGJU quotes are always reported as unverified.
+ */
 export function isStale(q: CurrencyQuote, now = Date.now()) {
   return (
     q.stale ||
     !q.sourceTimestamp ||
     now - Date.parse(q.sourceTimestamp) > 5 * 60_000 ||
-    now - Date.parse(q.fetchedAt) > 5 * 60_000
+    !isFetchFresh(q, now)
   );
+}
+/**
+ * Retrieval freshness: did ArzMan itself read this price from the source
+ * recently? A cache served after an upstream failure keeps its original
+ * `fetchedAt`, so it ages out of this window instead of masquerading as live.
+ * This — not `isStale` — is the correct gate for acting on a price, because
+ * `isStale` is permanently true for TGJU and would disable alerts entirely.
+ */
+export function isFetchFresh(q: CurrencyQuote, now = Date.now()) {
+  return now - Date.parse(q.fetchedAt) <= 5 * 60_000;
 }
 export function alertMatches(
   alert: PriceAlert,
@@ -243,7 +260,7 @@ export function alertMatches(
     !alert.enabled ||
     alert.triggeredAt ||
     q.currency !== alert.currency ||
-    isStale(q, now)
+    !isFetchFresh(q, now)
   )
     return false;
   if (alert.kind === "above") return q.priceToman > alert.threshold;
