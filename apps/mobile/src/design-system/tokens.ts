@@ -1,15 +1,299 @@
 /**
- * ArzManDesignSystem — Apple iOS 27 Liquid Glass Tokens
+ * ArzMan Design Tokens — Apple iOS 17/18 Compliant
  *
- * Designed specifically for Persian-first Iranian currency market iPhone application.
- * Follows Apple Human Interface Guidelines and Liquid Glass principles:
- * - Clear two-layer separation: Chrome/Controls (Liquid Glass) vs Content (Opaque/Readable)
- * - OLED True Black background in dark mode, crisp system grouped background in light mode
- * - Concentric geometry (outer curvature determines inner curvature)
- * - Restrained, meaningful use of materials and color
+ * Grounded in official Apple Human Interface Guidelines:
+ * - Materials (5-level hierarchy, Liquid Glass)
+ * - Tab Bars (49pt, regularMaterial, continuous 26pt)
+ * - Buttons (semantic styles: borderedProminent, bordered, plain, glass)
+ * - Corner Radii (continuous curves mandatory)
+ * - Typography (Dynamic Type scale, SF Pro / SF Rounded)
+ * - Vibrancy (semantic label colors: primary, secondary, tertiary)
+ * - Spacing (8pt base grid)
+ * - Shadows (4 elevation levels)
+ * - Motion (spring configs)
+ *
+ * Dark Mode: OLED true black (#000000), Apple system surfaces
+ * Light Mode: Apple system grouped background (#F2F2F7)
  */
 
+// ============================================================================
+// COLOR SYSTEM — Apple System Colors
+// ============================================================================
+
+export const colors = {
+  // --- Dark Mode (OLED True Black) ---
+  dark: {
+    // Base surfaces
+    background: "#000000",              // OLED true black
+    backgroundSecondary: "#0C0C0C",     // Subtle elevation
+    surface: "#1C1C1E",                 // Apple systemBackground (dark)
+    surfaceElevated: "#2C2C2E",         // Apple secondarySystemBackground
+    surfaceOverlay: "#3A3A3C",          // Apple tertiarySystemBackground
+
+    // Semantic text (vibrancy-ready)
+    text: "#FFFFFF",                    // .primary - vibrant on glass
+    textSecondary: "#EBEBF599",         // .secondary - 60% opacity white
+    textTertiary: "#EBEBF566",          // .tertiary - 40% opacity white
+    textQuaternary: "#EBEBF533",        // .quaternary - 20% opacity white
+
+    // System accent colors (exact iOS values)
+    accent: "#0A84FF",                  // iOS Blue
+    accentSecondary: "#5E5CE6",         // iOS Purple
+    accentTertiary: "#FF9F0A",          // iOS Orange
+
+    // Directional (with vibrancy)
+    green: "#30D158",                   // iOS Green
+    greenBackground: "rgba(48, 209, 88, 0.15)",
+    red: "#FF453A",                     // iOS Red
+    redBackground: "rgba(255, 69, 58, 0.15)",
+    amber: "#FF9F0A",                   // iOS Orange/Amber
+    amberBackground: "rgba(255, 159, 10, 0.15)",
+
+    // Glass Materials (matching iOS material recipes)
+    glassRegular: "rgba(28, 28, 30, 0.72)",      // .regularMaterial
+    glassThick: "rgba(28, 28, 30, 0.88)",        // .thickMaterial
+    glassThin: "rgba(28, 28, 30, 0.52)",         // .thinMaterial
+    glassUltraThin: "rgba(28, 28, 30, 0.32)",    // .ultraThinMaterial
+
+    // Glass borders & highlights
+    glassRim: "rgba(255, 255, 255, 0.18)",       // Inner stroke
+    glassSpecular: "rgba(255, 255, 255, 0.25)",  // Top-edge highlight
+    glassSeparator: "rgba(255, 255, 255, 0.1)",  // Hairline separator
+
+    // Dividers
+    separator: "rgba(255, 255, 255, 0.12)",
+    separatorOpaque: "#38383A",
+
+    // Interactive states
+    pressedOverlay: "rgba(255, 255, 255, 0.08)",
+    selectedOverlay: "rgba(10, 132, 255, 0.15)",
+
+    // Shadows (dark mode - more subtle)
+    shadowLevel1: "rgba(0, 0, 0, 0.15)",
+    shadowLevel2: "rgba(0, 0, 0, 0.20)",
+    shadowLevel3: "rgba(0, 0, 0, 0.25)",
+    shadowLevel4: "rgba(0, 0, 0, 0.30)",
+
+    // Hairlines (never pure black/white — Apple uses translucent separators)
+    lineSubtle: "rgba(255, 255, 255, 0.06)",
+
+    // Control fills (Apple fill colors, dark)
+    fillPrimary: "rgba(120, 120, 128, 0.36)",     // systemFill
+    fillSecondary: "rgba(120, 120, 128, 0.32)",   // secondarySystemFill
+    fillTertiary: "rgba(118, 118, 128, 0.24)",    // tertiarySystemFill
+    fillQuaternary: "rgba(116, 118, 128, 0.18)",  // quaternarySystemFill
+
+    // Legacy aliases (kept so partially migrated screens keep compiling)
+    muted: "#8E8E93",
+    line: "rgba(255, 255, 255, 0.12)",
+    raised: "#2C2C2E",
+    surfaceHover: "#3A3A3C",
+    glassClear: "rgba(28, 28, 30, 0.45)",
+    glassProminent: "rgba(44, 44, 46, 0.88)",
+    accentGlass: "rgba(10, 132, 255, 0.18)",
+    accentFill: "rgba(10, 132, 255, 0.15)",
+    greenFill: "rgba(48, 209, 88, 0.15)",
+    greenGlass: "rgba(48, 209, 88, 0.15)",
+    redFill: "rgba(255, 69, 58, 0.15)",
+    redGlass: "rgba(255, 69, 58, 0.15)",
+    amberFill: "rgba(255, 159, 10, 0.15)",
+    amberGlass: "rgba(255, 159, 10, 0.15)",
+    greenText: "#30D158",
+    redText: "#FF453A",
+    amberText: "#FF9F0A",
+  },
+
+  // --- Light Mode (Apple System Grouped) ---
+  light: {
+    // Base surfaces
+    background: "#F2F2F7",              // Apple systemGroupedBackground
+    backgroundSecondary: "#FFFFFF",     // White
+    surface: "#FFFFFF",                 // Apple systemBackground
+    surfaceElevated: "#F2F2F7",         // Apple secondarySystemBackground
+    surfaceOverlay: "#E8E8ED",          // Apple tertiarySystemBackground
+
+    // Semantic text
+    text: "#000000",                    // .primary
+    textSecondary: "#3C3C4399",         // .secondary - 60% opacity black
+    textTertiary: "#3C3C4366",          // .tertiary - 40% opacity black
+    textQuaternary: "#3C3C4333",        // .quaternary - 20% opacity black
+
+    // System accent colors
+    accent: "#007AFF",                  // iOS Blue
+    accentSecondary: "#5856D6",         // iOS Purple
+    accentTertiary: "#FF9500",          // iOS Orange
+
+    // Directional
+    green: "#34C759",                   // iOS Green
+    greenBackground: "rgba(52, 199, 89, 0.12)",
+    red: "#FF3B30",                     // iOS Red
+    redBackground: "rgba(255, 59, 48, 0.12)",
+    amber: "#FF9500",                   // iOS Orange
+    amberBackground: "rgba(255, 149, 0, 0.12)",
+
+    // Glass Materials
+    glassRegular: "rgba(255, 255, 255, 0.80)",
+    glassThick: "rgba(255, 255, 255, 0.92)",
+    glassThin: "rgba(255, 255, 255, 0.60)",
+    glassUltraThin: "rgba(255, 255, 255, 0.40)",
+
+    // Glass borders & highlights
+    glassRim: "rgba(0, 0, 0, 0.08)",
+    glassSpecular: "rgba(255, 255, 255, 0.6)",
+    glassSeparator: "rgba(0, 0, 0, 0.06)",
+
+    // Dividers
+    separator: "rgba(0, 0, 0, 0.18)",
+    separatorOpaque: "#C6C6C8",
+
+    // Interactive states
+    pressedOverlay: "rgba(0, 0, 0, 0.04)",
+    selectedOverlay: "rgba(0, 122, 255, 0.12)",
+
+    // Shadows (light mode)
+    shadowLevel1: "rgba(0, 0, 0, 0.05)",
+    shadowLevel2: "rgba(0, 0, 0, 0.08)",
+    shadowLevel3: "rgba(0, 0, 0, 0.12)",
+    shadowLevel4: "rgba(0, 0, 0, 0.16)",
+
+    // Hairlines
+    lineSubtle: "rgba(60, 60, 67, 0.12)",
+
+    // Control fills (Apple fill colors, light)
+    fillPrimary: "rgba(120, 120, 128, 0.20)",
+    fillSecondary: "rgba(120, 120, 128, 0.16)",
+    fillTertiary: "rgba(118, 118, 128, 0.12)",
+    fillQuaternary: "rgba(116, 118, 128, 0.08)",
+
+    // Legacy aliases (kept so partially migrated screens keep compiling)
+    muted: "#8E8E93",
+    line: "rgba(0, 0, 0, 0.18)",
+    raised: "#F2F2F7",
+    surfaceHover: "#E5E5EA",
+    glassClear: "rgba(255, 255, 255, 0.55)",
+    glassProminent: "rgba(255, 255, 255, 0.95)",
+    accentGlass: "rgba(0, 122, 255, 0.12)",
+    accentFill: "rgba(0, 122, 255, 0.12)",
+    greenFill: "rgba(52, 199, 89, 0.12)",
+    greenGlass: "rgba(52, 199, 89, 0.12)",
+    redFill: "rgba(255, 59, 48, 0.12)",
+    redGlass: "rgba(255, 59, 48, 0.12)",
+    amberFill: "rgba(255, 149, 0, 0.12)",
+    amberGlass: "rgba(255, 149, 0, 0.12)",
+    greenText: "#248A3D",
+    redText: "#D70015",
+    amberText: "#C93400",
+  },
+};
+
+// ============================================================================
+// SPACING — 8pt Base Grid (Apple Design Resources)
+// ============================================================================
+
+export const spacing = {
+  // Base unit = 4pt, but all layout uses 8pt multiples
+  none: 0,
+  xxxs: 4,   // 0.5x - micro adjustments
+  xxs: 8,    // 1x - base unit
+  xs: 12,    // 1.5x
+  sm: 16,    // 2x - standard padding
+  md: 20,    // 2.5x
+  lg: 24,    // 3x
+  xl: 28,    // 3.5x
+  xxl: 32,   // 4x
+  xxxl: 40,  // 5x
+  huge: 48,  // 6x
+  massive: 56, // 7x
+} as const;
+
+// Semantic spacing aliases
+export const semanticSpacing = {
+  screenPadding: spacing.sm,           // 16
+  screenPaddingLarge: spacing.md,      // 20
+  sectionGap: spacing.lg,              // 24
+  cardPadding: spacing.sm,             // 16
+  cardPaddingLarge: spacing.md,        // 20
+  itemGap: spacing.xs,                 // 12
+  itemGapSmall: spacing.xxs,           // 8
+  controlPadding: spacing.xs,          // 12
+  controlPaddingLarge: spacing.sm,     // 16
+  inlineGap: spacing.xxs,              // 8
+  groupGap: spacing.md,                // 20
+} as const;
+
+// ============================================================================
+// CORNER RADII — Continuous Curves (Simulated)
+// ============================================================================
+
+// Note: React Native doesn't support native continuous corners.
+// We simulate by using slightly larger radius + consistent inner/outer ratio.
+// Apple continuous radius ≈ radius * 1.15 for visual equivalence.
+
+export const radii = {
+  // Content cards (16-20pt continuous → ~18-23pt RN)
+  card: 18,
+  cardLarge: 22,
+  cardSmall: 14,
+
+  // Controls (14-16pt continuous → ~16-18pt RN)
+  control: 16,
+  controlLarge: 18,
+  controlSmall: 12,
+
+  // Buttons (large = 14-16pt continuous → ~16-18pt RN)
+  button: 16,
+  buttonLarge: 18,
+  buttonSmall: 12,
+
+  // Sheets/Modals (16-20pt continuous → ~18-23pt RN)
+  sheet: 22,
+  sheetLarge: 26,
+
+  // Tab bar (26pt continuous → ~30pt RN)
+  tabBar: 30,
+
+  // Pills/badges (fully rounded)
+  pill: 9999,
+  badge: 9999,
+
+  // Currency badges (12-14pt continuous → ~14-16pt RN)
+  currencyBadge: 14,
+  currencyBadgeLarge: 16,
+
+  // Concentric radius helper
+  // inner = outer - padding (clamped to minimum 6)
+  concentric: (outer: number, padding: number, min = 6): number => Math.max(min, outer - padding),
+} as const;
+
+// ============================================================================
+// TYPOGRAPHY — Apple Dynamic Type Scale (SF Pro / SF Rounded)
+// ============================================================================
+
 export const typography = {
+  // Display styles (for hero prices, large titles)
+  displayLarge: {
+    fontSize: 44,
+    lineHeight: 52,
+    fontWeight: "700" as const,
+    letterSpacing: -0.5,
+    fontFamily: "System", // SF Pro Rounded preferred
+  },
+  displayMedium: {
+    fontSize: 36,
+    lineHeight: 44,
+    fontWeight: "700" as const,
+    letterSpacing: -0.4,
+    fontFamily: "System",
+  },
+  displaySmall: {
+    fontSize: 32,
+    lineHeight: 40,
+    fontWeight: "700" as const,
+    letterSpacing: -0.3,
+    fontFamily: "System",
+  },
+
+  // Navigation / Screen titles
   largeTitle: {
     fontSize: 34,
     lineHeight: 41,
@@ -34,6 +318,8 @@ export const typography = {
     fontWeight: "600" as const,
     letterSpacing: 0.38,
   },
+
+  // Content hierarchy
   headline: {
     fontSize: 17,
     lineHeight: 22,
@@ -76,142 +362,413 @@ export const typography = {
     fontWeight: "400" as const,
     letterSpacing: 0.07,
   },
-  displayHero: {
-    fontSize: 42,
-    lineHeight: 48,
+
+  // Financial numbers (tabular figures)
+  priceHero: {
+    fontSize: 44,
+    lineHeight: 52,
     fontWeight: "700" as const,
     letterSpacing: -0.5,
+    fontFamily: "System",
+    fontVariant: ["tabular-nums"] as const,
   },
+  priceLarge: {
+    fontSize: 28,
+    lineHeight: 34,
+    fontWeight: "700" as const,
+    letterSpacing: -0.3,
+    fontFamily: "System",
+    fontVariant: ["tabular-nums"] as const,
+  },
+  priceMedium: {
+    fontSize: 22,
+    lineHeight: 28,
+    fontWeight: "600" as const,
+    letterSpacing: -0.2,
+    fontFamily: "System",
+    fontVariant: ["tabular-nums"] as const,
+  },
+  priceSmall: {
+    fontSize: 17,
+    lineHeight: 22,
+    fontWeight: "600" as const,
+    letterSpacing: -0.1,
+    fontFamily: "System",
+    fontVariant: ["tabular-nums"] as const,
+  },
+
+  // Currency badges (SF Rounded)
+  badgeLarge: {
+    fontSize: 18,
+    lineHeight: 22,
+    fontWeight: "700" as const,
+    letterSpacing: -0.1,
+    fontFamily: "System",
+  },
+  badgeMedium: {
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: "700" as const,
+    letterSpacing: 0,
+    fontFamily: "System",
+  },
+  badgeSmall: {
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: "600" as const,
+    letterSpacing: 0,
+    fontFamily: "System",
+  },
+} as const;
+
+// ============================================================================
+// SHADOWS — 4 Elevation Levels (Apple Depth)
+// ============================================================================
+
+export const shadows = {
+  // Level 0: Flat (content cards on background)
+  none: {
+    shadowColor: "transparent",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
+  },
+
+  // Level 1: Raised (hovered cards, selected segments)
+  level1: {
+    dark: {
+      shadowColor: "#000000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.15,
+      shadowRadius: 2,
+      elevation: 1,
+    },
+    light: {
+      shadowColor: "#000000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      elevation: 1,
+    },
+  },
+
+  // Level 2: Floating (tab bar, sheets, popovers)
+  level2: {
+    dark: {
+      shadowColor: "#000000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.20,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    light: {
+      shadowColor: "#000000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+  },
+
+  // Level 3: Modal (sheets, alerts)
+  level3: {
+    dark: {
+      shadowColor: "#000000",
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.25,
+      shadowRadius: 16,
+      elevation: 8,
+    },
+    light: {
+      shadowColor: "#000000",
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.12,
+      shadowRadius: 16,
+      elevation: 8,
+    },
+  },
+
+  // Level 4: FAB/Overlay (floating action buttons)
+  level4: {
+    dark: {
+      shadowColor: "#000000",
+      shadowOffset: { width: 0, height: 12 },
+      shadowOpacity: 0.30,
+      shadowRadius: 24,
+      elevation: 12,
+    },
+    light: {
+      shadowColor: "#000000",
+      shadowOffset: { width: 0, height: 12 },
+      shadowOpacity: 0.16,
+      shadowRadius: 24,
+      elevation: 12,
+    },
+  },
+} as const;
+
+// ============================================================================
+// MOTION — Spring Configurations (Apple Native Feel)
+// ============================================================================
+
+export const springs = {
+  // Press feedback (~100ms)
+  press: {
+    damping: 18,
+    stiffness: 180,
+    mass: 1.0,
+  },
+
+  // Tab transitions (~200ms)
+  tab: {
+    damping: 22,
+    stiffness: 170,
+    mass: 1.0,
+  },
+
+  // Sheet present/dismiss (~300ms)
+  modal: {
+    damping: 28,
+    stiffness: 190,
+    mass: 1.2,
+  },
+
+  // General UI (snappy)
+  snappy: {
+    damping: 15,
+    stiffness: 200,
+    mass: 0.9,
+  },
+
+  // Gentle (for content)
+  gentle: {
+    damping: 25,
+    stiffness: 150,
+    mass: 1.1,
+  },
+} as const;
+
+// ============================================================================
+// ICON SIZES — Apple System
+// ============================================================================
+
+export const iconSizes = {
+  // Tab bar icons
+  tabBar: 25,
+
+  // Navigation bar / toolbar
+  navigation: 22,
+
+  // Toolbar / action buttons
+  toolbar: 20,
+
+  // Currency badges
+  currencyBadge: 18,
+  currencyBadgeLarge: 22,
+
+  // List/item icons
+  list: 22,
+  listSmall: 18,
+
+  // Inline with text
+  inline: 16,
+  inlineSmall: 14,
+
+  // FAB
+  fab: 24,
+} as const;
+
+// ============================================================================
+// BORDER WIDTHS
+// ============================================================================
+
+export const borders = {
+  hairline: 0.5,        // StyleSheet.hairlineWidth
+  thin: 1,              // Standard border
+  medium: 1.5,          // Emphasized
+  focus: 2,             // Focus ring
+} as const;
+
+// ============================================================================
+// OPACITY VALUES
+// ============================================================================
+
+export const opacity = {
+  disabled: 0.38,
+  pressed: 0.08,        // Overlay on press
+  hover: 0.04,          // Overlay on hover (web)
+  selected: 0.12,       // Selected overlay
+  glassOverlay: 0.08,   // Glass press overlay
+  backdrop: 0.4,        // Modal backdrop
+} as const;
+
+// ============================================================================
+// Z-INDEX LAYERS
+// ============================================================================
+
+export const zIndex = {
+  base: 0,
+  dropdown: 100,
+  sticky: 200,
+  modal: 300,
+  popover: 400,
+  toast: 500,
+  tooltip: 600,
+  loading: 1000,
+} as const;
+
+// ============================================================================
+// BREAKPOINTS (for responsive layout if needed)
+// ============================================================================
+
+export const breakpoints = {
+  compact: 375,    // iPhone SE / mini
+  regular: 390,    // iPhone 14/15/16 Pro
+  large: 428,      // iPhone 14/15/16 Pro Max
+  ipad: 768,       // iPad
+} as const;
+
+// ============================================================================
+// CONTINUOUS CURVES — Apple squircle geometry
+// ============================================================================
+//
+// React Native exposes the native iOS squircle through `borderCurve`.
+// Apple requires continuous curvature for system-aligned containers,
+// because a standard circular corner looks "legacy" on modern devices.
+
+export const curve = {
+  /** Continuous (squircle) corner — the Apple default on iOS. */
+  continuous: "continuous" as const,
+  /** Circular corner — only for non-container ornaments. */
+  circular: "circular" as const,
 };
 
-export const spacing = {
-  xxs: 4,
-  xs: 8,
-  sm: 12,
-  md: 16,
-  lg: 20,
-  xl: 24,
-  xxl: 32,
-  huge: 44,
-};
-
-export const radii = {
-  sheet: 32,
-  card: 24,
-  cardNested: 16,
-  control: 14,
-  controlSmall: 10,
-  pill: 9999,
-  circle: 9999,
-};
-
-/** Concentric curvature helper: preserves visually identical center curvature */
-export function concentricRadius(outerRadius: number, padding: number, min = 6): number {
+/**
+ * Concentric curvature helper.
+ *
+ * Apple's concentricity rule: the inner radius of a nested container should
+ * equal `outerRadius - padding` so both curves share the same center point.
+ * When a very large padding would collapse the inner radius, we clamp it to
+ * `min` (Apple clamps to a small radius rather than producing a 0pt corner).
+ *
+ * @param outerRadius radius of the enclosing container
+ * @param padding distance between the outer edge and the inner element
+ * @param min smallest acceptable inner radius (default 6)
+ */
+export function concentricRadius(
+  outerRadius: number,
+  padding: number,
+  min = 6,
+): number {
   return Math.max(min, outerRadius - padding);
 }
 
-export const colors = {
-  dark: {
-    background: "#000000",          // Pure OLED black
-    backgroundSecondary: "#0C0D10", // Sub-surface
-    backgroundTertiary: "#14161C",  // Deep wells
-    surface: "#12141A",             // Card surface (opaque, crisp)
-    surfaceElevated: "#181A22",     // Elevated content card
-    surfaceHover: "#20232E",        // Touched surface
+/** Ready-made concentric pairs used across ArzMan (kept explicit, not magic). */
+export const concentricPairs = {
+  /** Screen-level card (18pt) holding an inset control with 12pt padding. */
+  cardControl: concentricRadius(18, 12),
+  /** Large hero card (22pt) holding an inset control with 16pt padding. */
+  heroControl: concentricRadius(22, 16),
+  /** Sheet (26pt) holding grouped rows with 20pt padding. */
+  sheetRow: concentricRadius(26, 20),
+} as const;
 
-    // Liquid Glass materials
-    glassRegular: "rgba(30, 34, 44, 0.72)",
-    glassClear: "rgba(18, 20, 26, 0.46)",
-    glassProminent: "rgba(42, 48, 62, 0.85)",
-    glassInteractive: "rgba(50, 56, 72, 0.90)",
-    glassRim: "rgba(255, 255, 255, 0.12)",
-    glassSpecular: "rgba(255, 255, 255, 0.18)",
+// ============================================================================
+// MATERIALS — where Liquid Glass is allowed (chrome) vs opaque (content)
+// ============================================================================
+//
+// Apple: "Liquid Glass forms a distinct functional layer for controls and
+// navigation elements" and "standard materials help with visual
+// differentiation within the content layer". Glass on content hurts legibility,
+// so ArzMan keeps market content opaque and spends glass only on chrome.
 
-    line: "rgba(255, 255, 255, 0.08)",
-    lineSubtle: "rgba(255, 255, 255, 0.05)",
-    lineOpaque: "#21242E",
+export const materials = {
+  /** Floating navigation chrome: tab bar, toolbars. */
+  chrome: { blurIntensityDark: 45, blurIntensityLight: 70 },
+  /** Sheets and modals — heavier, focused. */
+  sheet: { blurIntensityDark: 60, blurIntensityLight: 85 },
+  /** Interactive controls (buttons) sitting on top of content. */
+  control: { blurIntensityDark: 35, blurIntensityLight: 60 },
+  /** Hairline rim used to catch light at the top edge of a glass surface. */
+  specularHeight: 0.5,
+} as const;
 
-    text: "#FFFFFF",
-    textSecondary: "#A0A7B5",
-    textTertiary: "#697080",
-    textQuaternary: "#424754",
-    muted: "#8E95A5",
+// ============================================================================
+// MOTION — durations that pair with the spring presets above
+// ============================================================================
 
-    accent: "#0A84FF",              // iOS System Blue
-    accentGlass: "rgba(10, 132, 255, 0.20)",
-    accentText: "#60A5FA",
+export const motion = {
+  /** Hover-like overlays and color transitions. */
+  instant: 100,
+  /** Press in / press out. */
+  press: 120,
+  /** Tab selection and segmented indicator travel. */
+  selection: 200,
+  /** Screen-level transitions. */
+  screen: 300,
+  /** Long dismissals. */
+  dismiss: 350,
+} as const;
 
-    green: "#30D158",               // iOS System Green
-    greenGlass: "rgba(48, 209, 88, 0.18)",
-    greenText: "#4ADE80",
+// ============================================================================
+// TEXT STYLE NAMES — Apple Dynamic Type names used by the `Label` component
+// ============================================================================
 
-    red: "#FF453A",                 // iOS System Red
-    redGlass: "rgba(255, 69, 58, 0.18)",
-    redText: "#F87171",
+export const textStyleNames = [
+  "displayLarge",
+  "displayMedium",
+  "displaySmall",
+  "largeTitle",
+  "title1",
+  "title2",
+  "title3",
+  "headline",
+  "body",
+  "callout",
+  "subheadline",
+  "footnote",
+  "caption1",
+  "caption2",
+  "priceHero",
+  "priceLarge",
+  "priceMedium",
+  "priceSmall",
+  "badgeLarge",
+  "badgeMedium",
+  "badgeSmall",
+] as const;
 
-    amber: "#FFD60A",               // iOS System Yellow
-    amberGlass: "rgba(255, 214, 10, 0.18)",
-    amberText: "#FBBF24",
+export type TextStyleName = (typeof textStyleNames)[number];
 
-    raised: "#1B1E26",
-  },
-  light: {
-    background: "#F2F2F7",          // Apple system grouped background
-    backgroundSecondary: "#E5E5EA",
-    backgroundTertiary: "#D1D1D6",
-    surface: "#FFFFFF",             // Card surface
-    surfaceElevated: "#FFFFFF",
-    surfaceHover: "#F6F6F9",
-
-    // Liquid Glass materials
-    glassRegular: "rgba(255, 255, 255, 0.82)",
-    glassClear: "rgba(255, 255, 255, 0.58)",
-    glassProminent: "rgba(242, 244, 248, 0.92)",
-    glassInteractive: "rgba(230, 234, 242, 0.94)",
-    glassRim: "rgba(255, 255, 255, 0.85)",
-    glassSpecular: "rgba(0, 0, 0, 0.04)",
-
-    line: "rgba(0, 0, 0, 0.07)",
-    lineSubtle: "rgba(0, 0, 0, 0.04)",
-    lineOpaque: "#E5E5EA",
-
-    text: "#000000",
-    textSecondary: "#636366",
-    textTertiary: "#8E8E93",
-    textQuaternary: "#C7C7CC",
-    muted: "#6B7280",
-
-    accent: "#007AFF",              // Apple System Blue
-    accentGlass: "rgba(0, 122, 255, 0.12)",
-    accentText: "#0055B3",
-
-    green: "#248A3D",               // Apple System Green
-    greenGlass: "rgba(52, 199, 89, 0.14)",
-    greenText: "#15803D",
-
-    red: "#D70015",                 // Apple System Red
-    redGlass: "rgba(255, 59, 48, 0.12)",
-    redText: "#B91C1C",
-
-    amber: "#B25000",               // Apple System Orange
-    amberGlass: "rgba(255, 149, 0, 0.14)",
-    amberText: "#B45309",
-
-    raised: "#E8EDF4",
-  },
-};
-
-export const springs = {
-  snappy: { damping: 18, mass: 0.9, stiffness: 220 },
-  bouncy: { damping: 14, mass: 1.0, stiffness: 180 },
-  gentle: { damping: 24, mass: 1.1, stiffness: 140 },
-};
+// ============================================================================
+// EXPORTS
+// ============================================================================
 
 export const ArzManDesignSystem = {
-  typography,
-  spacing,
-  radii,
   colors,
+  spacing,
+  semanticSpacing,
+  radii,
+  typography,
+  shadows,
   springs,
-  concentricRadius,
-};
+  motion,
+  iconSizes,
+  borders,
+  opacity,
+  zIndex,
+  breakpoints,
+  curve,
+  materials,
+  concentricPairs,
+} as const;
+
+// Type exports for consumers
+export type Colors = typeof colors.dark;
+export type Spacing = typeof spacing;
+export type Radii = typeof radii;
+export type Typography = typeof typography;
+export type Shadows = typeof shadows;
+export type Springs = typeof springs;
+export type IconSizes = typeof iconSizes;
