@@ -11,7 +11,9 @@ interface Env {
   MARKET: DurableObjectNamespace<MarketStore>;
   ALLOWED_ORIGIN: string;
 }
-const REFRESH = 300_000;
+const REFRESH_INTERVAL_MS = 45_000; // Target 45 seconds (30-60s range)
+const BASE_BACKOFF_MS = 15_000;     // 15 seconds initial backoff on failure
+const MAX_BACKOFF_MS = 300_000;     // 5 minutes max backoff cap
 const ranges: Record<string, number> = {
   "1H": 3600_000,
   "1D": 86400_000,
@@ -39,8 +41,13 @@ export class MarketStore extends DurableObject<Env> {
   }
   private async update() {
     const attempt = (await this.ctx.storage.get<number>("lastAttempt")) ?? 0;
-    if (Date.now() - attempt < REFRESH) {
-      await this.ctx.storage.setAlarm(attempt + REFRESH + 1000);
+    const failures = (await this.ctx.storage.get<number>("consecutiveFailures")) ?? 0;
+    const cooldown = failures > 0
+      ? Math.min(MAX_BACKOFF_MS, BASE_BACKOFF_MS * Math.pow(2, Math.min(failures - 1, 5)))
+      : REFRESH_INTERVAL_MS;
+
+    if (Date.now() - attempt < cooldown) {
+      await this.ctx.storage.setAlarm(attempt + cooldown + 500);
       return;
     }
     await this.ctx.storage.put("lastAttempt", Date.now());
@@ -51,6 +58,8 @@ export class MarketStore extends DurableObject<Env> {
     if (!result.failed && result.snapshot) {
       const snapshot = result.snapshot;
       await this.ctx.storage.delete("lastError");
+      await this.ctx.storage.put("consecutiveFailures", 0);
+      await this.ctx.storage.put("lastSuccessfulFetch", snapshot.fetchedAt);
       for (const q of snapshot.quotes)
         this.ctx.storage.sql.exec(
           "INSERT OR IGNORE INTO observations VALUES (?, ?, ?, ?)",
@@ -63,10 +72,14 @@ export class MarketStore extends DurableObject<Env> {
         "DELETE FROM observations WHERE timestamp < ?",
         new Date(Date.now() - ranges["1Y"]).toISOString(),
       );
+      await this.ctx.storage.setAlarm(Date.now() + REFRESH_INTERVAL_MS);
     } else {
+      const nextFailures = failures + 1;
+      await this.ctx.storage.put("consecutiveFailures", nextFailures);
       await this.ctx.storage.put("lastError", true);
+      const nextBackoff = Math.min(MAX_BACKOFF_MS, BASE_BACKOFF_MS * Math.pow(2, Math.min(nextFailures - 1, 5)));
+      await this.ctx.storage.setAlarm(Date.now() + nextBackoff);
     }
-    await this.ctx.storage.setAlarm(Date.now() + REFRESH);
   }
   async alarm() {
     await this.refresh();
@@ -121,11 +134,11 @@ export class MarketStore extends DurableObject<Env> {
           error: "SOURCE_UNAVAILABLE",
           message: "منبع نرخ در دسترس نیست؛ دوباره تلاش کنید",
         },
-        { status: 503, headers: { "Retry-After": "300" } },
+        { status: 503, headers: { "Retry-After": "45" } },
       );
     const failed = await this.ctx.storage.get<boolean>("lastError");
     const snapshot =
-      failed || Date.now() - Date.parse(saved.fetchedAt) > REFRESH
+      failed || Date.now() - Date.parse(saved.fetchedAt) > REFRESH_INTERVAL_MS * 2
         ? staleSnapshot(saved)
         : saved;
     return Response.json(

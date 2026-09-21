@@ -160,9 +160,9 @@ export default function More() {
               دوره استعلام نرخ از سرویس هنگام باز بودن برنامه
             </Label>
             <GlassSegmentedControl
-              values={["60", "120", "300"] as const}
-              value={String(settings.refresh) as "60" | "120" | "300"}
-              onChange={(v) => update({ refresh: Number(v) as 60 | 120 | 300 })}
+              values={["30", "60", "120", "300"] as const}
+              value={String(settings.refresh) as "30" | "60" | "120" | "300"}
+              onChange={(v) => update({ refresh: Number(v) as 30 | 60 | 120 | 300 })}
               label={(v) => `${v} ثانیه`}
             />
           </View>

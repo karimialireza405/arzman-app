@@ -54,7 +54,11 @@ export function parseTgju(html: string, currency: Currency, now = Date.now()) {
   const unit = clean(unitRow.find(".value").text());
   const rawUnit = unit === "ریال" ? "IRR" : unit === "تومان" ? "IRT" : null;
   if (!rawUnit) throw new Error("Unknown currency unit");
-  // FAQ semantics explicitly say "price of each [currency]". Never infer an IQD lot from magnitude.
+  // IQD & Fiat Quote Size Convention:
+  // TGJU profile `price_iqd` explicitly quotes the price of single unit (1 IQD) in Rials (ریال).
+  // Verified live on TGJU: FAQ states «قیمت هر دینار عراق...» and table unit says «ریال».
+  // Example: raw 1,479 IRR = 147.9 Toman per 1 IQD (1,000 IQD = 147,900 Toman).
+  // Quote size is strictly 1 unit; lot sizes (e.g. 100 or 1000) must never be guessed.
   const faq = $('[itemprop="text"]')
     .filter((_, el) =>
       clean($(el).text()).includes(`قیمت هر ${sourceNames[currency]}`),

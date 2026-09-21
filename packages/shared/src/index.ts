@@ -184,30 +184,44 @@ export function calculatePortfolio(
     if (tx.type === "adjustment") {
       a.quantity = tx.quantity;
       a.costBasis = tx.quantity * tx.costToman;
+      a.averageCost = tx.quantity > 0 ? tx.costToman : 0;
     } else if (tx.type === "buy") {
       a.quantity += tx.quantity;
       a.costBasis += tx.quantity * tx.costToman;
+      a.averageCost = a.quantity > 1e-9 ? a.costBasis / a.quantity : 0;
     } else {
       if (tx.quantity > a.quantity + 1e-9)
         throw new Error("مقدار فروش بیشتر از موجودی است");
-      a.realizedPnl += tx.quantity * (tx.costToman - a.averageCost);
-      a.costBasis -= tx.quantity * a.averageCost;
-      a.quantity = Math.max(0, a.quantity - tx.quantity);
+      const sellQty = Math.min(tx.quantity, a.quantity);
+      a.realizedPnl += sellQty * (tx.costToman - a.averageCost);
+      a.costBasis -= sellQty * a.averageCost;
+      a.quantity = Math.max(0, a.quantity - sellQty);
+      if (a.quantity < 1e-9) {
+        a.quantity = 0;
+        a.costBasis = 0;
+        a.averageCost = 0;
+      } else {
+        // Selling part of a position preserves the remaining average cost
+        a.averageCost = a.costBasis / a.quantity;
+      }
     }
-    a.averageCost = a.quantity > 1e-9 ? a.costBasis / a.quantity : 0;
-    if (a.quantity === 0) a.costBasis = 0;
+    // Clean precision to prevent floating-point binary noise accumulation
+    a.quantity = Math.round(a.quantity * 1e8) / 1e8;
+    a.costBasis = Math.round(a.costBasis * 100) / 100;
+    a.averageCost = Math.round(a.averageCost * 100) / 100;
+    a.realizedPnl = Math.round(a.realizedPnl * 100) / 100;
     assets.set(tx.currency, a);
   }
   return [...assets.values()];
 }
 export function valuation(asset: PortfolioAsset, price: number | null) {
   if (price === null) return null;
-  const value = asset.quantity * price;
-  const pnl = value - asset.costBasis;
+  const value = Math.round(asset.quantity * price * 100) / 100;
+  const pnl = Math.round((value - asset.costBasis) * 100) / 100;
   return {
     value,
     pnl,
-    pnlPercent: asset.costBasis > 0 ? (pnl / asset.costBasis) * 100 : null,
+    pnlPercent: asset.costBasis > 0 ? Math.round((pnl / asset.costBasis) * 10000) / 100 : null,
     breakEven: asset.averageCost,
   };
 }

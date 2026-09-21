@@ -25,8 +25,15 @@ describe("TGJU captured fixtures", () => {
     });
   it("uses one IQD, not a hundred IQD", () => {
     const q = parseTgju(fixture("IQD"), "IQD");
+    expect(q.currency).toBe("IQD");
     expect(q.rawValue).toBe(1479);
+    expect(q.rawUnit).toBe("IRR");
+    expect(q.quoteSize).toBe(1);
     expect(q.priceToman).toBe(147.9);
+    expect(q.normalizedTomanValue).toBe(147.9);
+    // If TGJU changed convention to 100 dinars without updating parser, it must fail
+    const html100 = fixture("IQD").replace("قیمت هر", "قیمت صد");
+    expect(() => parseTgju(html100, "IQD")).toThrow("Missing per-unit quote evidence");
   });
   it("fails closed for changed units, missing quote evidence, currency and corrupted price", () => {
     const html = fixture("USD");

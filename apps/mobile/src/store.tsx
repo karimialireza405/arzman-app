@@ -39,7 +39,12 @@ const SettingsSchema = z.object({
   persian: z.boolean(),
   haptics: z.boolean(),
   appearance: z.enum(["dark", "light", "system"]),
-  refresh: z.union([z.literal(60), z.literal(120), z.literal(300)]),
+  refresh: z.union([
+    z.literal(30),
+    z.literal(60),
+    z.literal(120),
+    z.literal(300),
+  ]),
   privacy: z.boolean(),
 });
 const UserSchema = z.object({
