@@ -69,19 +69,19 @@ Copy-Item apps/mobile/.env.example apps/mobile/.env.local
 notepad apps/mobile/.env.local
 ```
 
-Set `EXPO_PUBLIC_API_URL` to your PC's Wi-Fi/LAN IPv4 address, e.g. `http://192.168.1.100:8787`. Find the address with `ipconfig`. **Do not use localhost for the physical iPhone**: that would refer to the phone. The local file created during this session uses this PC's observed LAN address; change it if your network changes. It is ignored by Git.
+Set `EXPO_PUBLIC_API_URL` to the **deployed HTTPS Worker URL**. `apps/mobile/.env.local` is already configured this way and is ignored by Git.
+
+> There are two independent connections and they are easy to confuse. **Metro** (the JS bundle and fast refresh) is iPhone ↔ this PC over Wi-Fi. The **market API** is iPhone ↔ Cloudflare over HTTPS. Because the app points at the deployed Worker, **the local Worker on port 8787 is not needed for iPhone testing** — no LAN backend URL, no firewall rule for 8787, no App Transport Security problem. Run `npm run server` only when developing the backend itself, and point `.env.local` at `http://<your LAN IPv4>:8787` for that.
 
 Start Expo:
 
 ```powershell
-npm run start -w @arzman/mobile -- --go
+npm run start -w @arzman/mobile
 ```
 
-Keep the PC and iPhone on the same network. Scan the terminal QR code with the iPhone camera. If Windows asks about firewall access, permit the development servers only on your trusted private network. A VPN or isolated guest Wi-Fi may block connectivity. You can press `w` for a browser preview, or open [the local preview](http://localhost:8081).
+Press `w` for a browser preview, or open [the local preview](http://localhost:8081). Environment changes require restarting Metro.
 
-**Expo Go compatibility:** the installed Expo Go must support SDK 57. The official [SDK 57 release notes](https://expo.dev/changelog/sdk-57) describe App Store availability limitations. If your installed Expo Go rejects SDK 57, use an EAS development build. Face ID permission testing and future native extensions require a development build regardless.
-
-Environment changes require restarting Metro. A phone using a Metro tunnel still needs a reachable backend URL; a tunnel for Metro does not expose port 8787.
+**Which runtime can run this app** — see the matrix below, and read [`docs/engineering-audit.md`](docs/engineering-audit.md) §5 before choosing. Short version, verified against the current SDK 57 docs: every native module this project uses *is* in Expo Go, but **Expo Go on iOS is no longer a free App Store install**, and a development build on a physical iPhone also requires signing. Either way a **paid Apple Developer Program membership is required**. The development build is the recommended route.
 
 ## Backend Endpoints and Deployment
 
@@ -128,23 +128,28 @@ npx eas-cli@latest submit --platform ios --profile production
 
 TestFlight also requires App Store Connect setup and Apple processing. These commands are documented, not executed. SDK 57 includes scene-support configuration in app.json for builds against iOS/Xcode 27. See [native capability notes](docs/NATIVE-CAPABILITIES.md).
 
-## Feature Compatibility Matrix (Expo Go vs EAS Development Build)
+## Feature Compatibility Matrix
 
-| Feature | Expo Go (SDK 57) | EAS Dev Build | Notes |
-|---------|------------------|---------------|-------|
-| Market data (live rates) | ✅ | ✅ | Works in both |
-| Converter | ✅ | ✅ | Works in both |
-| Portfolio (local transactions) | ✅ | ✅ | Works in both |
-| SecureStore (Keychain on iOS) | ⚠️ Limited | ✅ | Expo Go on iOS has no Keychain; uses web localStorage fallback |
-| Face ID (expo-local-authentication) | ❌ | ✅ | Requires native binary; Expo Go cannot prompt Face ID |
-| Haptics | ✅ | ✅ | Works in both (web fallback) |
-| SF Symbols (expo-symbols) | ❌ | ✅ | Native module; iOS only in dev build |
-| Charts (react-native-svg) | ✅ | ✅ | Works in both |
-| Notifications (local/foreground) | ✅ | ✅ | Foreground alerts only |
-| Background Push Notifications | ❌ | ✅ | Requires APNs credentials & server infra |
-| Widgets (WidgetKit) | ❌ | ✅ | Requires native extension + App Group |
-| Live Activities / Dynamic Island | ❌ | ✅ | Requires native extension + ActivityKit |
-| Siri / App Intents | ❌ | ✅ | Requires native extension + App Intents |
+Verified on 2026-09-22 against each library's own page on `docs.expo.dev/versions/v57.0.0/sdk/`
+("Included in Expo Go" is the badge shown there), and empirically: `npx expo start --go`
+serves an `exposdk:57.0.0` manifest and a working iOS Hermes bundle for this project.
+
+| Feature | Expo Web | Expo Go (iOS) | Development build | Notes |
+|---------|----------|---------------|-------------------|-------|
+| Market data, converter, alert logic | ✅ | ✅ | ✅ | Plain JS over an HTTPS API |
+| Charts (`react-native-svg`) | ✅ | ✅ | ✅ | Bundled in Expo Go |
+| Portfolio ledger | ⚠️ `localStorage` | ✅ Keychain | ✅ Keychain | |
+| `expo-secure-store` | ❌ falls back | ✅ | ✅ | Included in Expo Go |
+| `expo-sqlite` | ❌ falls back | ✅ | ✅ | Included in Expo Go |
+| Face ID (`expo-local-authentication`) | ❌ | ✅ | ✅ | Included in Expo Go — but the prompt shows **Expo Go's** permission text, not ArzMan's Persian one |
+| Liquid Glass (`expo-glass-effect`) | ❌ falls back | ✅ iOS 26+ | ✅ iOS 26+ | Included in Expo Go; plain view below iOS 26 |
+| `expo-blur` | approximation | ✅ | ✅ | Included in Expo Go |
+| SF Symbols (`expo-symbols`) | ❌ Ionicons | ✅ | ✅ | Included in Expo Go |
+| Haptics (`expo-haptics`) | ❌ no-op | ✅ | ✅ | Every call site is guarded and `.catch()`-ed |
+| `ios.enableSceneSupport` build property | n/a | ❌ not applied | ✅ | A config plugin cannot change Expo Go's prebuilt binary |
+| App identity (name «ارز من», icon, bundle id) | n/a | ❌ Expo Go shell | ✅ | |
+| Push notifications | ❌ | ❌ | ❌ | **Not implemented.** In-app alerts only, while the app is open |
+| Widgets · Live Activities · Dynamic Island · Siri/App Intents | ❌ | ❌ | ❌ | **Not implemented** (`nativeCapabilities` are all `false`). Each needs a native extension target, therefore a development build |
 
 ## Data Privacy and Limitations
 
@@ -152,7 +157,7 @@ TestFlight also requires App Store Connect setup and Apple processing. These com
 - The browser preview uses localStorage and does **not** offer encrypted portfolio storage or device authentication. Use sample data there.
 - The privacy switch guards portfolio/transaction screens and hides the home portfolio summary, relocking when backgrounded or when leaving the portfolio. Native Face ID, app-switcher snapshots and VoiceOver still require device QA. It is not a claim of a hardened encrypted wallet.
 - There is no portfolio export/recovery flow yet; do not rely on this development build as your only transaction record.
-- Current TGJU time labels are incomplete, so alerts do not currently fire on those quotes. No closed-app push delivery exists.
+- TGJU publishes no trade timestamp (only a clock or day/month label), so the status pill honestly reads «تازگی منبع تأیید نشده» and `sourceTimestamp` stays `null`. Alerts are evaluated against *retrieval* freshness instead, which ArzMan does know, so they fire while the app is open. There is no closed-app push delivery.
 - The history starts with this backend's actual collection period. Lines connect observed samples, not fabricated exchange ticks. One-year retention is implemented; one year's data does not appear immediately.
 - Watchlist order persists; removing/re-adding moves a currency to the end. Drag reordering is not implemented.
 - Chart smoothing/animation and final on-device spacing/accessibility polish remain. Native widgets/ActivityKit/App Intents are not compiled extensions yet.
@@ -210,63 +215,70 @@ See [QA status](docs/QA.md), [TGJU research](docs/TGJU-RESEARCH.md), [TODO](TODO
 
 ### Step-by-Step: Run ArzMan on Your iPhone (Windows Host)
 
-**Prerequisites on Windows:**
-1. Install Node.js 24 LTS from [nodejs.org](https://nodejs.org/)
-2. Install Git for Windows
-3. (Optional for EAS) Create free account at [expo.dev](https://expo.dev/)
+**Read this first.** Apple requires code signing for anything that runs on a physical
+iPhone. The current Expo documentation states it for macOS, Windows and Linux alike: *all
+builds that run on an iPhone device require a paid Apple Developer account for build
+signing.* Expo Go is not an escape route any more — installing Expo Go on iOS now requires
+an active paid Apple Developer Program subscription, building it yourself with
+`npx eas-cli@latest go`, and distributing it through TestFlight.
 
-**On your iPhone:**
-1. Install **Expo Go** from the App Store (free)
-   - Must support SDK 57 — check the installed version runs Expo 57+ apps
+So there is exactly one sensible route from Windows without a Mac, and it needs an
+[Apple Developer Program](https://developer.apple.com/programs/) membership (US$99/year):
+an **EAS development build**. It is also the better one — it is the real app, with the
+correct name, icon, bundle id, Persian Face ID prompt and scene support, and after the
+one-time build you get instant JavaScript reloads exactly like Expo Go.
 
-**Launch on Windows:**
+**One-time prerequisites**
+
+1. Node.js 24 LTS from [nodejs.org](https://nodejs.org/) and Git for Windows.
+2. A free [expo.dev](https://expo.dev/) account.
+3. An active Apple Developer Program membership, and your Apple ID to hand.
+
+**Build it (about 15 minutes, mostly waiting)**
 
 ```powershell
-# 1. Open PowerShell in the project folder
 cd D:\MY_APP\Arz_Man
-
-# 2. Install dependencies (once)
 npm ci
 
-# 3. Start the Cloudflare Worker backend (Terminal 1)
-npm run server
-# Wait for: "Listening on http://0.0.0.0:8787" (or similar)
-
-# 4. Configure the mobile app backend URL (Terminal 2, one-time setup)
-Copy-Item apps/mobile/.env.example apps/mobile/.env.local
-notepad apps/mobile/.env.local
-# Edit EXPO_PUBLIC_API_URL to your PC's LAN IP, e.g.:
-# EXPO_PUBLIC_API_URL=http://192.168.1.100:8787
-# Save and close Notepad
-
-# 5. Start Expo Metro bundler (Terminal 2)
-npm run start -w @arzman/mobile -- --go
-# A QR code will appear in the terminal
-```
-
-**Connect your iPhone:**
-1. Ensure iPhone and Windows PC are on the **same Wi-Fi network** (not guest/isolated)
-2. Open iPhone **Camera app** and scan the QR code in the terminal
-3. Tap the Expo Go notification to open the app
-
-**Troubleshooting:**
-- **QR code won't open / "Cannot connect"**: Windows Firewall is blocking Metro (port 8081) or the Worker (port 8787). In Windows Defender Firewall, allow both Node.js and wrangler for **Private networks** only.
-- **"Network request failed"**: The `EXPO_PUBLIC_API_URL` IP is wrong. Run `ipconfig` on Windows, find your `IPv4 Address` under your Wi-Fi adapter, update `.env.local`, then restart Metro.
-- **Metro tunnel required (no LAN access)**: Press `t` in Metro terminal to enable `exp.direct` tunnel. Note: **tunnel does not expose port 8787**. The backend must still be reachable via LAN or deployed to Cloudflare.
-- **Blank white screen**: Check Metro terminal for red errors. Run `npm run check` in project root to verify code integrity.
-- **Expo Go says "Unsupported SDK"**: Your installed Expo Go is too old/newer. Use EAS Development Build instead (see below).
-
-**For Face ID, SecureStore, SF Symbols, Widgets, Live Activities — Use EAS Dev Build:**
-
-```powershell
-cd D:\MY_APP\Arz_Man\apps\mobile
+cd apps\mobile
 npx eas-cli@latest login
 npx eas-cli@latest init
 npx eas-cli@latest device:create
-npx eas-cli@latest build --platform ios --profile development
-# Wait for cloud build (~5-15 min), then install the .ipa via TestFlight or device link
-# Run: npx expo start --dev-client  (scans QR with the installed dev build, not Expo Go)
+npx eas-cli@latest build --profile development --platform ios
 ```
+
+`device:create` prints a registration link — open it **on the iPhone** and install the
+profile, so Apple will let this build run on that specific device. `build` then asks for
+your Apple ID, creates the signing credentials for you, uploads the project and compiles it
+on EAS servers. No Xcode, no Mac. When it finishes it prints an install link and a QR code:
+open that on the iPhone and install ArzMan.
+
+**Run it (every time after that)**
+
+```powershell
+cd D:\MY_APP\Arz_Manpps\mobile
+npx expo start --dev-client
+```
+
+Keep the iPhone on the same Wi-Fi as this PC, open **ArzMan** on the phone, and it connects
+to Metro. `.env.local` already points the app at the deployed HTTPS Worker, so the market
+data arrives over the internet and **the local `:8787` backend is not involved**.
+
+**Troubleshooting**
+
+- *The app cannot reach Metro*: iPhone and PC must be on the same private Wi-Fi (not a guest
+  or isolated network, no VPN). Allow Node.js through Windows Defender Firewall for
+  **Private networks** only. As a fallback, `npx expo start --dev-client --tunnel`.
+- *«ارتباط با سرویس برقرار نشد»*: that is the market API, not Metro. Check
+  `EXPO_PUBLIC_API_URL` in `apps/mobile/.env.local` and restart Metro after any change.
+- *Blank screen*: read the Metro terminal for red errors, then run `npm run check` at the
+  repository root.
+- *Build fails on signing*: confirm the bundle id `com.arzman.personal` is free on your
+  account, or change `ios.bundleIdentifier` in `apps/mobile/app.json` to your own.
+
+**Windows-only preview.** `npm run start -w @arzman/mobile` then `w` runs the app in a
+browser. It is useful for logic and layout, but it is **not** evidence of iPhone behaviour:
+no Keychain, no Face ID, no SF Symbols, no Liquid Glass, no haptics.
 
 ---
 

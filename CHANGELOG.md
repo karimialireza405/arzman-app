@@ -2,6 +2,72 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1] - 2026-09-22 — engineering audit, market-data correctness, iPhone readiness
+
+Continues and completes the previous agent's unfinished audit. Full detail in
+[`docs/engineering-audit.md`](docs/engineering-audit.md).
+
+### Fixed
+- **P0 — live quotes were being rejected.** The TGJU parser required the page's FAQ
+  sentence to quote exactly the same number as the live quote table. TGJU renders that FAQ
+  from a slower cache, so during trading hours it legitimately lags — and the parser threw,
+  failing the **entire** four-currency snapshot and leaving the app on a stale cache. The
+  FAQ is now treated as what it is: evidence that the page quotes **one unit** and in which
+  unit. It must exist, its unit must match the table, and its number must agree in
+  magnitude (×0.5–×2) — a lag differs by percents, a lot-size or decimal regression by 10×,
+  so that regression class is still caught. The previous close became a second magnitude
+  anchor for the quote, the only one left when TGJU omits the daily high and low.
+- **P1 — price alerts could never fire.** `alertMatches` gated on `isStale`, which is
+  permanently true for TGJU because the page publishes a clock-only label that never
+  establishes a trade time. The two ideas are now separate: `isStale` still answers "can we
+  vouch for the trade time" for the status pill, and the new `isFetchFresh` answers "did we
+  read this price recently", which is what acting on a price actually requires. A cache
+  served after an upstream failure keeps its original `fetchedAt`, so it ages out instead of
+  passing as live.
+- **P1 — accounting precision.** Cost basis and average cost were rounded to two decimals
+  after every transaction, so a repeating weighted average drifted further from the truth
+  with each trade. Precision is now kept between transactions and rounded only for display.
+- **P2 — the display unit was ignored by the portfolio.** Selecting Rial changed the market
+  screens but left the portfolio total, open and realised P&L, daily change, per-holding
+  value, average cost and the home converter teaser in Toman under a Rial heading. Number
+  and label now move together on every surface. The transaction ledger and the manual-rate
+  form stay in Toman and say so, because that is the unit the amounts were entered in.
+- **P2 — a missing rate is now explained**, naming the currency and pointing at «نرخ من»,
+  instead of rendering a bare dash. A manual rate fills an absent quote for any held asset
+  rather than only USDT, which also makes the custom-rate screen's own description true.
+  A live market quote still always wins.
+- **P2 — deleting a transaction** now erases its Keychain item. The ledger index is still
+  committed first, so the erase can never strand the ledger.
+- **P3** — Persian digits for the quote size on the currency detail screen.
+
+### Added
+- `docs/engineering-audit.md` — findings by severity, the parser's validation model, live
+  TGJU readings, the portfolio lifecycle walk-through, local-vs-deployed backend parity, the
+  Expo Go compatibility matrix, network topology, security review and verification results.
+- `scripts/audit-api.ts` — read-only smoke test of every public API route against any base
+  URL, so a local Worker and a deployed one can be compared instead of guessed at.
+- `totalValuation` and `isFetchFresh` in `@arzman/shared`.
+- A `portfolio lifecycle` test suite: empty, buy, second buy, partial sell, full close,
+  adjustment, overselling, awkward prices, long trade runs, a missing rate, a manual rate.
+  **35 tests** in total, up from 24.
+
+### Documentation
+- **The README's iPhone instructions were wrong and are corrected.** Expo Go on iOS is no
+  longer a free App Store install, and every build that runs on a physical iPhone requires a
+  paid Apple Developer account for signing — on Windows as much as on macOS. The guide now
+  gives one route, the EAS development build, with the prerequisite stated up front.
+- The compatibility matrix was rebuilt from each library's own SDK 57 page. Previous claims
+  that Expo Go lacks Keychain, Face ID and SF Symbols were wrong; all three are included.
+  What Expo Go really cannot do for this project is apply `ios.enableSceneSupport` or carry
+  the app's own identity and Persian Face ID string.
+- Documented that the **deployed Cloudflare Worker is behind this repository** and what that
+  costs. Nothing was deployed.
+
+### Known and deliberate
+- The market status pill reads «متصل · تازگی منبع تأیید نشده» even for seconds-old data.
+  TGJU publishes no trade timestamp, so ArzMan refuses to claim one. This is honesty, not a
+  bug; `sourceTimestamp` stays `null` and `stale` stays `true`.
+
 ## [0.3.0] - 2026-09-21 — Apple HIG / Liquid Glass UI redesign
 
 ### Added

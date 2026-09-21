@@ -2,6 +2,27 @@
 
 ## Completed Milestones
 
+### Milestone 0.3.1 — engineering audit & iPhone readiness (2026-09-22)
+
+- [x] Recover, finish and commit the previous agent's uncommitted work (nothing discarded).
+- [x] **P0** Remove the TGJU FAQ equality gate that rejected valid live USD/EUR/AED quotes;
+      replace it with unit + magnitude corroboration and a previous-close anchor.
+- [x] **P1** Make price alerts reachable — gate on retrieval freshness (`isFetchFresh`),
+      not on `isStale`, which is permanently true for a source that publishes no trade time.
+- [x] **P2** Apply the Toman/Rial display unit across the whole portfolio dashboard and the
+      home teaser; number and label now always move together.
+- [x] **P2** Explain a missing rate in the UI; let any asset's manual rate fill an absent
+      quote; correct the custom-rate screen's description.
+- [x] **P2** Erase a deleted transaction's Keychain item (after the index commit).
+- [x] **P3** Persian digits for the quote size on the currency detail screen.
+- [x] Portfolio edge cases A–H as permanent tests *and* walked by hand in the running app.
+- [x] Measure local vs deployed backend parity; document the deployment gap without deploying.
+- [x] Establish the real Expo Go / development-build situation from the current official docs.
+- [x] Verification: `npm run check` (typecheck + lint + **35 tests**), `npx expo-doctor`
+      21/21, `npx expo export --platform all`, `npm run verify` (4/4 live), `audit-api.ts`.
+- [x] Documentation: `docs/engineering-audit.md` (new), HANDOFF §00, README (iPhone route and
+      compatibility matrix corrected), CHANGELOG, TODO.
+
 ### Milestone 0.3 — Apple HIG / Liquid Glass UI redesign (2026-09-21, Cline session)
 
 - [x] Recover and finish Claude's uncommitted work (tokens.ts refactor + Apple reference docs).
@@ -47,12 +68,25 @@
 
 ---
 
-## Future Native & Cloud Enhancements
+## Next — on-device QA (blocked only on an Apple Developer Program membership)
 
-- [ ] Deploy Cloudflare Worker (`npx wrangler deploy`) and verify public HTTPS endpoint.
-- [ ] Run EAS Development Build (`npx eas-cli build --platform ios --profile development`) for physical iPhone testing.
-- [ ] Visual QA pass on a physical iPhone (Expo Go → dev build) — web is not the benchmark.
-- [ ] Build WidgetKit extension (Lock Screen and Home Screen widgets for USD/EUR/AED/IQD).
-- [ ] Build ActivityKit Live Activity extension for tracking a selected currency during active trading sessions.
-- [ ] Implement remote push notifications worker with Apple Push Notification Service (APNs) credentials for closed-app price alerts.
-- [ ] Polish: adopt `Surface` in `src/chart.tsx` for identical radii; consider a max Dynamic-Type clamp for money values.
+- [ ] Create the EAS development build and install it on the iPhone
+      (`npx eas-cli@latest build --profile development --platform ios`).
+- [ ] On-device checklist: home · USD/EUR/AED/IQD detail · pull-to-refresh · converter ·
+      portfolio (buy → partial sell → close) · Face ID gate · manual USDT rate ·
+      offline (airplane mode) · Toman ⇄ Rial · RTL · dark/light · charts · tab bar ·
+      Dynamic Type · VoiceOver.
+- [ ] Confirm the Persian Face ID permission string appears (it will not in Expo Go).
+
+## Deferred / not implemented
+
+- [ ] **Deploy the Worker** — the deployed one predates the P0 parser fix and the
+      `Object.hasOwn` range guard: `npx wrangler deploy --config server/wrangler.jsonc`.
+      Re-run `npx tsx scripts/audit-api.ts <url>` afterwards; it should be 14/14.
+- [ ] Portfolio export / recovery flow (there is none today).
+- [ ] WidgetKit extension (Lock Screen / Home Screen widgets).
+- [ ] ActivityKit Live Activity + Dynamic Island.
+- [ ] Siri / App Intents.
+- [ ] Remote push notifications (APNs credentials, server scheduler, opt-in registration).
+- [ ] Polish: adopt `Surface` in `src/chart.tsx` for identical radii; consider a max
+      Dynamic-Type clamp for money values; hide fully closed positions from the holdings list.

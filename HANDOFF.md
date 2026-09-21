@@ -4,11 +4,103 @@
 **Platform:** iOS (Expo SDK 57, React Native 0.86, TypeScript, Expo Router)  
 **Development Host:** Windows 11 Pro, Node.js 24 LTS, Git Bash  
 **Design Reference:** Apple iOS 26/27 Liquid Glass + Human Interface Guidelines  
-**Date of Handoff:** 2026-09-21 (updated after the Cline UI-redesign session)  
-**Project Version:** 0.3.0  
+**Date of Handoff:** 2026-09-22 (updated after the engineering-audit session)  
+**Project Version:** 0.3.1  
 **Project Path:** `D:\MY_APP\Arz_Man`  
-**Git HEAD at session start:** `d56dae8` — `docs: update HANDOFF with live TGJU audit and next priorities`  
-**Git HEAD after this session:** see §0.6 (final commits of the redesign)  
+**Git HEAD at the redesign handoff:** `8900c9d`  
+**Git HEAD after the audit session:** see §00.4  
+
+> Read **§00 first** — it is the most recent session and supersedes anything older it
+> contradicts, in particular the Expo Go instructions in §0 and in `README.md`.
+
+---
+
+## 00. Engineering audit & iPhone readiness (2026-09-22)
+
+Full detail lives in **`docs/engineering-audit.md`**. This is the summary a next agent needs.
+
+### 00.1 Where the previous agent stopped
+
+The previous agent (GPT-6 Astra) hit its usage limit mid-session. Its work was **all
+uncommitted** in the working tree and has been preserved, finished and committed — nothing
+was discarded or redone:
+
+- `packages/shared/src/index.ts` — removed the per-transaction rounding that was corrupting
+  a repeating weighted average; added `totalValuation` so a missing price makes the total
+  unknown instead of zero; `valuation` returns zero for a closed position.
+- `packages/shared/src/domain.test.ts` — two new tests for the above.
+- `apps/mobile/*` — Rial/Toman labelling fixed on the currency-detail statistics; `—` and a
+  neutral tone instead of a fabricated loss when a rate is missing; a USDT manual-rate
+  fallback; chart HUD decimals; an unmount guard in the chart effect; an honest web-storage
+  notice on the portfolio screen.
+- `server/src/index.ts` — history range lookup switched to `Object.hasOwn`.
+- `package-lock.json` — synced for `tsx` and `expo-symbols` (verified: no other upgrades).
+- `scripts/audit-api.ts` — new read-only API smoke test.
+
+It had **not** finished: the TGJU FAQ problem it identified was still only diagnosed (the
+equality gate was still in the parser), the portfolio edge cases were only partially walked,
+and nothing was documented or committed.
+
+### 00.2 What this session completed
+
+1. **P0 — TGJU FAQ gate removed properly.** The parser no longer requires the FAQ number to
+   equal the live quote; it requires the FAQ to *exist* (per-unit evidence), to publish the
+   same unit, and to agree in magnitude (×0.5–×2). Added the previous close as a second
+   magnitude anchor. `docs/engineering-audit.md` §2 has the full validation model.
+2. **P1 — price alerts were unreachable** and now work: `alertMatches` gates on the new
+   `isFetchFresh` (did we read this price recently) instead of `isStale` (can we vouch for
+   the trade time), which is permanently true for TGJU.
+3. **P2 — display unit** now applies to the whole portfolio dashboard and the home teaser,
+   not just the market screens.
+4. **P2 — missing rates** are explained in the UI and any asset's manual rate now fills an
+   absent quote; the custom-rate screen's description was corrected to match.
+5. **P2 — deleted transactions** are now erased from the Keychain, after the ledger index
+   commit so the ledger can still never be stranded.
+6. Portfolio edge cases A–H finished as permanent tests **and** re-walked by hand in the
+   running app; offline fallback re-verified at runtime.
+7. Backend parity measured; Expo Go reality checked against the current official docs.
+
+### 00.3 Current status
+
+- **Tests:** 35/35 in 3 files. `npm run typecheck` ✅, `npm run lint` ✅, `npx expo-doctor`
+  21/21 ✅, `npx expo export --platform all` ✅.
+- **Live TGJU (2026-09-22 01:56 Tehran):** USD 230,800 · EUR 265,010 · AED 62,850 ·
+  IQD 148.6 Toman. All IRR, quote size 1 unit, `sourceTimestamp: null`, `stale: true` —
+  which is correct: TGJU publishes no trade timestamp, only a clock or day/month label.
+- **Deployed Cloudflare Worker is OUT OF DATE.** It serves correct prices today, but it
+  predates the P0 parser fix and still 503s on `?range=toString|__proto__|constructor`
+  where this repository returns 400. **Nothing was deployed.** The command, for whenever the
+  owner chooses: `npx wrangler deploy --config server/wrangler.jsonc`.
+- **API URL mode:** `apps/mobile/.env.local` (git-ignored) points at the deployed HTTPS
+  Worker. The local Worker on `:8787` is therefore **not** needed for iPhone testing.
+- **Expo Go:** no dependency in this project is incompatible with it — every native module
+  used is in the Expo Go bundle, and `npx expo start --go` serves a working
+  `exposdk:57.0.0` iOS bundle. But Expo Go on iOS is **no longer a free App Store install**:
+  the current docs require a paid Apple Developer Program subscription, `npx eas-cli@latest
+  go`, and TestFlight.
+- **Development build:** the docs state that *all* builds running on an iPhone device require
+  a paid Apple Developer account for signing, on macOS, Windows and Linux alike.
+- **iPhone readiness:** the application is ready. The only blocker is an Apple Developer
+  Program membership (US$99/year); there is no free route from Windows without a Mac.
+  Recommended route: **EAS development build**, `npx eas-cli@latest build --profile
+  development --platform ios`, then `npx expo start --dev-client`.
+- **Next task:** run that build on the owner's iPhone and complete the on-device QA
+  checklist in `TODO.md`.
+
+### 00.4 Commits from this session
+
+```
+8e4cc32 chore: sync lockfile and add a read-only API audit script
+5e05e9e fix(market): stop rejecting live quotes over a lagging TGJU FAQ
+6bd7cfb fix(shared): keep accounting precision and make price alerts reachable
+4945550 fix(mobile): honour the display unit everywhere and explain missing rates
+<this>  docs: record the engineering audit and correct the iPhone route
+```
+
+HEAD is that last docs commit — run `git log --oneline -6` for its hash; it is not written
+here because writing it would change it. The four fix/chore hashes above are stable. The
+working tree is clean apart from the untracked, local-only `.claude/` agent settings, which
+were deliberately not committed.
 
 ---
 
