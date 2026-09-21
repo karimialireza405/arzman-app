@@ -7,7 +7,13 @@ A Persian-first personal iPhone currency dashboard built on **Expo SDK 57, React
 ## What is included
 
 - Persian dashboard, markets, currency details, converter, watchlist, custom rates and dark/light/system appearance.
-- Native Liquid Glass when supported, a blur fallback, opaque readable market cards, native navigation sheets, safe-area layout and haptics.
+- **Apple-aligned UI kit** (`src/components/*` + `src/design-system/*`): Liquid Glass chrome
+  (tab bar, glass buttons) with **opaque** content surfaces, native `borderCurve: "continuous"`
+  squircles, semantic button hierarchy, segmented controls, iOS search field, inset-grouped
+  lists, SF Symbols on iOS, spring press states, haptics and system Reduce Motion support.
+- **Currency badge family** (`CurrencyBadge`): one consistent squircle icon system for
+  USD/EUR/AED/IQD (+USDT/IRT) with semantic tints — no flags, no emoji.
+- Native navigation sheets, safe-area layout (Dynamic Island, home indicator, floating tab bar).
 - Rial/toman preferences, Persian/English number formatting and explicit source quote sizes.
 - Local transactions, weighted average cost, realized/unrealized P&L, allocation, daily estimated change and device-authentication guards.
 - Foreground-only threshold, percentage and rapid-movement alerts, disabled for stale prices.
@@ -15,6 +21,15 @@ A Persian-first personal iPhone currency dashboard built on **Expo SDK 57, React
 - Shared schemas, parser fixtures, protected last-known-good cache and restart-persistent server history.
 
 USDT is a separate provider contract; no live USDT feed is enabled. A user-entered USDT price is explicitly labelled manual. Widgets, Live Activities, Siri and background push are disabled typed adapters plus implementation documentation.
+
+## UI design system (Apple HIG / Liquid Glass)
+
+- Tokens live in `apps/mobile/src/design-system/` (`tokens.ts`, `currency-icons.ts`);
+  components live in `apps/mobile/src/components/*` (barrel: `src/ui.tsx`).
+- Material rule: **glass = chrome, content = opaque** (HIG · Materials).
+- Buttons follow Apple's semantic hierarchy; the full mapping (and the official
+  Apple sources behind every rule) is documented in `docs/apple-references/`
+  and `docs/ui-audit.md` § "Post-Redesign Status".
 
 ## Architecture
 

@@ -2,6 +2,61 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2026-09-21 — Apple HIG / Liquid Glass UI redesign
+
+### Added
+- **Currency icon system (`apps/mobile/src/design-system/currency-icons.ts`):**
+  one consistent squircle badge family for USD `$`, EUR `€`, AED `د.إ`, IQD `ع.د`
+  (plus USDT/IRT/IRR) — four sizes, three tones (tint/filled/neutral), Apple
+  system tints, per-glyph RTL/LTR direction, dark/light aware, reusable via
+  `CurrencyBadge`/`CurrencyIcon`.
+- **Modular UI kit (`apps/mobile/src/components/*`, re-exported by `src/ui.tsx`):**
+  - `theme.ts` — `useTheme`, `useFeedback` (selection/impact/notification haptics),
+    `usePressFeedback` (spring press states), `useReduceMotion` (reads the system
+    Reduce Motion switch), `textStyle` (Apple Dynamic Type names).
+  - `primitives.tsx` — `AppIcon` (SF Symbols on iOS via `expo-symbols`, Ionicons
+    elsewhere), `Label` (Dynamic Type variants + tabular figures), `Divider`, `IconTile`.
+  - `surfaces.tsx` — `Glass` (Liquid Glass chrome with honest blur fallback),
+    `GlassContainer`, opaque `Surface`/`Card`, `GroupedList` with inset hairline
+    separators, `SettingsRow`, `SwitchRow` (iOS Settings hierarchy).
+  - `controls.tsx` — `Button` with Apple's semantic styles (`prominent`, `tinted`,
+    `bordered`, `glass`, `plain`, `destructive`), sizes 50/44/34pt, capsule shape in
+    horizontal rows, ≥44pt hit regions; `IconButton`; `SegmentedControl` with a
+    traveling selection indicator; `SearchField` (36pt, magnifier + clear).
+  - `market.tsx` — `Price`, `usePrice`, `ChangePill`, `RangeMeter`, `MarketStatus`,
+    `MarketHero`, `CurrencyRow`, `CurrencyList`.
+  - `screen.tsx` — `Screen` (safe areas + floating tab-bar clearance), `Section`,
+    `EmptyState`, `AmountInput`.
+- **Design tokens:** Apple system colors for dark/light, OLED `#000000` background,
+  semantic control fills, `borderCurve: "continuous"` token, concentric geometry
+  presets, 8pt spacing grid, 4 shadow elevations, 5 spring presets, motion durations.
+- **Floating tab bar:** 58pt Liquid Glass capsule with specular hairline, always
+  visible labels, quiet accent selection, selection haptics, RTL-mirrored order.
+
+### Changed
+- All screens rebuilt on the new kit: Home, Markets, Converter, Portfolio, More,
+  Currency Detail, Alerts, Custom Rates, Transaction, plus chart polish.
+- Market content is now rendered on **opaque** surfaces; Liquid Glass is used only
+  for chrome (tab bar, glass buttons, icon buttons) per HIG · Materials.
+- Money values use tabular figures and dominate their labels; high/low moved to
+  secondary metadata lines.
+- Lists use iOS inset-grouped rows with inset separators instead of per-item cards.
+
+### Removed
+- The decorative, **fabricated sparkline** in the Home hero. It was replaced by
+  `RangeMeter`, which plots only the source-reported daily low/high/current.
+
+### Fixed
+- The broken uncommitted token refactor from the previous session (21 TypeScript
+  errors) — reconciled without discarding any of the intended architecture.
+- Content could previously collide with the floating tab bar; `Screen` now reserves
+  exactly `TAB_BAR.clearance(insetBottom)`.
+
+### Verified
+- `npm run check` — typecheck 0 errors, ESLint 0 errors/0 warnings, Vitest 22/22.
+- `npx expo-doctor` — 21/21 checks passed.
+- `npx expo export --platform all` — clean Web, iOS Hermes and Android Hermes bundles.
+
 ## [0.2.0] - 2026-09-21
 
 ### Added

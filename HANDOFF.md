@@ -3,12 +3,94 @@
 **Project:** «ارز من» (ArzMan) — Personal Iranian Currency-Market iPhone Application  
 **Platform:** iOS (Expo SDK 57, React Native 0.86, TypeScript, Expo Router)  
 **Development Host:** Windows 11 Pro, Node.js 24 LTS, Git Bash  
-**Design Reference:** Apple iOS 27 Liquid Glass / HIG Design System  
-**Date of Handoff:** 2026-09-21  
-**Project Version:** 0.2.0  
+**Design Reference:** Apple iOS 26/27 Liquid Glass + Human Interface Guidelines  
+**Date of Handoff:** 2026-09-21 (updated after the Cline UI-redesign session)  
+**Project Version:** 0.3.0  
 **Project Path:** `D:\MY_APP\Arz_Man`  
-**Git HEAD:** `87b8b45` — `fix: harden TGJU normalization, 45s server refresh, financial precision`  
-**Previous Commit:** `9886e04` — `feat: establish ArzMan v0.2 verified baseline`  
+**Git HEAD at session start:** `d56dae8` — `docs: update HANDOFF with live TGJU audit and next priorities`  
+**Git HEAD after this session:** see §0.6 (final commits of the redesign)  
+
+---
+
+## 0. UI Redesign Handoff — Claude → Cline (2026-09-21)
+
+### 0.1 What Claude had completed before the handoff
+
+Claude's session produced (all committed through `d56dae8`):
+
+- The v0.2 verified baseline: working app, 45s server refresh hardening, `npm run verify` audit.
+- A first design-system pass (`apps/mobile/src/design-system/tokens.ts`) and a large
+  `apps/mobile/src/ui.tsx` component library with native `expo-glass-effect` integration.
+- Screen upgrades: floating tab bar, formSheet modals, home hero, market search,
+  converter, currency detail + chart, portfolio, alerts, custom rates, settings.
+- Three *uncommitted* files found at handoff:
+  - `docs/apple-references/apple-reference-index.md` (new)
+  - `docs/apple-references/apple-ui-findings.md` (new)
+  - `docs/ui-audit.md` (new)
+  - `apps/mobile/src/design-system/tokens.ts` (**modified, and left broken**: the
+    rewrite renamed/removed `concentricRadius`, `lineSubtle`, `redGlass`, `greenGlass`,
+    `redText`, `greenText`, `amberText`, `accentGlass`, `glassClear`, `surfaceHover`
+    while screens still referenced them → 21 TypeScript errors).
+
+### 0.2 What Cline completed in this session
+
+1. **Recovered Claude's work** — kept the new token architecture, extended it with
+   the missing semantic tokens (`fillPrimary…fillQuaternary`, `lineSubtle`, tint
+   fills, legacy aliases) and re-exported `concentricRadius`. No work was discarded.
+2. **Rebuilt the UI kit as modules** (the single 1,500-line `ui.tsx` became a thin
+   barrel over `src/components/*`, so all screen imports kept working):
+   - `theme.ts` — `useTheme`, `useFeedback` (haptics), `usePressFeedback` (spring
+     press states), `useReduceMotion` (system Reduce Motion), `textStyle`.
+   - `primitives.tsx` — `AppIcon` (SF Symbols ⇄ Ionicons), `Label` (Dynamic Type
+     variants), `Divider`, `IconTile`.
+   - `surfaces.tsx` — `Glass` (Liquid Glass chrome, honest fallback), `GlassContainer`,
+     opaque `Surface`/`Card`, `GroupedList` (inset hairline separators), `SettingsRow`,
+     `SwitchRow`.
+   - `controls.tsx` — `Button` (prominent/tinted/bordered/glass/plain/destructive,
+     50/44/34pt, capsule-in-rows), `IconButton`, `SegmentedControl` (traveling
+     indicator), `SearchField`, `Choices`.
+   - `market.tsx` — `Price`, `usePrice`, `ChangePill`, `RangeMeter` (replaces the
+     fabricated sparkline), `MarketStatus`, `MarketHero`, `CurrencyRow`, `CurrencyList`.
+   - `screen.tsx` — `Screen` (safe areas + tab-bar clearance), `Section`, `EmptyState`,
+     `AmountInput`.
+3. **Currency icon system** — `src/design-system/currency-icons.ts`: one consistent
+   badge family (squircle, continuous corners, 4 sizes, 3 tones, semantic Apple
+   tints, per-glyph RTL/LTR direction). Used on home, market, detail, converter,
+   portfolio, alerts and custom rates.
+4. **Redesigned every screen**: tab bar, home, market, converter, portfolio, more,
+   currency detail, alerts, custom rates, transaction, chart polish.
+5. **Verification**: `npm run check` green (typecheck + lint + 22 tests),
+   `npx expo-doctor` 21/21, `npx expo export --platform all` clean.
+
+### 0.3 Current UI state
+
+- Dark/OLED-first (`#000000`), Apple light mode (`#F2F2F7`), both fully themed.
+- Glass is chrome-only (tab bar, glass buttons, icon buttons); market content is opaque.
+- All containers use native `borderCurve: "continuous"` squircles.
+- Buttons follow Apple's semantic hierarchy; one prominent CTA per view.
+- Lists are iOS inset-grouped (rows + inset hairlines), not card grids.
+- RTL mirrored throughout (leading = right); currency glyphs never mirrored.
+- Tab bar order is mirrored for Persian reading order (خانه on the right).
+
+### 0.4 Apple references used
+
+See `docs/apple-references/apple-reference-index.md` (12 official sources, each with
+URL and the design decision it grounds). The official "View Markdown" data endpoint
+is documented there and was used for HIG pages.
+
+### 0.5 Remaining visual issues
+
+Listed in `docs/ui-audit.md` § "Remaining known visual debt" — notably: glass
+fallbacks on web/Android are approximations, the chart card still uses its own
+padding, money values intentionally do not scale with Dynamic Type.
+
+### 0.6 Exact test state & Git commits
+
+- `npm run check` → typecheck ✅, lint ✅ (0 errors/0 warnings), vitest 22/22 ✅
+- `npx expo-doctor` → 21/21 ✅
+- `npx expo export --platform all` → Web + iOS + Android Hermes bundles ✅
+- Commits created in this session (see `git log --oneline`): docs reference audit,
+  design-system rebuild, currency badge system, screen redesign, docs update.
 
 ---
 
