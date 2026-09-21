@@ -5,6 +5,10 @@
 **Development Host:** Windows 11 Pro, Node.js 24 LTS, Git Bash  
 **Design Reference:** Apple iOS 27 Liquid Glass / HIG Design System  
 **Date of Handoff:** 2026-09-21  
+**Project Version:** 0.2.0  
+**Project Path:** `D:\MY_APP\Arz_Man`  
+**Git HEAD:** `87b8b45` — `fix: harden TGJU normalization, 45s server refresh, financial precision`  
+**Previous Commit:** `9886e04` — `feat: establish ArzMan v0.2 verified baseline`  
 
 ---
 
@@ -129,13 +133,16 @@
 ```text
 Physical iPhone / Expo Mobile App
                │
-               ▼ (HTTP GET /api/market)
+               ▼ (HTTP GET /api/market, app polls every 30-300s user-configurable)
 Cloudflare Worker (ArzMan Market Service)
                │
                ▼
 Durable Object (`MarketStore`, SQLite backed)
-  - Enforces 5-minute cooldown between source scrapes
+  - 45-second cooldown between source scrapes (target 30-60s)
+  - Exponential backoff on failures: 15s → 30s → 60s → 120s → 240s → 300s cap
+  - Consecutive-failure counter persisted in storage
   - Serves cached last-known-good snapshot to all connected clients
+  - Request coalescing: concurrent requests share one in-flight refresh
   - Stores validated observations in SQLite table `observations`
                │
                ▼ (Public HTTPS fetch, 12s timeout, 2MB cap)
@@ -146,6 +153,15 @@ TGJU Public Profile Pages (tgju.org)
   - IQD: /profile/price_iqd
 ```
 
+**Live TGJU verification audit (2026-09-21, via `npm run verify`):**
+
+| Currency | TGJU Raw (IRR) | Quote Size | Normalized Toman | Status |
+|----------|----------------|------------|------------------|--------|
+| USD      | 2,306,000      | 1 unit     | 230,600          | ✅ OK  |
+| EUR      | 2,651,000      | 1 unit     | 265,100          | ✅ OK  |
+| AED      | 627,880        | 1 unit     | 62,788           | ✅ OK  |
+| IQD      | 1,479          | 1 unit     | 147.9            | ✅ OK  |
+
 ---
 
 ## 8. TGJU Parser Details
@@ -155,7 +171,7 @@ TGJU Public Profile Pages (tgju.org)
   - Raw values are quoted in Rial (`IRR`) or Toman (`IRT`).
   - Unit is extracted from `واحد پولی` row.
   - Per-unit quote evidence is verified from the FAQ section (`در حال حاضر قیمت هر...`).
-  - IQD is explicitly verified as quote size = 1 (each dinar), avoiding lot-size guesswork.
+  - **IQD quote convention verified live:** TGJU profile `price_iqd` explicitly quotes the price of **one (1) Iraqi Dinar** in Rials. FAQ text confirms: «قیمت هر دینار عراق... ۱,۴۷۹ ریال». Quote size is strictly **1 unit**. Lot sizes (100 or 1000) are never inferred from magnitude. Example: 1,479 IRR = 147.9 Toman per 1 IQD.
   - Normalized formula: `priceToman = rawValue / (rawUnit === "IRR" ? 10 : 1) / quoteSize`.
 - **Validation & Fault Tolerance:**
   - Primary price extracted from `[data-col="info.last_trade.PDrCotVal"]`.
@@ -163,6 +179,11 @@ TGJU Public Profile Pages (tgju.org)
   - Both sources, along with FAQ price, must agree.
   - Sanity bounds: USD/EUR/AED must be between 100 and 1,000,000,000 Toman; IQD between 0.1 and 1,000,000 Toman.
   - Malformed or unreachable scrapes never overwrite the last-known-good cache.
+- **Unit Conventions (verified live, 2026-09-21):**
+  - **USD:** raw in IRR, quote size 1 → 1 USD = `rawValue/10` Toman
+  - **EUR:** raw in IRR, quote size 1 → 1 EUR = `rawValue/10` Toman
+  - **AED:** raw in IRR, quote size 1 → 1 AED = `rawValue/10` Toman
+  - **IQD:** raw in IRR, quote size 1 → 1 IQD = `rawValue/10` Toman (e.g., 1,479 IRR = 147.9 Toman)
 
 ---
 
@@ -190,9 +211,30 @@ TGJU Public Profile Pages (tgju.org)
 
 ---
 
-## 12. Next Tasks for Future Sessions
+## 12. Next Highest-Priority Task for Future Sessions
 
-1. **Deploy Cloudflare Worker:** Run `wrangler login` and `npm run deploy` from `server/` to launch the live market backend on Cloudflare.
+1. **Deploy Cloudflare Worker:** Run `wrangler login` and `npm run deploy` from `server/` to launch the live market backend on Cloudflare. This is the highest-priority next task, because it replaces the local LAN-based backend URL in `.env.local` with a permanent HTTPS endpoint reachable from anywhere.
 2. **EAS Development Build:** Run `eas build --platform ios --profile development` to generate an ad-hoc or internal development build for physical iPhone testing with native Face ID and Liquid Glass.
 3. **Widget & Live Activity Implementation:** Using the contracts in `apps/mobile/src/native-capabilities.ts`, build an iOS WidgetKit extension (shared App Group container for top 4 currencies) and ActivityKit dynamic island tracker.
 4. **Push Notification Worker:** Connect Expo Server SDK or Cloudflare queues to evaluate price alert rules server-side and dispatch remote push notifications when the app is closed.
+
+---
+
+## 13. Verification Command Summary (npm run verify)
+
+Run from project root on Windows:
+
+```powershell
+npm run verify
+```
+
+This command independently audits the ArzMan TGJU parser against the actual live public TGJU profile pages for USD, EUR, AED, IQD. It prints:
+- Raw TGJU value and unit (IRR or IRT)
+- Quote lot size (explicitly, never guessed)
+- Normalized Toman price with full math shown
+- Daily change, high/low, timestamps
+- Stale flag status
+- OK/FAIL verdict per currency
+- Audit summary table at the end
+
+This is **not** a mandatory CI test. It never breaks CI when TGJU is temporarily unavailable; it simply reports the failure. Run it explicitly when auditing market data correctness. Documented in README.md under "Live Market Verification Command".
