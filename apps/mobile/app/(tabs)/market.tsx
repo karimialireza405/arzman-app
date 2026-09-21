@@ -1,46 +1,47 @@
+/**
+ * Markets — «بازار»
+ *
+ * iOS Stocks pattern: search first, then a scope control (همه / دنبال‌شده‌ها),
+ * then one inset grouped list. Rows are pressable and navigate to detail.
+ */
 import { useState } from "react";
 import { View } from "react-native";
 import { fiatCodes, names, type Currency } from "@arzman/shared";
+import { useApp } from "../../src/store";
 import {
-  Screen,
-  MarketStatus,
+  CurrencyList,
   CurrencyRow,
-  GlassSearchBar,
-  GlassSegmentedControl,
   EmptyState,
   Label,
+  MarketStatus,
+  Screen,
+  SearchField,
+  SegmentedControl,
+  spacing,
 } from "../../src/ui";
-import { useApp } from "../../src/store";
 
-const filterTabs = ["all", "favorites"] as const;
-type FilterTab = (typeof filterTabs)[number];
+const filters = ["all", "favorites"] as const;
+type Filter = (typeof filters)[number];
 
-const filterLabels: Record<FilterTab, string> = {
-  all: "همه ارزها",
+const filterLabels: Record<Filter, string> = {
+  all: "همه",
   favorites: "دنبال‌شده‌ها",
 };
 
 export default function Market() {
   const app = useApp();
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<FilterTab>("all");
+  const [filter, setFilter] = useState<Filter>("all");
 
-  const normalizedSearch = search.trim().toLowerCase();
+  const query = search.trim().toLowerCase();
 
-  const filteredCodes = fiatCodes.filter((code) => {
-    // 1. Filter by category
-    if (filter === "favorites" && !app.user.watchlist.includes(code)) {
-      return false;
-    }
-
-    // 2. Filter by search query
-    if (normalizedSearch) {
-      const codeMatch = code.toLowerCase().includes(normalizedSearch);
-      const nameMatch = names[code].toLowerCase().includes(normalizedSearch);
-      return codeMatch || nameMatch;
-    }
-
-    return true;
+  const filtered = fiatCodes.filter((code) => {
+    if (filter === "favorites" && !app.user.watchlist.includes(code)) return false;
+    if (!query) return true;
+    return (
+      code.toLowerCase().includes(query) ||
+      names[code].toLowerCase().includes(query)
+    );
   });
 
   return (
@@ -49,27 +50,25 @@ export default function Market() {
       eyebrow="نرخ لحظه‌ای بازار آزاد ایران"
       refresh
     >
-      {/* Connectivity & Source Freshness Status */}
       <MarketStatus />
 
-      {/* Floating Glass Search Bar */}
-      <GlassSearchBar
-        value={search}
-        onChangeText={setSearch}
-        placeholder="جستجوی ارز (دلار، یورو، AED...)"
-        onClear={() => setSearch("")}
-      />
+      {/* Search + scope (iOS search pattern) */}
+      <View style={{ gap: spacing.xs }}>
+        <SearchField
+          value={search}
+          onChangeText={setSearch}
+          placeholder="جستجوی ارز (دلار، یورو، AED…)"
+          onClear={() => setSearch("")}
+        />
+        <SegmentedControl
+          values={filters}
+          value={filter}
+          onChange={setFilter}
+          label={(v) => filterLabels[v]}
+        />
+      </View>
 
-      {/* Segmented Filter (All vs Favorites) */}
-      <GlassSegmentedControl
-        values={filterTabs}
-        value={filter}
-        onChange={setFilter}
-        label={(tab) => filterLabels[tab]}
-      />
-
-      {/* Filtered Currencies List */}
-      {filteredCodes.length === 0 ? (
+      {filtered.length === 0 ? (
         <EmptyState
           title="ارزی یافت نشد"
           description={
@@ -78,10 +77,15 @@ export default function Market() {
               : `هیچ ارزی مطابق با «${search}» پیدا نشد.`
           }
           icon={filter === "favorites" ? "star-outline" : "search"}
+          action={
+            filter === "favorites"
+              ? { title: "بازگشت به همه ارزها", onPress: () => setFilter("all") }
+              : undefined
+          }
         />
       ) : (
-        <View style={{ gap: 10 }}>
-          {filteredCodes.map((code: Currency) => (
+        <CurrencyList>
+          {filtered.map((code: Currency) => (
             <CurrencyRow
               key={code}
               code={code}
@@ -89,13 +93,12 @@ export default function Market() {
               showFavorite
             />
           ))}
-        </View>
+        </CurrencyList>
       )}
 
-      {/* Helpful Hint */}
-      <View style={{ paddingHorizontal: 6, gap: 4, marginTop: 4 }}>
-        <Label secondary size={12} style={{ textAlign: "center" }}>
-          برای مشاهده نمودار و جزئیات تکنیکال، هر ردیف را لمس کنید.
+      <View style={{ paddingHorizontal: spacing.xxs }}>
+        <Label tertiary size={11} align="center">
+          برای مشاهده نمودار و جزئیات هر ارز، ردیف مورد نظر را لمس کنید.
         </Label>
       </View>
     </Screen>

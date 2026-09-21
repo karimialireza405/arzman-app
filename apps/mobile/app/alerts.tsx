@@ -1,6 +1,12 @@
+/**
+ * Price alerts — «هشدارهای قیمت» (modal sheet).
+ *
+ * Form-first layout: pick currency → pick condition → enter threshold → save.
+ * The honesty notice stays: alerts are evaluated only while the app is open.
+ */
 import { useState } from "react";
 import { useLocalSearchParams } from "expo-router";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 import {
   CurrencySchema,
   fiatCodes,
@@ -13,15 +19,21 @@ import {
 } from "@arzman/shared";
 import { useApp } from "../src/store";
 import {
-  Screen,
-  Card,
-  GlassSegmentedControl,
   AmountInput,
-  GlassButton,
-  Label,
+  AppIcon,
+  Button,
+  CurrencyBadge,
   EmptyState,
-  useTheme,
+  GroupedList,
+  Label,
+  Screen,
+  Section,
+  SegmentedControl,
+  Surface,
   radii,
+  spacing,
+  useFeedback,
+  useTheme,
 } from "../src/ui";
 
 const labels: Record<PriceAlert["kind"], string> = {
@@ -35,12 +47,13 @@ const shortKindLabels: Record<PriceAlert["kind"], string> = {
   above: "بالاتر از",
   below: "پایین‌تر از",
   percent: "نوسان ٪",
-  rapid: "جهش ۵دقیقه",
+  rapid: "جهش ۵د",
 };
 
 export default function Alerts() {
   const app = useApp();
   const t = useTheme();
+  const feedback = useFeedback();
   const params = useLocalSearchParams<{ currency?: string }>();
 
   const [currency, setCurrency] = useState<Currency>(
@@ -65,7 +78,7 @@ export default function Alerts() {
         triggeredAt: null,
       });
       app.updateUser((u) => ({ ...u, alerts: [...u.alerts, alert] }));
-      app.haptic();
+      feedback.success();
       setAmount("");
       setError("");
     } catch {
@@ -74,218 +87,182 @@ export default function Alerts() {
   };
 
   return (
-    <Screen title="هشدارهای قیمت" eyebrow="نظارت لحظه‌ای بر بازار">
-      {/* 1. Honest Foreground Capability Note */}
-      <Card
+    <Screen title="هشدارهای قیمت" eyebrow="نظارت لحظه‌ای بر بازار" floatingTabBar={false}>
+      {/* Honest capability note — apple-style inline notice, not a banner card */}
+      <Surface
         style={{
-          padding: 16,
-          gap: 6,
-          backgroundColor: t.dark
-            ? "rgba(255, 214, 10, 0.12)"
-            : "rgba(255, 149, 0, 0.1)",
-          borderColor: t.amber,
+          flexDirection: "row-reverse",
+          gap: spacing.xs,
+          alignItems: "flex-start",
+          backgroundColor: t.amberFill,
         }}
       >
-        <Label size={13} weight="700" amber>
-          نحوهٔ عملکرد هشدارها در نسخه فعلی
-        </Label>
-        <Label secondary size={12} style={{ lineHeight: 18 }}>
-          هشدارها هنگام باز بودن برنامه و بر اساس نرخ‌های دارای مهر زمانی معتبر
-          بررسی می‌شوند. ارسال اعلان پس از بستن برنامه به زیرساخت پوش سرور نیاز دارد و
-          در این نسخه فعال نیست.
-        </Label>
-      </Card>
-
-      {/* 2. Create Alert Form */}
-      <Card elevated style={{ padding: 20, gap: 16 }}>
-        <Label size={17} weight="700">
-          ایجاد هشدار هوشمند جدید
-        </Label>
-
-        {/* Currency Selection */}
-        <View style={{ gap: 6 }}>
-          <Label secondary size={13} weight="600">
-            انتخاب ارز:
+        <AppIcon name="info" size={18} color={t.amber} style={{ marginTop: 2 }} />
+        <View style={{ flex: 1, gap: 2 }}>
+          <Label size={13} weight="600" style={{ color: t.amberText }}>
+            نحوهٔ عملکرد هشدارها
           </Label>
-          <GlassSegmentedControl
-            values={fiatCodes}
-            value={currency}
-            onChange={setCurrency}
-          />
+          <Label secondary size={12} style={{ lineHeight: 18 }}>
+            هشدارها هنگام باز بودن برنامه بررسی می‌شوند. اعلان پس از بستن برنامه
+            به زیرساخت پوش سرور نیاز دارد و در این نسخه فعال نیست.
+          </Label>
         </View>
+      </Surface>
 
-        {/* Condition Type Selection */}
-        <View style={{ gap: 6 }}>
-          <Label secondary size={13} weight="600">
-            شرط فعال‌سازی:
-          </Label>
-          <GlassSegmentedControl
-            values={kinds}
-            value={kind}
-            onChange={setKind}
-            label={(k) => shortKindLabels[k]}
+      {/* Create form */}
+      <Section title="هشدار جدید">
+        <Surface style={{ gap: spacing.sm }}>
+          <View style={{ gap: spacing.xxs }}>
+            <Label secondary size={13} weight="600">انتخاب ارز</Label>
+            <SegmentedControl
+              values={fiatCodes}
+              value={currency}
+              onChange={setCurrency}
+              label={(c) => names[c]}
+              size="compact"
+            />
+          </View>
+
+          <View style={{ gap: spacing.xxs }}>
+            <Label secondary size={13} weight="600">شرط فعال‌سازی</Label>
+            <SegmentedControl
+              values={kinds}
+              value={kind}
+              onChange={setKind}
+              label={(k) => shortKindLabels[k]}
+              size="compact"
+            />
+          </View>
+
+          <AmountInput
+            label={labels[kind]}
+            value={amount}
+            onChangeText={setAmount}
+            unit={kind === "above" || kind === "below" ? "تومان" : "٪"}
           />
-        </View>
 
-        {/* Threshold Input */}
-        <AmountInput
-          label={
-            kind === "above" || kind === "below"
-              ? "آستانه قیمت · تومان"
-              : "آستانه درصد تغییر"
-          }
-          value={amount}
-          onChangeText={setAmount}
-          placeholder="۰"
-          unit={kind === "above" || kind === "below" ? "تومان" : "٪"}
-        />
+          {!!error && <Label red size={13}>{error}</Label>}
 
-        {kind === "rapid" && (
-          <Label tertiary size={11}>
-            شرط حرکت سریع: مقایسهٔ قیمت دریافتی با استعلام قبلی در بازهٔ حداکثر پنج دقیقه.
-          </Label>
-        )}
+          <Button
+            title="افزودن هشدار"
+            icon="add"
+            variant="prominent"
+            size="large"
+            fullWidth
+            disabled={!amount}
+            onPress={handleCreate}
+          />
+        </Surface>
+      </Section>
 
-        {!!error && (
-          <Label red size={13}>
-            {error}
-          </Label>
-        )}
-
-        <GlassButton
-          title="افزودن به هشدارهای فعال"
-          icon="notifications"
-          variant="prominent"
-          size="large"
-          disabled={!app.ready || !!app.storageError || !amount}
-          onPress={handleCreate}
-        />
-      </Card>
-
-      {/* 3. Existing Alerts List */}
-      <Label size={17} weight="700">
-        هشدارهای ثبت‌شده ({formatNumber(app.user.alerts.length, app.user.settings.persian)})
-      </Label>
-
-      {app.user.alerts.length === 0 ? (
-        <EmptyState
-          title="هشداری وجود ندارد"
-          description="با تعیین آستانه و نوع شرط، تغییرات قیمت ارزها را زیر نظر بگیرید."
-          icon="notifications-outline"
-        />
-      ) : (
-        <View style={{ gap: 10 }}>
-          {app.user.alerts.map((a) => {
-            const isTriggered = !!a.triggeredAt;
-            const isEnabled = a.enabled;
-
-            return (
-              <Card key={a.id} style={{ padding: 16, gap: 12 }}>
+      {/* Existing alerts */}
+      <Section
+        title="هشدارهای فعال"
+        subtitle={`${formatNumber(app.user.alerts.length, app.user.settings.persian)} هشدار`}
+      >
+        {app.user.alerts.length === 0 ? (
+          <Surface>
+            <EmptyState
+              title="هشداری تعریف نشده است"
+              description="با تعیین آستانه، هنگام باز بودن برنامه از تغییرات نرخ مطلع می‌شوید."
+              icon="notifications-outline"
+            />
+          </Surface>
+        ) : (
+          <GroupedList separatorInset={66}>
+            {app.user.alerts.map((a) => {
+              const isTriggered = !!a.triggeredAt;
+              const isEnabled = a.enabled;
+              const statusColor = isTriggered
+                ? t.redText
+                : isEnabled
+                  ? t.greenText
+                  : t.textTertiary;
+              return (
                 <View
+                  key={a.id}
                   style={{
-                    flexDirection: "row-reverse",
-                    justifyContent: "space-between",
-                    alignItems: "center",
+                    paddingHorizontal: spacing.sm,
+                    paddingVertical: spacing.xs,
+                    gap: spacing.xxs,
                   }}
                 >
-                  <View style={{ gap: 2 }}>
-                    <Label size={16} weight="700">
-                      {names[a.currency]} ({a.currency})
-                    </Label>
-                    <Label secondary size={13}>
-                      {labels[a.kind]}{" "}
-                      {formatNumber(a.threshold, app.user.settings.persian)}{" "}
-                      {a.kind === "above" || a.kind === "below" ? "تومان" : "٪"}
-                    </Label>
+                  <View
+                    style={{
+                      flexDirection: "row-reverse",
+                      alignItems: "center",
+                      gap: spacing.xs,
+                    }}
+                  >
+                    <CurrencyBadge code={a.currency} size="md" dark={t.dark} />
+                    <View style={{ flex: 1, gap: 1 }}>
+                      <Label size={16} weight="600">
+                        {names[a.currency]}
+                      </Label>
+                      <Label secondary size={12} allowFontScaling={false}>
+                        {labels[a.kind]} {formatNumber(a.threshold, app.user.settings.persian)}{" "}
+                        {a.kind === "above" || a.kind === "below" ? "تومان" : "٪"}
+                      </Label>
+                    </View>
+                    <View
+                      style={{
+                        paddingHorizontal: spacing.xxs,
+                        paddingVertical: 3,
+                        borderRadius: radii.pill,
+                        backgroundColor: isTriggered
+                          ? t.redFill
+                          : isEnabled
+                            ? t.greenFill
+                            : t.fillTertiary,
+                      }}
+                    >
+                      <Label size={11} weight="600" style={{ color: statusColor }}>
+                        {isTriggered ? "فعال‌شده" : isEnabled ? "در حال پایش" : "متوقف"}
+                      </Label>
+                    </View>
                   </View>
 
                   <View
                     style={{
-                      paddingHorizontal: 8,
-                      paddingVertical: 3,
-                      borderRadius: radii.pill,
-                      backgroundColor: isTriggered
-                        ? t.redGlass
-                        : isEnabled
-                          ? t.greenGlass
-                          : t.raised,
+                      flexDirection: "row-reverse",
+                      gap: spacing.xxs,
+                      paddingStart: 50,
                     }}
                   >
-                    <Label
-                      size={11}
-                      weight="700"
-                      style={{
-                        color: isTriggered
-                          ? t.redText
-                          : isEnabled
-                            ? t.greenText
-                            : t.textTertiary,
-                      }}
-                    >
-                      {isTriggered
-                        ? "فعال‌شده"
-                        : isEnabled
-                          ? "در حال پایش"
-                          : "متوقف"}
-                    </Label>
+                    <Button
+                      title={isTriggered ? "فعال‌سازی مجدد" : isEnabled ? "توقف موقت" : "فعال‌سازی"}
+                      variant="plain"
+                      size="small"
+                      onPress={() =>
+                        app.updateUser((u) => ({
+                          ...u,
+                          alerts: u.alerts.map((item) =>
+                            item.id === a.id
+                              ? { ...item, enabled: isTriggered ? true : !item.enabled, triggeredAt: null }
+                              : item,
+                          ),
+                        }))
+                      }
+                    />
+                    <Button
+                      title="حذف"
+                      variant="plain"
+                      size="small"
+                      textStyle={{ color: t.red }}
+                      onPress={() =>
+                        app.updateUser((u) => ({
+                          ...u,
+                          alerts: u.alerts.filter((item) => item.id !== a.id),
+                        }))
+                      }
+                    />
                   </View>
                 </View>
-
-                {/* Actions */}
-                <View
-                  style={{
-                    flexDirection: "row-reverse",
-                    gap: 8,
-                    paddingTop: 4,
-                    borderTopWidth: StyleSheet.hairlineWidth,
-                    borderTopColor: t.lineSubtle,
-                  }}
-                >
-                  <GlassButton
-                    title={
-                      isTriggered
-                        ? "فعال‌سازی مجدد"
-                        : isEnabled
-                          ? "توقف موقت"
-                          : "فعال‌سازی"
-                    }
-                    size="small"
-                    variant="regular"
-                    style={{ flex: 1 }}
-                    onPress={() =>
-                      app.updateUser((u) => ({
-                        ...u,
-                        alerts: u.alerts.map((item) =>
-                          item.id === a.id
-                            ? {
-                                ...item,
-                                enabled: isTriggered ? true : !item.enabled,
-                                triggeredAt: null,
-                              }
-                            : item,
-                        ),
-                      }))
-                    }
-                  />
-
-                  <GlassButton
-                    title="حذف"
-                    icon="close-outline"
-                    size="small"
-                    variant="quiet"
-                    onPress={() =>
-                      app.updateUser((u) => ({
-                        ...u,
-                        alerts: u.alerts.filter((item) => item.id !== a.id),
-                      }))
-                    }
-                  />
-                </View>
-              </Card>
-            );
-          })}
-        </View>
-      )}
+              );
+            })}
+          </GroupedList>
+        )}
+      </Section>
     </Screen>
   );
 }

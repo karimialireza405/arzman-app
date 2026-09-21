@@ -158,17 +158,17 @@ export function ChartCard({ currency }: { currency: Currency }) {
         value={range}
         onChange={setRange}
         label={(r) => rangeLabels[r]}
+        size="compact"
       />
 
       {/* 2. Interactive Scrubber HUD */}
       {activePoint && points.length >= 2 && (
         <View
           style={{
-            backgroundColor: t.dark
-              ? "rgba(22, 25, 34, 0.7)"
-              : "rgba(240, 243, 248, 0.8)",
+            backgroundColor: t.fillQuaternary,
             padding: 12,
-            borderRadius: radii.control,
+            borderRadius: radii.controlSmall,
+            borderCurve: "continuous",
             gap: 4,
           }}
         >

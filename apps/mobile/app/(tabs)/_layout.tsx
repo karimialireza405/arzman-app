@@ -1,8 +1,30 @@
+/**
+ * Floating Liquid Glass tab bar.
+ *
+ * Apple HIG · Tab bars:
+ *  - "Use a tab bar to support navigation, not to provide actions."
+ *  - "Prefer filled symbols or icons for consistency with the platform."
+ *  - "Include tab labels to help with navigation."
+ *
+ * Liquid Glass specifics (HIG · Materials + iOS 26 tab bar behavior):
+ *  - the bar floats above the content with the regular material, separated from
+ *    the home indicator by a fixed gap;
+ *  - the selected tab gets a *quiet* tinted capsule behind the symbol — no glow;
+ *  - tabs are mirrored for the Persian RTL reading order (خانه on the right).
+ */
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 import { Tabs } from "expo-router";
-import { View, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Glass, useTheme, AppIcon, radii } from "../../src/ui";
-import { useApp } from "../../src/store";
+import {
+  AppIcon,
+  Glass,
+  TAB_BAR,
+  curve,
+  spacing,
+  useFeedback,
+  useTheme,
+} from "../../src/ui";
 
 interface TabConfig {
   name: string;
@@ -12,45 +34,20 @@ interface TabConfig {
 }
 
 const tabs: TabConfig[] = [
-  {
-    name: "index",
-    title: "خانه",
-    activeIcon: "home",
-    inactiveIcon: "home-outline",
-  },
-  {
-    name: "market",
-    title: "بازار",
-    activeIcon: "stats-chart",
-    inactiveIcon: "stats-chart-outline",
-  },
-  {
-    name: "converter",
-    title: "مبدل",
-    activeIcon: "swap-horizontal",
-    inactiveIcon: "swap-horizontal",
-  },
-  {
-    name: "portfolio",
-    title: "دارایی من",
-    activeIcon: "wallet",
-    inactiveIcon: "wallet-outline",
-  },
-  {
-    name: "more",
-    title: "بیشتر",
-    activeIcon: "more",
-    inactiveIcon: "ellipsis-horizontal-circle-outline",
-  },
+  { name: "index", title: "خانه", activeIcon: "home", inactiveIcon: "home-outline" },
+  { name: "market", title: "بازار", activeIcon: "stats-chart", inactiveIcon: "stats-chart-outline" },
+  { name: "converter", title: "مبدل", activeIcon: "swap-horizontal", inactiveIcon: "swap-horizontal" },
+  { name: "portfolio", title: "دارایی من", activeIcon: "wallet", inactiveIcon: "wallet-outline" },
+  { name: "more", title: "بیشتر", activeIcon: "more", inactiveIcon: "ellipsis-horizontal-circle-outline" },
 ];
 
 export default function TabLayout() {
   const t = useTheme();
-  const { haptic } = useApp();
+  const feedback = useFeedback();
   const insets = useSafeAreaInsets();
 
-  const bottomOffset = Math.max(insets.bottom + 4, 16);
-  const barHeight = 64;
+  // The bar floats a fixed gap above the home indicator (or a 16pt floor).
+  const bottomOffset = Math.max(insets.bottom, TAB_BAR.sideInset) + TAB_BAR.bottomGap;
 
   return (
     <Tabs
@@ -62,61 +59,41 @@ export default function TabLayout() {
         tabBarStyle: {
           position: "absolute",
           bottom: bottomOffset,
-          left: 16,
-          right: 16,
-          height: barHeight,
-          paddingTop: 6,
-          paddingBottom: 6,
-          paddingHorizontal: 8,
+          left: TAB_BAR.sideInset,
+          right: TAB_BAR.sideInset,
+          height: TAB_BAR.height,
+          paddingTop: spacing.xxs - 2,
+          paddingBottom: spacing.xxs - 2,
+          paddingHorizontal: spacing.xxs,
           borderTopWidth: 0,
-          borderRadius: radii.pill,
+          borderRadius: TAB_BAR.height / 2,
           backgroundColor: "transparent",
           elevation: 0,
           shadowColor: "#000000",
           shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: t.dark ? 0.45 : 0.12,
+          shadowOpacity: t.dark ? 0.5 : 0.14,
           shadowRadius: 16,
         },
         tabBarBackground: () => (
           <Glass
             glassEffectStyle="regular"
             interactive
-            radius={radii.pill}
-            style={[
-              StyleSheet.absoluteFill,
-              {
-                backgroundColor: t.dark
-                  ? "rgba(22, 25, 33, 0.78)"
-                  : "rgba(255, 255, 255, 0.85)",
-                borderWidth: StyleSheet.hairlineWidth,
-                borderColor: t.glassRim,
-              },
-            ]}
-          >
-            {/* Specular edge sheen for iOS 27 Liquid Glass aesthetic */}
-            <View
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 20,
-                right: 20,
-                height: StyleSheet.hairlineWidth,
-                backgroundColor: t.glassSpecular,
-              }}
-            />
-          </Glass>
+            radius={TAB_BAR.height / 2}
+            specular
+            style={StyleSheet.absoluteFill}
+          />
         ),
         tabBarLabelStyle: {
           fontSize: 10,
           fontWeight: "600",
-          marginTop: 2,
+          marginTop: 1,
         },
         tabBarItemStyle: {
           paddingVertical: 2,
         },
       }}
     >
-      {tabs.map((tab) => (
+      {[...tabs].reverse().map((tab) => (
         <Tabs.Screen
           key={tab.name}
           name={tab.name}
@@ -125,29 +102,42 @@ export default function TabLayout() {
             tabBarIcon: ({ focused, color }) => (
               <View
                 style={{
-                  width: 32,
-                  height: 28,
+                  width: 46,
+                  height: 30,
                   justifyContent: "center",
                   alignItems: "center",
-                  borderRadius: 14,
-                  backgroundColor: focused
-                    ? t.dark
-                      ? "rgba(10, 132, 255, 0.16)"
-                      : "rgba(0, 122, 255, 0.12)"
-                    : "transparent",
+                  borderRadius: 15,
+                  borderCurve: curve.continuous,
+                  backgroundColor: focused ? t.accentFill : "transparent",
                 }}
               >
                 <AppIcon
                   name={focused ? tab.activeIcon : tab.inactiveIcon}
-                  size={21}
+                  size={23}
                   color={color}
+                  weight={focused ? "semibold" : "regular"}
                 />
               </View>
+            ),
+            tabBarLabel: ({ focused, color, children }) => (
+              <Text
+                allowFontScaling={false}
+                style={{
+                  color,
+                  fontSize: 10,
+                  fontWeight: focused ? "700" : "500",
+                  textAlign: "center",
+                  writingDirection: "rtl",
+                  marginTop: 1,
+                }}
+              >
+                {children}
+              </Text>
             ),
           }}
           listeners={{
             tabPress: () => {
-              haptic();
+              feedback.tap();
             },
           }}
         />

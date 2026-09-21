@@ -1,29 +1,35 @@
+/**
+ * Currency detail — «جزئیات ارز»
+ *
+ * Apple Stocks pattern: calm hero (name, live price, change), then the real
+ * observation chart, then a grouped stats list, then a small set of actions.
+ * One prominent action only (HIG · Buttons).
+ */
 import { useLocalSearchParams, router } from "expo-router";
-import { View, StyleSheet } from "react-native";
-import { CurrencySchema, names } from "@arzman/shared";
+import { View } from "react-native";
+import { CurrencySchema, formatNumber, names } from "@arzman/shared";
 import { useApp } from "../../src/store";
-import {
-  Screen,
-  Card,
-  Label,
-  Price,
-  MarketChangeBadge,
-  SpreadBar,
-  GlassButton,
-  MarketStatus,
-  EmptyState,
-  useTheme,
-  radii,
-  concentricRadius,
-} from "../../src/ui";
 import { ChartCard } from "../../src/chart";
-
-const currencySymbols: Record<string, string> = {
-  USD: "$",
-  EUR: "€",
-  AED: "د.إ",
-  IQD: "ع.د",
-};
+import {
+  Button,
+  ChangePill,
+  CurrencyBadge,
+  Divider,
+  EmptyState,
+  GroupedList,
+  IconButton,
+  Label,
+  MarketStatus,
+  Price,
+  RangeMeter,
+  Screen,
+  Section,
+  SettingsRow,
+  Surface,
+  radii,
+  spacing,
+  useTheme,
+} from "../../src/ui";
 
 export default function Detail() {
   const params = useLocalSearchParams<{ code: string }>();
@@ -56,225 +62,132 @@ export default function Detail() {
     }));
   };
 
+  const persian = app.user.settings.persian;
+
   return (
     <Screen
       title={names[code]}
       eyebrow={`${code} · بازار آزاد ایران`}
       refresh
+      trailing={
+        <IconButton
+          icon={isFavorite ? "star" : "star-outline"}
+          size={38}
+          active={isFavorite}
+          activeColor={t.amber}
+          accessibilityLabel={isFavorite ? "حذف از دنبال‌شده‌ها" : "افزودن به دنبال‌شده‌ها"}
+          onPress={toggleFavorite}
+        />
+      }
     >
       <MarketStatus />
 
-      {/* 1. Currency Price Hero Card */}
-      <Card elevated style={{ padding: 20, gap: 16 }}>
+      {/* Hero */}
+      <Surface elevated radius={radii.cardLarge} style={{ gap: spacing.sm }}>
         <View
           style={{
             flexDirection: "row-reverse",
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: "flex-start",
           }}
         >
-          {/* Right in RTL: Icon and Title */}
-          <View
-            style={{
-              flexDirection: "row-reverse",
-              alignItems: "center",
-              gap: 12,
-            }}
-          >
-            <View
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: concentricRadius(radii.card, 20, 12),
-                backgroundColor: t.dark
-                  ? "rgba(40, 44, 56, 0.7)"
-                  : "rgba(228, 233, 242, 0.85)",
-                justifyContent: "center",
-                alignItems: "center",
-                borderWidth: StyleSheet.hairlineWidth,
-                borderColor: t.glassRim,
-              }}
-            >
-              <Label size={20} weight="700" accent>
-                {currencySymbols[code] || code}
-              </Label>
-            </View>
-
+          <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: spacing.xs }}>
+            <CurrencyBadge code={code} size="lg" tone="filled" dark={t.dark} />
             <View style={{ gap: 2 }}>
-              <Label size={18} weight="700">
+              <Label size={17} weight="600">
                 {names[code]}
               </Label>
-              <Label secondary size={12}>
-                کد استاندارد: {code}
+              <Label tertiary size={11} allowFontScaling={false}>
+                کد استاندارد {code}
               </Label>
             </View>
           </View>
-
-          {/* Left in RTL: Change badge */}
-          <MarketChangeBadge value={q?.changePercent} size="large" />
+          <ChangePill value={q?.changePercent} size="medium" />
         </View>
 
-        {/* Main Price Display */}
-        <View
-          style={{
-            flexDirection: "row-reverse",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
-            paddingTop: 4,
-          }}
-        >
-          <Price value={q?.priceToman} large />
-          {q?.change != null && (
-            <View style={{ gap: 2, alignItems: "flex-start" }}>
-              <Label secondary size={11}>
-                تغییر روزانه:
-              </Label>
-              <Price value={q.change} />
-            </View>
-          )}
+        <Price value={q?.priceToman} size="hero" digits={0} align="flex-start" />
+
+        {q ? (
+          <RangeMeter current={q.priceToman} low={q.lowToman} high={q.highToman} />
+        ) : null}
+
+        <Divider />
+
+        <View style={{ flexDirection: "row-reverse", justifyContent: "space-between" }}>
+          <Label tertiary size={11} allowFontScaling={false}>
+            زمان منبع: {q?.sourceTimeLabel || "نامشخص"}
+          </Label>
+          <Label tertiary size={11} allowFontScaling={false}>
+            واحد منبع: {q?.rawUnit === "IRR" ? "ریال" : "تومان"} · هر {q?.quoteSize ?? 1} واحد
+          </Label>
         </View>
+      </Surface>
 
-        {/* Spread Bar */}
-        {q && (
-          <SpreadBar
-            current={q.priceToman}
-            low={q.lowToman}
-            high={q.highToman}
-          />
-        )}
-      </Card>
-
-      {/* 2. Interactive Stocks-Style Chart */}
+      {/* Observation chart (real data only) */}
       <ChartCard currency={code} />
 
-      {/* 3. Detailed Statistics Grid */}
-      <Card style={{ padding: 18, gap: 14 }}>
-        <Label size={17} weight="700">
-          مشخصات معامله و منبع
-        </Label>
+      {/* Daily stats — grouped list, values dominate labels */}
+      <Section title="آمار امروز">
+        <GroupedList>
+          <SettingsRow
+            title="بالاترین نرخ روز"
+            accessory="none"
+            value={q && q.highToman != null ? `${formatNumber(q.highToman, persian, 0)} ${app.user.settings.unit === "IRR" ? "ریال" : "تومان"}` : "—"}
+          />
+          <SettingsRow
+            title="پایین‌ترین نرخ روز"
+            accessory="none"
+            value={q && q.lowToman != null ? `${formatNumber(q.lowToman, persian, 0)} ${app.user.settings.unit === "IRR" ? "ریال" : "تومان"}` : "—"}
+          />
+          <SettingsRow
+            title="نرخ روز گذشته"
+            accessory="none"
+            value={q?.previousToman != null ? `${formatNumber(q.previousToman, persian, 0)} ${app.user.settings.unit === "IRR" ? "ریال" : "تومان"}` : "—"}
+          />
+          <SettingsRow
+            title="تغییر روزانه"
+            accessory="none"
+            value={
+              q?.change != null
+                ? `${q.change >= 0 ? "+" : ""}${formatNumber(q.change, persian, 0)} ${app.user.settings.unit === "IRR" ? "ریال" : "تومان"}`
+                : "—"
+            }
+          />
+        </GroupedList>
+      </Section>
 
-        <View
-          style={{
-            flexDirection: "row-reverse",
-            flexWrap: "wrap",
-            gap: 12,
-          }}
-        >
-          {/* High */}
-          <View
-            style={{
-              width: "47%",
-              backgroundColor: t.raised,
-              padding: 12,
-              borderRadius: radii.control,
-              gap: 4,
-            }}
-          >
-            <Label secondary size={11}>
-              بالاترین نرخ روز
-            </Label>
-            <Price value={q?.highToman} />
-          </View>
-
-          {/* Low */}
-          <View
-            style={{
-              width: "47%",
-              backgroundColor: t.raised,
-              padding: 12,
-              borderRadius: radii.control,
-              gap: 4,
-            }}
-          >
-            <Label secondary size={11}>
-              پایین‌ترین نرخ روز
-            </Label>
-            <Price value={q?.lowToman} />
-          </View>
-
-          {/* Previous Close */}
-          <View
-            style={{
-              width: "47%",
-              backgroundColor: t.raised,
-              padding: 12,
-              borderRadius: radii.control,
-              gap: 4,
-            }}
-          >
-            <Label secondary size={11}>
-              نرخ روز گذشته
-            </Label>
-            <Price value={q?.previousToman} />
-          </View>
-
-          {/* Time & Unit */}
-          <View
-            style={{
-              width: "47%",
-              backgroundColor: t.raised,
-              padding: 12,
-              borderRadius: radii.control,
-              gap: 4,
-            }}
-          >
-            <Label secondary size={11}>
-              زمان ثبت نرخ در منبع
-            </Label>
-            <Label size={13} weight="600">
-              {q?.sourceTimeLabel || "نامشخص"}
-            </Label>
-          </View>
-        </View>
-
-        <View
-          style={{
-            paddingTop: 8,
-            borderTopWidth: StyleSheet.hairlineWidth,
-            borderTopColor: t.lineSubtle,
-            gap: 2,
-          }}
-        >
-          <Label tertiary size={11}>
-            واحد منبع: {q?.rawUnit === "IRR" ? "ریال" : "تومان"} برای {q?.quoteSize ?? 1} واحد {code}
-          </Label>
-          <Label tertiary size={11}>
-            منبع اطلاعات: شبکه اطلاع‌رسانی طلا و ارز (TGJU)
-          </Label>
-        </View>
-      </Card>
-
-      {/* 4. Action Buttons */}
-      <View style={{ gap: 10 }}>
-        <GlassButton
-          title={isFavorite ? "حذف از دنبال‌شده‌ها" : "افزودن به دنبال‌شده‌ها"}
-          icon={isFavorite ? "star" : "star-outline"}
-          variant={isFavorite ? "secondary" : "regular"}
-          onPress={toggleFavorite}
-        />
-
-        <GlassButton
+      {/* Actions — stacked full-width rounded buttons (HIG · Buttons · iOS) */}
+      <View style={{ gap: spacing.xs }}>
+        <Button
           title="تبدیل این ارز در مبدل"
           icon="swap-horizontal"
-          variant="regular"
-          onPress={() =>
-            router.push({ pathname: "/converter", params: { from: code } })
-          }
+          variant="prominent"
+          size="large"
+          fullWidth
+          onPress={() => router.push({ pathname: "/converter", params: { from: code } })}
         />
-
-        <GlassButton
+        <Button
           title="تنظیم هشدار قیمت"
           icon="notifications-outline"
-          variant="regular"
-          onPress={() =>
-            router.push({ pathname: "/alerts", params: { currency: code } })
-          }
+          variant="tinted"
+          size="medium"
+          fullWidth
+          onPress={() => router.push({ pathname: "/alerts", params: { currency: code } })}
         />
-
-        <GlassButton
-          title="ثبت خرید یا فروش در دارایی من"
+        <Button
+          title={isFavorite ? "حذف از دنبال‌شده‌ها" : "افزودن به دنبال‌شده‌ها"}
+          icon={isFavorite ? "star" : "star-outline"}
+          variant="glass"
+          size="medium"
+          fullWidth
+          onPress={toggleFavorite}
+        />
+        <Button
+          title="ثبت تراکنش در دارایی من"
           icon="add"
-          variant="prominent"
+          variant="glass"
+          size="medium"
+          fullWidth
           onPress={() => router.push("/transaction")}
         />
       </View>

@@ -1,5 +1,10 @@
+/**
+ * Custom rates — «نرخ من» (modal sheet).
+ *
+ * Personal broker/USDT rate entry, compared honestly with the open market.
+ */
 import { useState } from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 import {
   parseAmount,
   CustomRateSchema,
@@ -8,16 +13,21 @@ import {
 } from "@arzman/shared";
 import { useApp } from "../src/store";
 import {
-  Screen,
-  Card,
-  GlassSegmentedControl,
   AmountInput,
-  GlassButton,
+  AppIcon,
+  Button,
+  ChangePill,
+  CurrencyBadge,
+  EmptyState,
+  GroupedList,
   Label,
-  Price,
-  MarketChangeBadge,
+  Screen,
+  Section,
+  SegmentedControl,
+  Surface,
+  spacing,
+  useFeedback,
   useTheme,
-  radii,
 } from "../src/ui";
 
 const customCurrencyOptions = ["USD", "EUR", "AED", "IQD", "USDT"] as const;
@@ -25,6 +35,7 @@ const customCurrencyOptions = ["USD", "EUR", "AED", "IQD", "USDT"] as const;
 export default function CustomRates() {
   const app = useApp();
   const t = useTheme();
+  const feedback = useFeedback();
 
   const [currency, setCurrency] = useState<(typeof customCurrencyOptions)[number]>("USDT");
   const [amount, setAmount] = useState("");
@@ -44,7 +55,7 @@ export default function CustomRates() {
           rate,
         ],
       }));
-      app.haptic();
+      feedback.success();
       setAmount("");
       setError("");
     } catch {
@@ -53,172 +64,173 @@ export default function CustomRates() {
   };
 
   return (
-    <Screen title="نرخ من" eyebrow="تعیین نرخ صرافی یا توافقی شما">
-      {/* 1. Explanatory Banner */}
-      <Card
+    <Screen title="نرخ من" eyebrow="تعیین نرخ صرافی یا توافقی شما" floatingTabBar={false}>
+      <Surface
         style={{
-          padding: 16,
-          gap: 6,
-          backgroundColor: t.dark
-            ? "rgba(10, 132, 255, 0.12)"
-            : "rgba(0, 122, 255, 0.08)",
-          borderColor: t.accent,
+          flexDirection: "row-reverse",
+          gap: spacing.xs,
+          alignItems: "flex-start",
+          backgroundColor: t.accentFill,
         }}
       >
-        <Label size={13} weight="700" accent>
-          نرخ اختصاصی و ارزش‌گذاری تتر
-        </Label>
-        <Label secondary size={12} style={{ lineHeight: 18 }}>
-          اگر با صرافی مشخصی معامله می‌کنید یا برای تتر (USDT) نرخ شخصی دارید، نرخ
-          تومانی آن را در این بخش ثبت کنید تا در بخش دارایی و مبدل مورد استفاده قرار گیرد.
-        </Label>
-      </Card>
-
-      {/* 2. Custom Rate Entry Form */}
-      <Card elevated style={{ padding: 20, gap: 16 }}>
-        <Label size={17} weight="700">
-          ثبت یا ویرایش نرخ دستی
-        </Label>
-
-        <View style={{ gap: 6 }}>
-          <Label secondary size={13} weight="600">
-            انتخاب دارایی:
+        <AppIcon name="info" size={18} color={t.accent} style={{ marginTop: 2 }} />
+        <View style={{ flex: 1, gap: 2 }}>
+          <Label size={13} weight="600" accent>
+            نرخ اختصاصی و ارزش‌گذاری تتر
           </Label>
-          <GlassSegmentedControl
-            values={customCurrencyOptions}
-            value={currency}
-            onChange={setCurrency}
-            label={(c) => (c === "USDT" ? "تتر" : c)}
-          />
+          <Label secondary size={12} style={{ lineHeight: 18 }}>
+            اگر با صرافی مشخصی معامله می‌کنید یا برای تتر نرخ شخصی دارید، نرخ
+            تومانی آن را ثبت کنید تا در دارایی و مبدل استفاده شود.
+          </Label>
         </View>
+      </Surface>
 
-        <AmountInput
-          label={`قیمت هر ۱ ${names[currency]} (تومان)`}
-          value={amount}
-          onChangeText={setAmount}
-          placeholder="۰"
-          unit="تومان"
-        />
+      <Section title="ثبت یا ویرایش نرخ دستی">
+        <Surface style={{ gap: spacing.sm }}>
+          <View style={{ gap: spacing.xxs }}>
+            <Label secondary size={13} weight="600">انتخاب دارایی</Label>
+            <SegmentedControl
+              values={customCurrencyOptions}
+              value={currency}
+              onChange={setCurrency}
+              label={(c) => (c === "USDT" ? "تتر" : names[c])}
+              size="compact"
+            />
+          </View>
 
-        {!!error && (
-          <Label red size={13}>
-            {error}
-          </Label>
-        )}
+          <AmountInput
+            label={`قیمت هر ۱ ${names[currency]}`}
+            value={amount}
+            onChangeText={setAmount}
+            unit="تومان"
+          />
 
-        <GlassButton
-          title="ذخیره نرخ دستی"
-          icon="check"
-          variant="prominent"
-          size="large"
-          disabled={!app.ready || !!app.storageError || !amount}
-          onPress={handleSave}
-        />
-      </Card>
+          {!!error && <Label red size={13}>{error}</Label>}
 
-      {/* 3. Existing Custom Rates */}
-      <Label size={17} weight="700">
-        نرخ‌های دستی فعال ({formatNumber(app.user.customRates.length, app.user.settings.persian)})
-      </Label>
+          <Button
+            title="ذخیره نرخ دستی"
+            icon="check"
+            variant="prominent"
+            size="large"
+            fullWidth
+            disabled={!app.ready || !!app.storageError || !amount}
+            onPress={handleSave}
+          />
+        </Surface>
+      </Section>
 
-      {app.user.customRates.length === 0 ? (
-        <Card style={{ padding: 24, alignItems: "center", gap: 8 }}>
-          <Label secondary size={13}>
-            هنوز نرخ دستی برای دارایی‌ها ثبت نشده است.
-          </Label>
-        </Card>
-      ) : (
-        <View style={{ gap: 10 }}>
-          {app.user.customRates.map((rate) => {
-            const market = app.snapshot?.quotes.find(
-              (q) => q.currency === rate.currency,
-            );
-
-            const spreadDiff = market ? rate.priceToman - market.priceToman : null;
-            const spreadPct = market
-              ? (rate.priceToman / market.priceToman - 1) * 100
-              : null;
-
-            return (
-              <Card key={rate.currency} style={{ padding: 18, gap: 12 }}>
+      <Section
+        title="نرخ‌های فعال"
+        subtitle={`${formatNumber(app.user.customRates.length, app.user.settings.persian)} نرخ ثبت‌شده`}
+      >
+        {app.user.customRates.length === 0 ? (
+          <Surface>
+            <EmptyState
+              title="نرخ دستی ثبت نشده است"
+              description="نخستین نرخ توافقی خود را در فرم بالا ثبت کنید."
+              icon="pricetag-outline"
+            />
+          </Surface>
+        ) : (
+          <GroupedList separatorInset={66}>
+            {app.user.customRates.map((rate) => {
+              const market = app.snapshot?.quotes.find(
+                (q) => q.currency === rate.currency,
+              );
+              const spreadDiff = market ? rate.priceToman - market.priceToman : null;
+              const spreadPct = market
+                ? (rate.priceToman / market.priceToman - 1) * 100
+                : null;
+              return (
                 <View
+                  key={rate.currency}
                   style={{
-                    flexDirection: "row-reverse",
-                    justifyContent: "space-between",
-                    alignItems: "center",
+                    paddingHorizontal: spacing.sm,
+                    paddingVertical: spacing.xs,
+                    gap: spacing.xxs,
                   }}
                 >
-                  <View style={{ gap: 2 }}>
-                    <Label size={17} weight="700">
-                      {names[rate.currency]} ({rate.currency})
-                    </Label>
-                    <Label secondary size={11}>
-                      ثبت: {new Date(rate.updatedAt).toLocaleString("fa-IR")}
-                    </Label>
-                  </View>
-
-                  <Price value={rate.priceToman} />
-                </View>
-
-                {market && spreadDiff !== null && (
                   <View
                     style={{
                       flexDirection: "row-reverse",
-                      justifyContent: "space-between",
                       alignItems: "center",
-                      backgroundColor: t.raised,
-                      padding: 10,
-                      borderRadius: radii.control,
+                      gap: spacing.xs,
                     }}
                   >
-                    <Label secondary size={12}>
-                      اختلاف با بازار آزاد ({formatNumber(market.priceToman, app.user.settings.persian)}):
+                    <CurrencyBadge code={rate.currency} size="md" dark={t.dark} />
+                    <View style={{ flex: 1, gap: 1 }}>
+                      <Label size={16} weight="600">
+                        {names[rate.currency]}
+                      </Label>
+                      <Label tertiary size={11} allowFontScaling={false}>
+                        ثبت: {new Date(rate.updatedAt).toLocaleString("fa-IR")}
+                      </Label>
+                    </View>
+                    <Label
+                      allowFontScaling={false}
+                      style={{
+                        fontSize: 17,
+                        lineHeight: 22,
+                        fontWeight: "600",
+                        fontVariant: ["tabular-nums"],
+                        writingDirection: "ltr",
+                      }}
+                    >
+                      {formatNumber(rate.priceToman, app.user.settings.persian, 0)}
                     </Label>
+                  </View>
+
+                  {market && spreadDiff !== null ? (
                     <View
                       style={{
                         flexDirection: "row-reverse",
+                        justifyContent: "space-between",
                         alignItems: "center",
-                        gap: 8,
+                        paddingStart: 50,
                       }}
                     >
-                      <Label size={12} weight="600" tabular>
-                        {spreadDiff > 0 ? "+" : ""}
-                        {formatNumber(spreadDiff, app.user.settings.persian)} تومان
+                      <Label tertiary size={11} allowFontScaling={false}>
+                        اختلاف با بازار ({formatNumber(market.priceToman, app.user.settings.persian, 0)})
                       </Label>
-                      <MarketChangeBadge value={spreadPct} size="small" />
+                      <View
+                        style={{ flexDirection: "row-reverse", alignItems: "center", gap: spacing.xxs }}
+                      >
+                        <Label
+                          size={12}
+                          weight="600"
+                          allowFontScaling={false}
+                          style={{ fontVariant: ["tabular-nums"], writingDirection: "ltr" }}
+                        >
+                          {spreadDiff > 0 ? "+" : ""}
+                          {formatNumber(spreadDiff, app.user.settings.persian, 0)}
+                        </Label>
+                        <ChangePill value={spreadPct} size="small" />
+                      </View>
                     </View>
-                  </View>
-                )}
+                  ) : null}
 
-                <View
-                  style={{
-                    flexDirection: "row-reverse",
-                    justifyContent: "flex-end",
-                    paddingTop: 4,
-                    borderTopWidth: StyleSheet.hairlineWidth,
-                    borderTopColor: t.lineSubtle,
-                  }}
-                >
-                  <GlassButton
-                    title="حذف نرخ دستی"
-                    icon="close-outline"
-                    variant="quiet"
-                    size="small"
-                    onPress={() =>
-                      app.updateUser((u) => ({
-                        ...u,
-                        customRates: u.customRates.filter(
-                          (r) => r.currency !== rate.currency,
-                        ),
-                      }))
-                    }
-                  />
+                  <View style={{ flexDirection: "row-reverse", paddingStart: 50 }}>
+                    <Button
+                      title="حذف نرخ دستی"
+                      variant="plain"
+                      size="small"
+                      textStyle={{ color: t.red }}
+                      onPress={() =>
+                        app.updateUser((u) => ({
+                          ...u,
+                          customRates: u.customRates.filter(
+                            (r) => r.currency !== rate.currency,
+                          ),
+                        }))
+                      }
+                    />
+                  </View>
                 </View>
-              </Card>
-            );
-          })}
-        </View>
-      )}
+              );
+            })}
+          </GroupedList>
+        )}
+      </Section>
     </Screen>
   );
 }

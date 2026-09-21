@@ -1,3 +1,9 @@
+/**
+ * Transaction entry — «ثبت تراکنش» (modal sheet).
+ *
+ * iOS form idiom: segmented choice rows, large tabular numeric fields, a live
+ * total preview, and a single prominent save action.
+ */
 import { useEffect, useState } from "react";
 import { AppState, Platform, View } from "react-native";
 import * as LocalAuthentication from "expo-local-authentication";
@@ -12,14 +18,17 @@ import {
 } from "@arzman/shared";
 import { useApp } from "../src/store";
 import {
-  Screen,
-  Card,
-  GlassSegmentedControl,
   AmountInput,
-  GlassButton,
+  Button,
+  EmptyState,
   Label,
-  useTheme,
+  Screen,
+  SegmentedControl,
+  Surface,
   radii,
+  spacing,
+  useFeedback,
+  useTheme,
 } from "../src/ui";
 
 const types = ["buy", "sell", "adjustment"] as const;
@@ -34,6 +43,7 @@ const typeLabels: Record<TxType, string> = {
 export default function Transaction() {
   const app = useApp();
   const t = useTheme();
+  const feedback = useFeedback();
 
   const [currency, setCurrency] = useState<typeof AssetSchema._output>("USD");
   const [kind, setKind] = useState<TxType>("buy");
@@ -52,36 +62,34 @@ export default function Transaction() {
 
   if (app.user.settings.privacy && !authorized) {
     return (
-      <Screen title="تأیید هویت" eyebrow="ثبت امن تراکنش دارایی">
-        <Card style={{ padding: 24, gap: 16, alignItems: "center" }}>
-          <Label size={18} weight="700">
-            نیاز به احراز هویت دستگاه
+      <Screen title="تأیید هویت" eyebrow="ثبت امن تراکنش دارایی" floatingTabBar={false}>
+        <EmptyState
+          title="نیاز به احراز هویت دستگاه"
+          description="برای ثبت تراکنش دارایی، تأیید با Face ID یا رمز عبور دستگاه الزامی است."
+          icon="lock-closed-outline"
+        />
+        <Button
+          title="تأیید هویت"
+          variant="prominent"
+          size="large"
+          fullWidth
+          onPress={() => {
+            if (Platform.OS === "web") {
+              setError("این قابلیت به دستگاه نیاز دارد");
+              return;
+            }
+            void LocalAuthentication.authenticateAsync({
+              promptMessage: "ثبت تراکنش دارایی",
+            })
+              .then((r) => setAuthorized(r.success))
+              .catch(() => setError("احراز هویت انجام نشد"));
+          }}
+        />
+        {!!error && (
+          <Label red size={13} align="center">
+            {error}
           </Label>
-          <Label secondary size={13} style={{ textAlign: "center" }}>
-            برای دسترسی به بخش ثبت تراکنش دارایی، احراز هویت با Face ID یا رمز عبور دستگاه الزامی است.
-          </Label>
-          <GlassButton
-            title="تأیید هویت"
-            variant="prominent"
-            size="large"
-            onPress={() => {
-              if (Platform.OS === "web") {
-                setError("این قابلیت به دستگاه نیاز دارد");
-                return;
-              }
-              void LocalAuthentication.authenticateAsync({
-                promptMessage: "ثبت تراکنش دارایی",
-              })
-                .then((r) => setAuthorized(r.success))
-                .catch(() => setError("احراز هویت انجام نشد"));
-            }}
-          />
-          {!!error && (
-            <Label red size={13}>
-              {error}
-            </Label>
-          )}
-        </Card>
+        )}
       </Screen>
     );
   }
@@ -109,28 +117,21 @@ export default function Transaction() {
       });
       calculatePortfolio([...app.transactions, tx]);
       await app.saveTransaction(tx);
-      app.haptic();
+      feedback.success();
       router.back();
     } catch (e) {
-      setError(
-        e instanceof Error && e.message.includes("م")
-          ? e.message
-          : "مقدار مثبت و بهای معتبر وارد کنید",
-      );
+      setError(e instanceof Error ? e.message : "ورودی نامعتبر است");
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <Screen title="ثبت تراکنش" eyebrow="مدیریت پورتفوی شخصی">
-      <Card style={{ padding: 20, gap: 16 }}>
-        {/* Type Segmented Control */}
-        <View style={{ gap: 6 }}>
-          <Label secondary size={13} weight="600">
-            نوع عملیات مالی:
-          </Label>
-          <GlassSegmentedControl
+    <Screen title="ثبت تراکنش" eyebrow="ذخیرهٔ محلی و امن" floatingTabBar={false}>
+      <Surface style={{ gap: spacing.sm }}>
+        <View style={{ gap: spacing.xxs }}>
+          <Label secondary size={13} weight="600">نوع عملیات مالی</Label>
+          <SegmentedControl
             values={types}
             value={kind}
             onChange={setKind}
@@ -138,20 +139,17 @@ export default function Transaction() {
           />
         </View>
 
-        {/* Currency Selection */}
-        <View style={{ gap: 6 }}>
-          <Label secondary size={13} weight="600">
-            انتخاب ارز:
-          </Label>
-          <GlassSegmentedControl
+        <View style={{ gap: spacing.xxs }}>
+          <Label secondary size={13} weight="600">انتخاب دارایی</Label>
+          <SegmentedControl
             values={AssetSchema.options}
             value={currency}
             onChange={setCurrency}
-            label={(c) => (c === "IRT" ? "تومان" : c)}
+            label={(c) => names[c]}
+            size="compact"
           />
         </View>
 
-        {/* Quantity Input */}
         <AmountInput
           label={
             kind === "adjustment"
@@ -160,11 +158,9 @@ export default function Transaction() {
           }
           value={quantity}
           onChangeText={setQuantity}
-          placeholder="۰"
           unit={currency}
         />
 
-        {/* Unit Cost Input */}
         <AmountInput
           label={
             kind === "adjustment"
@@ -173,71 +169,75 @@ export default function Transaction() {
           }
           value={cost}
           onChangeText={setCost}
-          placeholder="۰"
           unit="تومان"
         />
 
-        {/* Total Price Live Calculation Box */}
-        {totalEstimatedToman !== null && kind !== "adjustment" && (
+        {totalEstimatedToman !== null && kind !== "adjustment" ? (
           <View
             style={{
-              backgroundColor: t.dark
-                ? "rgba(25, 28, 36, 0.75)"
-                : "rgba(235, 239, 246, 0.8)",
-              padding: 14,
-              borderRadius: radii.control,
               flexDirection: "row-reverse",
               justifyContent: "space-between",
               alignItems: "center",
-              borderWidth: 1,
-              borderColor: t.line,
+              backgroundColor: t.fillQuaternary,
+              paddingHorizontal: spacing.sm,
+              paddingVertical: spacing.xs,
+              borderRadius: radii.controlSmall,
+              borderCurve: "continuous",
             }}
           >
-            <Label secondary size={12}>
-              ارزش کل این معامله:
-            </Label>
-            <Label size={15} weight="700" tabular>
+            <Label secondary size={13}>ارزش کل این معامله</Label>
+            <Label
+              allowFontScaling={false}
+              style={{
+                fontSize: 17,
+                fontWeight: "700",
+                fontVariant: ["tabular-nums"],
+                writingDirection: "ltr",
+              }}
+            >
               {formatNumber(totalEstimatedToman, app.user.settings.persian, 0)} تومان
             </Label>
           </View>
-        )}
+        ) : null}
 
-        {kind === "adjustment" && (
+        {kind === "adjustment" ? (
           <View
             style={{
-              backgroundColor: t.raised,
-              padding: 12,
-              borderRadius: radii.control,
+              backgroundColor: t.amberFill,
+              paddingHorizontal: spacing.sm,
+              paddingVertical: spacing.xs,
+              borderRadius: radii.controlSmall,
+              borderCurve: "continuous",
             }}
           >
-            <Label secondary size={12}>
-              در حالت اصلاح موجودی، میزان کل دارایی و میانگین خرید شما برای ارز {names[currency]} با این مقادیر بازنویسی و تنظیم می‌گردد.
+            <Label size={12} style={{ color: t.amberText, lineHeight: 18 }}>
+              در حالت اصلاح موجودی، میزان کل دارایی و میانگین خرید شما برای{" "}
+              {names[currency]} با این مقادیر بازنویسی می‌شود.
             </Label>
           </View>
-        )}
+        ) : null}
 
-        {!!error && (
-          <Label red size={13}>
-            {error}
-          </Label>
-        )}
+        {!!error && <Label red size={13}>{error}</Label>}
 
-        <GlassButton
-          title={saving ? "در حال ذخیره روی دستگاه…" : "ذخیره تراکنش در دارایی من"}
+        <Button
+          title={saving ? "در حال ذخیره روی دستگاه…" : "ذخیره تراکنش"}
           icon="check"
           variant="prominent"
           size="large"
+          fullWidth
           loading={saving}
           disabled={saving || !app.ready || !!app.storageError}
           onPress={() => void save()}
         />
-      </Card>
+      </Surface>
 
-      <View style={{ paddingHorizontal: 6, gap: 4, marginTop: 4 }}>
-        <Label tertiary size={11} style={{ textAlign: "center" }}>
-          ثبت تراکنش‌ها فقط در حافظهٔ دستگاه انجام شده و روی میانگین خرید و سود/زیان محاسبه می‌شود.
+      <View style={{ paddingHorizontal: spacing.xxs }}>
+        <Label tertiary size={11} align="center" style={{ lineHeight: 17 }}>
+          تراکنش‌ها فقط در حافظهٔ دستگاه ذخیره می‌شوند و در محاسبهٔ میانگین خرید
+          و سود/زیان لحاظ می‌گردند.
         </Label>
       </View>
     </Screen>
   );
 }
+
