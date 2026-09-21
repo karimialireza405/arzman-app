@@ -81,11 +81,27 @@ export function parseTgju(html: string, currency: Currency, now = Date.now()) {
   const rawValue = parseAmount(primary || alternative || "");
   if (primary && alternative && rawValue !== parseAmount(alternative))
     throw new Error("Conflicting current prices");
-  const faqPrice = clean(faq.find(".price").text())
-    .replace(/ریال|تومان/g, "")
-    .trim();
-  if (faqPrice && parseAmount(faqPrice) !== rawValue)
-    throw new Error("Conflicting FAQ price");
+  // The FAQ block is *convention* evidence, not a price oracle: it establishes
+  // that the page quotes one unit ("قیمت هر …") and in which unit it publishes.
+  // Verified live on 2026-09-22: its number is rendered from a slower cache than
+  // the live table and legitimately lags the main quote during trading hours, so
+  // requiring equality rejected valid USD/EUR/AED quotes. It is now used only to
+  // corroborate the unit and the order of magnitude of the authoritative quote.
+  const faqPriceText = clean(faq.find(".price").text());
+  const faqUnitText = faqPriceText || clean(faq.text());
+  const faqUnit = faqUnitText.includes("ریال")
+    ? "IRR"
+    : faqUnitText.includes("تومان")
+      ? "IRT"
+      : null;
+  if (faqUnit && faqUnit !== rawUnit) throw new Error("Conflicting quote unit");
+  const faqPrice = faqPriceText.replace(/ریال|تومان/g, "").trim();
+  if (faqPrice) {
+    // A lagging FAQ differs by percents; a lot-size or decimal regression by 10x.
+    const ratio = parseAmount(faqPrice) / rawValue;
+    if (!(ratio >= 0.5 && ratio <= 2))
+      throw new Error("FAQ contradicts quote magnitude");
+  }
   const field = (label: string) => {
     const s = rows.get(label);
     return !s || s === "-"
@@ -100,6 +116,14 @@ export function parseTgju(html: string, currency: Currency, now = Date.now()) {
   )
     throw new Error("Price outside sanity bounds");
   const previousToman = field("نرخ روز گذشته");
+  // Daily bounds already catch a unit regression when TGJU publishes them. The
+  // previous close is the remaining anchor when high/low are absent: this market
+  // is volatile in percents, never by a factor of two in one session.
+  if (previousToman !== null) {
+    const sessionRatio = priceToman / previousToman;
+    if (!(sessionRatio >= 0.5 && sessionRatio <= 2))
+      throw new Error("Implausible move against previous close");
+  }
   const sourceTimeLabel = rows.get("زمان ثبت آخرین نرخ") || "نامشخص";
   const sourceTimestamp = parseSourceTimestamp(sourceTimeLabel, now);
   return CurrencyQuoteSchema.parse({

@@ -55,6 +55,48 @@ describe("TGJU captured fixtures", () => {
       false,
     );
   });
+  /**
+   * Live audit, 2026-09-22: TGJU renders the FAQ sentence from a slower cache
+   * than the quote table, so during trading hours its number legitimately lags
+   * the main quote. Requiring equality made the parser reject valid USD, EUR
+   * and AED quotes and took the whole snapshot down with them.
+   */
+  describe("FAQ is corroborating evidence, not a price oracle", () => {
+    const faq = (value: string) =>
+      fixture("USD").replace(
+        /(<span class="price">)[^<]*(<\/span>)/,
+        `$1${value}$2`,
+      );
+    it("accepts a FAQ number that lags the authoritative quote", () => {
+      const q = parseTgju(faq("2,301,500 ریال"), "USD");
+      expect(q.rawValue).toBe(2_306_000);
+      expect(q.priceToman).toBe(230_600);
+    });
+    it("still rejects a FAQ that contradicts the quote's magnitude", () => {
+      expect(() => parseTgju(faq("23,060,000 ریال"), "USD")).toThrow(
+        "FAQ contradicts quote magnitude",
+      );
+      expect(() => parseTgju(faq("230,600 ریال"), "USD")).toThrow(
+        "FAQ contradicts quote magnitude",
+      );
+    });
+    it("still rejects a FAQ published in a different unit than the table", () => {
+      expect(() => parseTgju(faq("2,306,000 تومان"), "USD")).toThrow(
+        "Conflicting quote unit",
+      );
+    });
+  });
+  it("rejects a quote that cannot plausibly follow the previous close", () => {
+    const previous = (value: string) =>
+      fixture("USD").replace(
+        /(نرخ روز گذشته<\/td>\s*<td class="text-left">)[^<]*/,
+        `$1${value}`,
+      );
+    expect(parseTgju(previous("2,290,000"), "USD").previousToman).toBe(229_000);
+    expect(() => parseTgju(previous("306,000"), "USD")).toThrow(
+      "Implausible move against previous close",
+    );
+  });
   it("does not invent timestamps and rejects future timestamps", () => {
     expect(parseSourceTimestamp("۱۲:۳۰:۰۰", Date.now())).toBeNull();
     expect(() =>

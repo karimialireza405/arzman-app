@@ -89,7 +89,7 @@ export class MarketStore extends DurableObject<Env> {
     if (url.pathname.startsWith("/api/history/")) {
       const code = CurrencySchema.safeParse(url.pathname.split("/").pop());
       const range = url.searchParams.get("range") ?? "1D";
-      if (!code.success || !ranges[range])
+      if (!code.success || !Object.hasOwn(ranges, range))
         return Response.json(
           { error: "Invalid currency or range" },
           { status: 400 },
