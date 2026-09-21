@@ -14,3 +14,6 @@ export async function readPrivate(key: string) {
 export async function writePrivate(key: string, value: string) {
   return writeLocal(`private-${key}`, value);
 }
+export async function deletePrivate(key: string) {
+  localStorage.removeItem(`private-${key}`);
+}

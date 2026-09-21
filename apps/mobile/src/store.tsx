@@ -27,6 +27,7 @@ import {
   writeLocal,
   readPrivate,
   writePrivate,
+  deletePrivate,
   clearMarketCache,
 } from "./storage";
 
@@ -255,9 +256,11 @@ function useAppStore() {
     if (!ready || storageError) throw new Error(storageError || "داده‌ها هنوز آماده نیستند");
     const next=transactions.filter(t=>t.id!==id);
     calculatePortfolio(next);
-    // Commit the index first. An orphaned Keychain item is safer than a broken ledger.
+    // Commit the index first. An orphaned Keychain item is safer than a broken ledger,
+    // so the erase is a best-effort follow-up that can never strand the ledger.
     await writeLocal("portfolio-index",JSON.stringify(next.map(t=>t.id)));
     setTransactions(next);
+    await deletePrivate(`tx-${id}`).catch(() => undefined);
   };
   const haptic = () => {
     if (user.settings.haptics && Platform.OS !== "web")

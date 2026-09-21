@@ -12,6 +12,7 @@ import * as LocalAuthentication from "expo-local-authentication";
 import {
   calculatePortfolio,
   valuation,
+  totalValuation,
   names,
   formatNumber,
   type Asset,
@@ -34,6 +35,7 @@ import {
   radii,
   spacing,
   useFeedback,
+  usePrice,
   useTheme,
 } from "../../src/ui";
 
@@ -145,6 +147,7 @@ function StatColumn({
 export default function Portfolio() {
   const app = useApp();
   const t = useTheme();
+  const fmt = usePrice();
   const feedback = useFeedback();
   const [unlocked, setUnlocked] = useState(false);
   const [authError, setAuthError] = useState("");
@@ -232,22 +235,22 @@ export default function Portfolio() {
     const price =
       asset.currency === "IRT"
         ? 1
-        : (quote?.priceToman ??
-          (asset.currency === "USDT" ? custom?.priceToman : null) ??
-          null);
+        // The market quote is authoritative; a personal rate only fills the gap
+        // an absent quote leaves (USDT always, any fiat while the source is down).
+        : (quote?.priceToman ?? custom?.priceToman ?? null);
     return {
       asset,
       value: valuation(asset, price),
       quote,
-      manual: asset.currency === "USDT" && !!custom,
+      manual: !quote && !!custom && asset.currency !== "IRT",
     };
   });
 
-  const totalValue = rows.reduce((s, r) => s + (r.value?.value ?? 0), 0);
+  const totalValue = totalValuation(rows.map((r) => r.value));
   const totalCostBasis = rows.reduce((s, r) => s + r.asset.costBasis, 0);
-  const unrealized = totalValue - totalCostBasis;
+  const unrealized = totalValue === null ? null : totalValue - totalCostBasis;
   const unrealizedPercent =
-    totalCostBasis > 0 ? (unrealized / totalCostBasis) * 100 : null;
+    totalCostBasis > 0 && unrealized !== null ? (unrealized / totalCostBasis) * 100 : null;
   const realized = rows.reduce((s, r) => s + r.asset.realizedPnl, 0);
 
   const dailyChange = rows.every(
@@ -265,7 +268,7 @@ export default function Portfolio() {
   return (
     <Screen
       title="دارایی من"
-      eyebrow="کاملاً محلی و رمزگذاری‌شده در دستگاه"
+      eyebrow={Platform.OS === "web" ? "محلی در مرورگر؛ بدون رمزگذاری اختصاصی" : "محلی؛ تراکنش‌ها در فضای امن دستگاه"}
       refresh
     >
       <MarketStatus />
@@ -297,37 +300,38 @@ export default function Portfolio() {
                 writingDirection: "ltr",
               }}
             >
-              {formatNumber(totalValue, persian, 0)}
+              {totalValue === null ? "—" : fmt(totalValue, 0)}
             </Label>
             <Label tertiary size={11} allowFontScaling={false}>
-              تومان
+              {names[app.user.settings.unit]}
             </Label>
           </View>
 
+          {totalValue === null && <Label secondary size={13}>نرخ بعضی دارایی‌ها موجود نیست؛ ارزش کل و سود/زیان قابل محاسبه نیست.</Label>}
           <View
             style={{ flexDirection: "row-reverse", gap: spacing.md, alignItems: "center" }}
           >
             <StatColumn
               title="سود/زیان باز"
-              value={formatNumber(unrealized, persian, 0)}
-              tone={unrealized >= 0 ? "positive" : "negative"}
+              value={unrealized === null ? "—" : fmt(unrealized, 0)}
+              tone={unrealized === null ? "neutral" : unrealized >= 0 ? "positive" : "negative"}
               pill={unrealizedPercent}
             />
             <StatColumn
               title="تحقق‌یافته"
-              value={formatNumber(realized, persian, 0)}
+              value={fmt(realized, 0)}
               tone={realized >= 0 ? "neutral" : "negative"}
             />
             {dailyChange !== null ? (
               <StatColumn
                 title="تغییر امروز"
-                value={formatNumber(dailyChange, persian, 0)}
+                value={fmt(dailyChange, 0)}
                 tone={dailyChange >= 0 ? "positive" : "negative"}
               />
             ) : null}
           </View>
 
-          {allocation.length > 1 ? (
+          {allocation.length > 1 && totalValue !== null ? (
             <AllocationBar allocation={allocation} total={totalValue} />
           ) : null}
         </Surface>
@@ -385,11 +389,20 @@ export default function Portfolio() {
                           writingDirection: "ltr",
                         }}
                       >
-                        {value ? formatNumber(value.value, persian, 0) : "—"}
+                        {value ? fmt(value.value, 0) : "—"}
                       </Label>
                       <ChangePill value={pnlPercent} size="small" />
                     </View>
                   </View>
+
+                  {!value && asset.currency !== "IRT" ? (
+                    <View style={{ paddingStart: 50 }}>
+                      <Label amber size={11}>
+                        نرخ بازار برای {names[asset.currency]} در دسترس نیست؛ برای
+                        ارزش‌گذاری، در «نرخ من» نرخ دستی ثبت کنید.
+                      </Label>
+                    </View>
+                  ) : null}
 
                   {quote || manual ? (
                     <View
@@ -401,7 +414,7 @@ export default function Portfolio() {
                       }}
                     >
                       <Label tertiary size={11} allowFontScaling={false}>
-                        میانگین خرید {formatNumber(asset.averageCost, persian, 0)}
+                        میانگین خرید {fmt(asset.averageCost, 0)}
                       </Label>
                       {manual ? (
                         <Label amber size={11} allowFontScaling={false}>

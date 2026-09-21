@@ -26,7 +26,7 @@ import type { StyleProp, ViewStyle } from "react-native";
 /** Formats Toman values using the user's unit + digit preferences. */
 export function usePrice() {
   const { user } = useApp();
-  return (value: number | null | undefined, digits = 0) =>
+  return (value: number | null | undefined, digits = 2) =>
     value == null
       ? "—"
       : formatNumber(
@@ -80,7 +80,7 @@ export function Price({
           color: t.text,
         }}
       >
-        {fmt(value, digits ?? 0)}
+        {fmt(value, digits ?? 2)}
       </Label>
       <Label secondary size={11} style={{ textAlign: align === "flex-end" ? "right" : "left" }}>
         {unitLabel}
@@ -211,10 +211,10 @@ export function RangeMeter({
           }}
         >
           <Label tertiary size={11}>
-            پایین‌ترین {fmt(low, 0)}
+            پایین‌ترین {fmt(low)}
           </Label>
           <Label tertiary size={11}>
-            بالاترین {fmt(high, 0)}
+            بالاترین {fmt(high)}
           </Label>
         </View>
       ) : null}
@@ -553,7 +553,7 @@ export function CurrencyRow({
                 color: t.text,
               }}
             >
-              {fmt(quote?.priceToman, 0)}
+              {fmt(quote?.priceToman)}
             </Label>
             <ChangePill value={quote?.changePercent} size="small" />
           </View>
@@ -584,7 +584,7 @@ export function CurrencyRow({
             }}
           >
             <Label tertiary size={11} allowFontScaling={false}>
-              بازه امروز {fmt(quote.lowToman, 0)} تا {fmt(quote.highToman, 0)}
+              بازه امروز {fmt(quote.lowToman)} تا {fmt(quote.highToman)}
             </Label>
             <Label tertiary size={11} allowFontScaling={false}>
               {quote.sourceTimeLabel}

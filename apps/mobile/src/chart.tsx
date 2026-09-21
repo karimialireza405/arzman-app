@@ -49,6 +49,7 @@ export function ChartCard({ currency }: { currency: Currency }) {
 
   useEffect(() => {
     const controller = new AbortController();
+    let current = true;
     setPoints([]);
     setLoading(true);
     setStatus("در حال دریافت تاریخچه…");
@@ -79,15 +80,17 @@ export function ChartCard({ currency }: { currency: Currency }) {
           );
         }
       } catch {
+        if (!current) return;
         if (!controller.signal.aborted) setStatus("تاریخچه در دسترس نیست");
         else setStatus("دریافت تاریخچه کامل نشد");
       } finally {
         clearTimeout(timer);
-        setLoading(false);
+        if (current) setLoading(false);
       }
     })();
 
     return () => {
+      current = false;
       controller.abort();
       clearTimeout(timer);
     };
@@ -185,7 +188,7 @@ export function ChartCard({ currency }: { currency: Currency }) {
                   activePoint.priceToman *
                     (app.user.settings.unit === "IRR" ? 10 : 1),
                   app.user.settings.persian,
-                  0,
+                  2,
                 )}{" "}
                 {app.user.settings.unit === "IRR" ? "ریال" : "تومان"}
               </Label>

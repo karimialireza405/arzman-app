@@ -54,3 +54,11 @@ export async function writePrivate(key: string, value: string) {
     keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
   });
 }
+/** Best-effort erase. The ledger index is authoritative; this only reclaims the item. */
+export async function deletePrivate(key: string) {
+  if (Platform.OS === "web") {
+    localStorage.removeItem(`private-${key}`);
+    return;
+  }
+  await SecureStore.deleteItemAsync(key);
+}

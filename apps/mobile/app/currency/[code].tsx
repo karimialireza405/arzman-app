@@ -29,12 +29,14 @@ import {
   radii,
   spacing,
   useTheme,
+  usePrice,
 } from "../../src/ui";
 
 export default function Detail() {
   const params = useLocalSearchParams<{ code: string }>();
   const app = useApp();
   const t = useTheme();
+  const fmt = usePrice();
 
   const result = CurrencySchema.safeParse(params.code);
   if (!result.success) {
@@ -62,7 +64,6 @@ export default function Detail() {
     }));
   };
 
-  const persian = app.user.settings.persian;
 
   return (
     <Screen
@@ -105,7 +106,7 @@ export default function Detail() {
           <ChangePill value={q?.changePercent} size="medium" />
         </View>
 
-        <Price value={q?.priceToman} size="hero" digits={0} align="flex-start" />
+        <Price value={q?.priceToman} size="hero" align="flex-start" />
 
         {q ? (
           <RangeMeter current={q.priceToman} low={q.lowToman} high={q.highToman} />
@@ -118,7 +119,8 @@ export default function Detail() {
             زمان منبع: {q?.sourceTimeLabel || "نامشخص"}
           </Label>
           <Label tertiary size={11} allowFontScaling={false}>
-            واحد منبع: {q?.rawUnit === "IRR" ? "ریال" : "تومان"} · هر {q?.quoteSize ?? 1} واحد
+            واحد منبع: {q?.rawUnit === "IRR" ? "ریال" : "تومان"} · هر{" "}
+            {formatNumber(q?.quoteSize ?? 1, app.user.settings.persian, 0)} واحد
           </Label>
         </View>
       </Surface>
@@ -132,24 +134,24 @@ export default function Detail() {
           <SettingsRow
             title="بالاترین نرخ روز"
             accessory="none"
-            value={q && q.highToman != null ? `${formatNumber(q.highToman, persian, 0)} ${app.user.settings.unit === "IRR" ? "ریال" : "تومان"}` : "—"}
+            value={q && q.highToman != null ? `${fmt(q.highToman)} ${names[app.user.settings.unit]}` : "—"}
           />
           <SettingsRow
             title="پایین‌ترین نرخ روز"
             accessory="none"
-            value={q && q.lowToman != null ? `${formatNumber(q.lowToman, persian, 0)} ${app.user.settings.unit === "IRR" ? "ریال" : "تومان"}` : "—"}
+            value={q && q.lowToman != null ? `${fmt(q.lowToman)} ${names[app.user.settings.unit]}` : "—"}
           />
           <SettingsRow
             title="نرخ روز گذشته"
             accessory="none"
-            value={q?.previousToman != null ? `${formatNumber(q.previousToman, persian, 0)} ${app.user.settings.unit === "IRR" ? "ریال" : "تومان"}` : "—"}
+            value={q?.previousToman != null ? `${fmt(q.previousToman)} ${names[app.user.settings.unit]}` : "—"}
           />
           <SettingsRow
             title="تغییر روزانه"
             accessory="none"
             value={
               q?.change != null
-                ? `${q.change >= 0 ? "+" : ""}${formatNumber(q.change, persian, 0)} ${app.user.settings.unit === "IRR" ? "ریال" : "تومان"}`
+                ? `${q.change >= 0 ? "+" : ""}${fmt(q.change)} ${names[app.user.settings.unit]}`
                 : "—"
             }
           />

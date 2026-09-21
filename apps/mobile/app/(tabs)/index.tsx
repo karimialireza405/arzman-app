@@ -7,7 +7,7 @@
  */
 import { View } from "react-native";
 import { router } from "expo-router";
-import { calculatePortfolio, formatNumber, valuation } from "@arzman/shared";
+import { calculatePortfolio, names, valuation, totalValuation } from "@arzman/shared";
 import { useApp } from "../../src/store";
 import {
   CurrencyList,
@@ -20,6 +20,7 @@ import {
   Section,
   SettingsRow,
   spacing,
+  usePrice,
   useTheme,
 } from "../../src/ui";
 
@@ -28,6 +29,8 @@ const majorCurrencies = ["EUR", "AED", "IQD"] as const;
 export default function Home() {
   const app = useApp();
   const t = useTheme();
+  const fmt = usePrice();
+  const unit = names[app.user.settings.unit];
   const quotes = app.snapshot?.quotes ?? [];
   const assets = calculatePortfolio(app.transactions);
 
@@ -36,12 +39,13 @@ export default function Home() {
       a,
       a.currency === "IRT"
         ? 1
-        : (quotes.find((q) => q.currency === a.currency)?.priceToman ?? null),
+        : // Market quote first; a personal rate only fills an absent quote.
+          (quotes.find((q) => q.currency === a.currency)?.priceToman ??
+          app.user.customRates.find((r) => r.currency === a.currency)?.priceToman ??
+          null),
     ),
   );
-  const totalPortfolioValue = values.some((v) => v === null)
-    ? null
-    : values.reduce((s, v) => s + (v?.value ?? 0), 0);
+  const totalPortfolioValue = totalValuation(values);
 
   // Followed currencies that are not already covered by the hero + majors.
   const extraWatchlist = app.user.watchlist.filter(
@@ -76,7 +80,7 @@ export default function Home() {
             icon="wallet"
             value={
               totalPortfolioValue !== null
-                ? `${formatNumber(totalPortfolioValue, app.user.settings.persian, 0)} تومان`
+                ? `${fmt(totalPortfolioValue, 0)} ${unit}`
                 : "—"
             }
             onPress={() => router.push("/portfolio")}
@@ -122,7 +126,7 @@ export default function Home() {
         <SettingsRow
           title={
             usd
-              ? `۱۰۰ دلار آمریکا = ${formatNumber(usd.priceToman * 100, app.user.settings.persian, 0)} تومان`
+              ? `۱۰۰ دلار آمریکا = ${fmt(usd.priceToman * 100, 0)} ${unit}`
               : "تبدیل هوشمند با نرخ بازار آزاد"
           }
           icon="swap-horizontal"
