@@ -1,0 +1,33 @@
+{
+  "name": "arzman",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "server"
+  ],
+  "scripts": {
+    "start": "npm run start -w @arzman/mobile",
+    "server": "npm run dev -w @arzman/server",
+    "typecheck": "tsc --noEmit -p packages/shared && tsc --noEmit -p server && tsc --noEmit -p apps/mobile",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm run lint && npm test"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "eslint": "^9.39.0",
+    "prettier": "^3.9.8",
+    "react-native-reanimated": "4.5.1",
+    "react-native-worklets": "0.10.1",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.57.0",
+    "vitest": "^4.1.0"
+  },
+  "overrides": {
+    "react-native-gesture-handler": "2.32.0",
+    "react-native-reanimated": "4.5.1",
+    "react-native-worklets": "0.10.1"
+  }
+}

@@ -1,0 +1,1178 @@
+You are the lead senior engineer, iOS product designer, backend engineer, QA engineer, and technical owner of a real personal iPhone application called:
+
+«ارز من»
+English/internal name: ArzMan
+
+Your job is NOT to merely generate example code or a prototype.
+
+Your job is to BUILD THE ACTUAL WORKING PROJECT, run it, inspect errors, fix them, test it, document it, and leave the repository in a state where another coding agent can continue the work without needing me to explain anything again.
+
+I am developing on WINDOWS, not macOS.
+
+The application is for my personal iPhone.
+
+==================================================
+1. CORE TECHNOLOGY
+==================================================
+
+Build the mobile app using:
+
+- React Native
+- Expo
+- TypeScript
+- Expo Router
+- Current stable Expo SDK
+- pnpm or npm, choose whichever is most reliable
+- Strict TypeScript
+- Functional components
+- Clean modular architecture
+
+The project must be developable on Windows.
+
+I want to be able to test it on my physical iPhone using Expo Go whenever the used native modules permit it.
+
+For functionality that requires a development build, explain it and configure EAS Build properly.
+
+Do NOT make Swift/Xcode/macOS a requirement for normal development.
+
+Prepare the project for:
+
+- Expo development
+- EAS Development Build
+- EAS production build
+- eventual TestFlight installation
+
+Do not require a paid third-party market-data API.
+
+==================================================
+2. PRODUCT IDENTITY
+==================================================
+
+App name:
+ارز من
+
+Internal English name:
+ArzMan
+
+Language:
+Persian, RTL, Persian-first.
+
+The interface must feel like a first-party Apple iPhone application, not like a generic React Native or Android application.
+
+Target visual language:
+modern iOS 27-style Apple Liquid Glass aesthetic.
+
+IMPORTANT:
+Do not create cheap fake glassmorphism.
+
+The design should approximate Apple's native visual hierarchy:
+
+- translucent materials
+- adaptive blur
+- subtle glass surfaces
+- restrained reflections
+- proper depth hierarchy
+- native-feeling sheets
+- native-feeling navigation
+- rounded continuous corners
+- soft shadows only when appropriate
+- excellent dark mode
+- correct Safe Area handling
+- native-feeling gestures
+- spring animations
+- subtle haptic feedback
+- large iOS-style titles
+- Apple-like typography hierarchy
+- minimal visual noise
+
+Use system/native-feeling controls wherever practical.
+
+Do not turn every card into glass.
+
+Liquid Glass should mostly be used for:
+- controls
+- navigation
+- tab bar
+- floating actions
+- menus
+- sheets
+- interactive overlays
+
+Market content itself must remain highly readable.
+
+Primary visual theme:
+Dark / OLED-friendly.
+
+Background should be close to true black.
+
+Use green/red only where semantically needed for market movement.
+
+Persian numbers should be supported in displayed UI while internal calculations remain standard numeric values.
+
+All screens must support RTL correctly.
+
+==================================================
+3. MAIN NAVIGATION
+==================================================
+
+Create a polished bottom tab navigation:
+
+خانه
+بازار
+مبدل
+دارایی من
+بیشتر
+
+Use an iOS-style floating/translucent Liquid Glass tab bar.
+
+Use tasteful icons.
+
+Provide haptic feedback when changing important tabs/actions.
+
+==================================================
+4. HOME SCREEN
+==================================================
+
+The Home screen should immediately feel premium.
+
+Include:
+
+- greeting / app identity
+- last market update
+- connection status
+- overall market summary
+- main USD card
+- compact EUR card
+- compact AED card
+- compact IQD card
+- daily percentage movement
+- price movement
+- daily high
+- daily low
+- update time
+- quick converter
+- favorite currencies
+- portfolio summary if the user has entered holdings
+
+Primary currencies:
+
+USD — دلار آمریکا
+EUR — یورو
+AED — درهم امارات
+IQD — دینار عراق
+
+Prices shown to the user should default to TOMAN.
+
+Internally retain original source unit metadata.
+
+Never silently mix rial and toman.
+
+==================================================
+5. MARKET DATA — CRITICAL REQUIREMENT
+==================================================
+
+I DO NOT HAVE A CURRENCY API KEY.
+
+Do NOT ask me to obtain a paid API.
+
+The app must obtain Iranian open-market currency data from a well-known Iranian public market website.
+
+Primary preferred source:
+
+TGJU
+شبکه اطلاع‌رسانی طلا و ارز
+tgju.org
+
+Before implementing the scraper:
+
+1. research the current TGJU public pages
+2. inspect the current HTML/data delivery mechanism
+3. inspect any publicly exposed market/widget data endpoints used by the website
+4. prefer the least brittle publicly accessible method
+5. do not circumvent authentication, CAPTCHAs, anti-bot protections, paywalls, or access controls
+6. respect reasonable request frequency and public-site limitations
+
+The app should retrieve at minimum:
+
+USD
+EUR
+AED
+IQD
+
+For each currency, obtain as many of the following as reliably available:
+
+- current price
+- previous price
+- daily change
+- daily percentage
+- daily high
+- daily low
+- timestamp
+- source
+- source unit
+- freshness
+
+IMPORTANT UNIT NORMALIZATION:
+
+TGJU may expose some prices in RIAL.
+
+The app UI defaults to TOMAN.
+
+Implement a centralized currency normalization layer.
+
+Example concept:
+
+source amount in rial
+→ normalized rial
+→ normalized toman
+→ formatted Persian UI
+
+Do NOT blindly divide every number by 10.
+
+Inspect source metadata/page semantics and normalize based on the actual source/unit.
+
+IQD needs special attention.
+
+Some Iranian market sources may publish:
+- 1 IQD
+- 100 IQD
+- or another quoted unit
+
+Determine the quoted unit from the source and normalize it explicitly.
+
+Store:
+- rawValue
+- rawUnit
+- quoteSize
+- normalizedTomanValue
+
+so calculations remain correct.
+
+==================================================
+6. DO NOT SCRAPE DIRECTLY FROM EVERY PHONE REQUEST
+==================================================
+
+Do NOT make the iPhone aggressively scrape TGJU every few seconds.
+
+Build a lightweight market-data service layer.
+
+Preferred architecture:
+
+ArzMan iPhone app
+        ↓
+ArzMan lightweight serverless data service
+        ↓
+TGJU public market page/data
+        ↓
+parser + validation + cache
+        ↓
+normalized JSON
+
+Use a free/simple serverless option suitable for this project.
+
+Preferred:
+Cloudflare Workers
+
+Alternative if there is a strong technical reason:
+Vercel serverless / similar simple solution.
+
+The backend must not require a paid currency API.
+
+Create endpoint(s) such as:
+
+GET /api/market
+GET /api/market/USD
+GET /api/history/USD?range=1D
+
+Example normalized response:
+
+{
+  "currency": "USD",
+  "nameFa": "دلار آمریکا",
+  "priceToman": 231300,
+  "rawPrice": 2313000,
+  "rawUnit": "IRR",
+  "quoteSize": 1,
+  "change": 1200,
+  "changePercent": 0.52,
+  "highToman": 232100,
+  "lowToman": 228900,
+  "source": "TGJU",
+  "sourceTimestamp": "...",
+  "fetchedAt": "...",
+  "stale": false
+}
+
+These numbers are illustrative only.
+
+NEVER hardcode fake market prices as real values.
+
+==================================================
+7. RESILIENT SCRAPER
+==================================================
+
+Treat scraping/parsing as a production subsystem.
+
+Do not rely on one fragile CSS selector.
+
+Create:
+
+- primary parser
+- alternative parser
+- structural validation
+- sanity validation
+- stale-data detection
+- unit validation
+- timestamp validation
+- error logging
+- graceful fallback
+
+If selectors change, the app must not display zero or garbage as legitimate prices.
+
+If parsing fails:
+
+show last known valid data
++
+mark it as stale
++
+display the last successful update time.
+
+Store a cached last-known-good response.
+
+Never replace valid cached market data with malformed fresh data.
+
+Create automated parser tests using saved fixture HTML/data.
+
+The fixture tests should verify USD/EUR/AED/IQD parsing and unit conversion.
+
+Centralize source parsing under something like:
+
+server/src/providers/tgju/
+
+Do NOT scatter scraping logic throughout the codebase.
+
+Create a provider interface so another source can later be added.
+
+For example:
+
+MarketDataProvider
+
+and:
+
+TGJUProvider
+
+==================================================
+8. FALLBACK DATA SOURCE ARCHITECTURE
+==================================================
+
+Design support for multiple sources even if TGJU is the active source.
+
+Possible future structure:
+
+Primary:
+TGJU
+
+Fallback:
+another reputable Iranian public market source after researching its accessibility and terms.
+
+Do not implement questionable scraping merely to have a fallback.
+
+Create the abstraction now so another provider can be added later.
+
+Display source information in the app's About/Data Source section.
+
+==================================================
+9. REFRESH STRATEGY
+==================================================
+
+Do not abuse the source website.
+
+The server should cache rates.
+
+Use a sensible refresh period such as roughly 30–60 seconds while the market is active, unless investigation shows a different appropriate rate.
+
+The mobile app may poll our own cached backend while it is active.
+
+Use:
+
+- foreground refresh
+- pull to refresh
+- AppState handling
+- stale-data detection
+- exponential backoff on errors
+
+Do not pretend iOS can run continuous JavaScript polling forever in the background.
+
+For true background price alerts, design a server-side monitoring system.
+
+==================================================
+10. PRICE ALERTS
+==================================================
+
+Create an Alerts section.
+
+Allow the user to define:
+
+USD above X
+USD below X
+EUR above X
+AED below X
+etc.
+
+Also architect:
+
+percentage movement alert
+rapid movement alert
+
+Examples:
+
+دلار بالاتر از ۲۴۰,۰۰۰ تومان
+درهم پایین‌تر از ۶۲,۰۰۰ تومان
+تغییر دلار بیش از ۲٪
+
+IMPORTANT:
+
+Because iOS applications cannot continuously poll markets while suspended, true closed-app alerts must eventually be evaluated server-side.
+
+Build the architecture with this reality in mind.
+
+If push notification infrastructure is not configured yet, implement local/in-app alert logic and clearly document the server-push TODO.
+
+Do not fake background reliability.
+
+==================================================
+11. MARKET DETAIL SCREEN
+==================================================
+
+Tapping a currency opens a beautiful detail page.
+
+Include:
+
+- symbol
+- Persian currency name
+- current price
+- price change
+- percentage
+- high
+- low
+- last update
+- source
+- price chart
+- favorite button
+- create alert
+- converter shortcut
+
+Chart ranges:
+
+1H
+1D
+1W
+1M
+3M
+1Y
+
+Historical data must use actual stored/retrieved observations.
+
+Never fabricate historical prices.
+
+If historical source data is unavailable initially, begin collecting it in our own backend storage and clearly indicate the available period.
+
+==================================================
+12. CHARTS
+==================================================
+
+Use a performant React Native charting solution compatible with Expo/dev builds.
+
+Charts should feel like Apple Stocks:
+
+- smooth line
+- minimal grid
+- interactive touch
+- selected point
+- haptic feedback where feasible
+- date/time tooltip
+- subtle animation
+- red/green semantics based on movement
+- dark mode
+- proper RTL surrounding UI
+
+Avoid visually noisy trading charts.
+
+This is a personal currency dashboard, not TradingView.
+
+==================================================
+13. CURRENCY CONVERTER
+==================================================
+
+Create a dedicated converter.
+
+Examples:
+
+500 USD → Toman
+100,000,000 Toman → USD
+100 EUR → Toman
+Toman → AED
+USD → EUR
+etc.
+
+Support:
+
+USD
+EUR
+AED
+IQD
+Toman
+Rial
+
+Conversion must clearly communicate that non-IRR cross conversions may be derived using the available Iranian market rates.
+
+Allow quick swap.
+
+Large readable amount input.
+
+Persian formatting.
+
+Copy result.
+
+Haptic feedback.
+
+==================================================
+14. PORTFOLIO — دارایی من
+==================================================
+
+Create a private personal portfolio.
+
+The user can enter holdings such as:
+
+300 USDT
+400 USD
+250 EUR
+1000 AED
+
+Include initially:
+
+USD
+EUR
+AED
+IQD
+USDT
+Toman
+
+For manually entered holdings calculate:
+
+- current estimated value in toman
+- total portfolio value
+- daily estimated change
+- allocation
+- quantity
+- average acquisition cost
+- profit/loss
+- profit/loss percent
+- break-even price
+
+Support transaction entries:
+
+Buy
+Sell
+Adjustment
+
+Example:
+
+80 USDT @ 218,000 Toman
+
+Store data locally and privately.
+
+Use secure storage where appropriate.
+
+Optional privacy:
+Face ID / device authentication lock for Portfolio.
+
+==================================================
+15. USDT
+==================================================
+
+USDT should be architected separately from fiat currencies.
+
+If implementing live USDT/IRT price, research a reliable public Iranian source or exchange endpoint that does not require my secret API key.
+
+Do not invent USDT price.
+
+If no stable public source can be used legally/reliably, leave USDT market price behind a provider interface and clearly document it instead of faking it.
+
+==================================================
+16. CUSTOM RATE — نرخ من
+==================================================
+
+Create "نرخ من".
+
+The user may enter a custom exchange-office rate.
+
+Example:
+
+Market USD:
+234,750 Toman
+
+My Exchange:
+236,200 Toman
+
+Difference:
++1,450 Toman
++0.62%
+
+Support per currency custom rates.
+
+==================================================
+17. WATCHLIST
+==================================================
+
+Create favorites/watchlist.
+
+The four default currencies:
+
+USD
+EUR
+AED
+IQD
+
+Allow future expansion.
+
+Persist ordering and favorites locally.
+
+==================================================
+18. WIDGET ARCHITECTURE
+==================================================
+
+Prepare the project architecture for iOS widgets.
+
+Target widgets eventually:
+
+Small:
+USD price + movement
+
+Medium:
+USD
+EUR
+AED
+IQD
+
+Lock Screen:
+compact USD price
+
+Because Expo Go cannot host arbitrary native widget extensions, do NOT hack around this.
+
+Document which parts require:
+
+- EAS development build
+- native iOS extension/config plugin
+- Apple Developer signing
+
+Implement what can safely be implemented now and isolate native work.
+
+==================================================
+19. LIVE ACTIVITY / DYNAMIC ISLAND
+==================================================
+
+Architect optional Live Activity for tracking one selected currency.
+
+Example:
+
+USD
+234,750
++1.01%
+
+Do not pretend Live Activities are permanently updating background processes.
+
+Respect Apple's Live Activity limitations.
+
+If native code/plugin is needed, isolate and document it.
+
+Do not make the base app dependent on this feature.
+
+==================================================
+20. SIRI / SHORTCUTS
+==================================================
+
+Prepare architecture for future commands such as:
+
+قیمت دلار چنده؟
+۵۰۰ دلار چند تومن میشه؟
+
+If full App Intents integration requires native extension work unavailable in Expo Go, document it and keep the base application functional.
+
+==================================================
+21. SETTINGS
+==================================================
+
+Create settings for:
+
+- default display unit: Toman / Rial
+- Persian/English numerals
+- refresh preference
+- haptic feedback
+- appearance
+- privacy lock
+- data source information
+- cache information
+- about
+- app version
+- clear local cache
+
+Theme options:
+
+System
+Dark
+Light
+
+Dark should be the default product aesthetic.
+
+==================================================
+22. OFFLINE MODE
+==================================================
+
+The app must remain useful without internet.
+
+Store the latest valid rates locally.
+
+When offline show:
+
+آخرین بروزرسانی:
+...
+
+and clearly indicate stale/offline state.
+
+Never silently show cached data as live.
+
+==================================================
+23. DATA MODEL
+==================================================
+
+Create strong TypeScript models.
+
+Avoid `any`.
+
+Use schema validation such as Zod for external/untrusted market data.
+
+Validate the backend response again on the mobile app boundary.
+
+Create reusable models for:
+
+Currency
+CurrencyQuote
+HistoricalPoint
+PortfolioAsset
+PortfolioTransaction
+PriceAlert
+CustomRate
+MarketSnapshot
+ProviderStatus
+
+==================================================
+24. LOCAL STORAGE
+==================================================
+
+Use an appropriate modern local persistence solution compatible with Expo.
+
+Persist:
+
+- settings
+- watchlist
+- cached quotes
+- portfolio
+- transactions
+- custom rates
+- alerts
+
+Separate:
+market cache
+from
+user financial data.
+
+Do not unnecessarily upload my personal portfolio to the backend.
+
+Portfolio should stay local by default.
+
+==================================================
+25. SECURITY
+==================================================
+
+Never place secrets in the client.
+
+No secret API keys should be required for TGJU scraping.
+
+Do not expose admin credentials.
+
+Validate all external data.
+
+Set reasonable server request timeouts.
+
+Rate-limit public backend endpoints if needed.
+
+Do not use eval.
+
+Do not execute content received from scraped pages.
+
+Treat HTML/data from market sources as untrusted.
+
+==================================================
+26. PROJECT STRUCTURE
+==================================================
+
+Use a clean project structure similar to:
+
+/apps/mobile
+/server
+/packages/shared
+/docs
+
+or another equally clean monorepo structure if justified.
+
+Keep:
+
+UI
+domain logic
+data providers
+networking
+storage
+formatters
+scraping
+tests
+
+properly separated.
+
+==================================================
+27. UI COMPONENT SYSTEM
+==================================================
+
+Build a reusable Apple-inspired component system.
+
+Examples:
+
+GlassButton
+GlassTabBar
+GlassSheet
+MarketCard
+CurrencyRow
+PriceText
+ChangeBadge
+ChartCard
+SegmentedRangePicker
+AmountInput
+EmptyState
+OfflineBanner
+StaleDataBadge
+PortfolioCard
+
+Do not duplicate styling all over the project.
+
+Use design tokens:
+
+spacing
+corner radius
+typography
+glass opacity
+background
+semantic colors
+
+==================================================
+28. ACCESSIBILITY
+==================================================
+
+Support:
+
+- Dynamic Type as reasonably possible
+- sufficient contrast
+- VoiceOver labels
+- large tap targets
+- Reduce Motion where possible
+- RTL
+
+Do not sacrifice readability for glass effects.
+
+==================================================
+29. PERFORMANCE
+==================================================
+
+Avoid needless re-renders.
+
+Use sensible memoization only where helpful.
+
+Cancel abandoned network requests.
+
+Do not fetch identical market data from multiple screens independently.
+
+Use a centralized query/cache layer such as TanStack Query if appropriate.
+
+==================================================
+30. TESTING
+==================================================
+
+Implement meaningful tests.
+
+At minimum:
+
+- TGJU parser fixture tests
+- rial/toman normalization tests
+- IQD quote-size normalization tests
+- converter tests
+- portfolio average-cost tests
+- profit/loss tests
+- schema validation tests
+
+Run:
+typecheck
+lint
+tests
+
+Fix failures before declaring a phase complete.
+
+==================================================
+31. ERROR HANDLING
+==================================================
+
+Design polished user states for:
+
+No internet
+Server unavailable
+Source unavailable
+Parser failure
+Stale data
+No history
+Empty portfolio
+Invalid input
+
+Never display raw stack traces to users.
+
+==================================================
+32. README
+==================================================
+
+Create a professional README in the repository.
+
+It must explain:
+
+- what ArzMan is
+- architecture
+- requirements
+- Windows setup
+- install commands
+- how to run Expo
+- how to open it on iPhone using Expo Go
+- when a development build is required
+- backend setup
+- serverless deployment
+- environment variables
+- EAS setup
+- testing
+- known limitations
+- data source behavior
+
+Commands must be copy/paste ready.
+
+==================================================
+33. AI HANDOFF FILE — VERY IMPORTANT
+==================================================
+
+Because I may hit the model usage limit and continue development with another AI, you MUST continuously maintain:
+
+/HANDOFF.md
+
+This file must contain:
+
+- project goal
+- current architecture
+- important technical decisions
+- what has been implemented
+- what is partially implemented
+- what remains
+- current bugs
+- commands to run
+- how market data works
+- TGJU research findings
+- selectors/data endpoints currently used
+- important file paths
+- environment variables
+- Expo/EAS status
+- test status
+- next recommended task
+- any technical debt
+
+ALSO maintain:
+
+/TODO.md
+/CHANGELOG.md
+
+Update HANDOFF.md before ending every meaningful coding session.
+
+Another AI must be able to continue simply by reading the repository and HANDOFF.md.
+
+==================================================
+34. GIT
+==================================================
+
+If Git is available:
+
+Initialize repository if necessary.
+
+Use logical commits.
+
+Do not commit secrets.
+
+Create a useful .gitignore.
+
+Suggested milestone commits:
+
+chore: initialize ArzMan project
+feat: implement design system
+feat: implement market data service
+feat: add TGJU provider
+feat: add home market dashboard
+feat: add converter
+feat: add portfolio
+feat: add alerts
+
+Do not create meaningless commit spam.
+
+==================================================
+35. WORKING STYLE
+==================================================
+
+You are an autonomous coding agent.
+
+Do not keep stopping to ask me trivial questions.
+
+When reasonable ambiguity exists:
+make the most professional engineering decision
+document it
+continue.
+
+Do not send me huge blocks of code to manually paste if you have filesystem/terminal tools.
+
+USE THE TOOLS.
+
+Create files directly.
+
+Run commands directly.
+
+Inspect errors directly.
+
+Fix the errors directly.
+
+If a dependency is incompatible:
+research a compatible solution
+replace it
+continue.
+
+If a planned library is abandoned:
+remove dead dependency/configuration.
+
+Do not leave the repository half-broken after experimenting.
+
+==================================================
+36. NO FAKE COMPLETION
+==================================================
+
+Never say:
+"implemented"
+"working"
+"done"
+"production ready"
+
+unless you have actually verified the relevant code.
+
+Distinguish clearly between:
+
+Implemented
+Configured but untested
+Mocked
+Planned
+Requires Apple signing
+Requires deployment
+
+No fake live data.
+
+No fabricated historical data.
+
+No fabricated API response.
+
+==================================================
+37. DEVELOPMENT PHASES
+==================================================
+
+Implement in this order:
+
+PHASE 1
+- repository
+- Expo/TypeScript project
+- routing
+- RTL
+- design system
+- dark mode
+- tab navigation
+
+PHASE 2
+- investigate TGJU
+- serverless market service
+- TGJU provider
+- normalization
+- validation
+- caching
+- tests
+
+PHASE 3
+- Home screen
+- Markets screen
+- currency detail
+- refresh states
+- offline states
+
+PHASE 4
+- converter
+- watchlist
+- custom rate
+
+PHASE 5
+- portfolio
+- transactions
+- profit/loss
+- privacy lock
+
+PHASE 6
+- alerts architecture
+- notification groundwork
+
+PHASE 7
+- charts/history
+- backend historical collection
+
+PHASE 8
+- widget/native capability groundwork
+- Live Activity design
+- Siri/App Intent design
+
+PHASE 9
+- polish
+- accessibility
+- performance
+- tests
+- documentation
+
+==================================================
+38. START NOW
+==================================================
+
+First:
+
+1. inspect the current working directory
+2. determine whether a project already exists
+3. if one exists, preserve useful work instead of blindly replacing it
+4. research the current official Expo-compatible stack
+5. research the current TGJU pages/public market-data delivery
+6. write a short implementation plan into the repository
+7. begin Phase 1
+8. continue into Phase 2 if no blocker exists
+9. run the project/tests as you proceed
+10. keep HANDOFF.md updated
+
+Do not merely explain how I could build this.
+
+BUILD IT.

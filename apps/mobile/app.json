@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "ارز من",
+    "slug": "arzman",
+    "scheme": "arzman",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.arzman.personal",
+      "infoPlist": {
+        "CFBundleAllowMixedLocalizations": true,
+        "CFBundleLocalizations": ["fa", "en"]
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-sqlite",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "برای حفاظت از دارایی‌های شما از Face ID استفاده می‌شود."
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "enableSceneSupport": true
+          }
+        }
+      ]
+    ],
+    "extra": {
+      "supportsRTL": true
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}

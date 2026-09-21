@@ -1,0 +1,17 @@
+{
+  "name": "@arzman/server",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev --ip 0.0.0.0",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "@arzman/shared": "*",
+    "cheerio": "^1.2.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0",
+    "@cloudflare/workers-types": "^5.20260920.1"
+  }
+}
