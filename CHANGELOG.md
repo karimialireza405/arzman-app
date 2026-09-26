@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2026-09-27 — professional redesign
+
+References: Dribbble currency-exchange shots (Kites Design dark exchange UI,
+card-per-row rate lists, Lumina) and the ui-ux-pro-max fintech guidance.
+
+### Added
+- **Vazirmatn** typography (OFL), applied to every string through `Label`.
+- **Brand hero card** (`QuoteHero`) on Home and currency detail: indigo→violet
+  gradient, today's trend, daily range, glass action chips.
+- **Real sparklines** in every currency row, from stored observations only.
+- Price-change tick, violet ambient light, staggered section entrance, tab
+  shift transition. All respect Reduce Motion.
+
+### Fixed
+- **Text overflowing its frame («ارز من»)**: Persian needs 1.5625× line height
+  (measured from the font files); the scale gave 1.2–1.35×. Enforced centrally.
+- Letter-spacing on Persian text broke letter joins — dropped for Persian.
+- White on the prominent button fill was 2.72:1 → new `accentSolid` (5.15 / 7.10).
+- Currency detail repeated its name three times; sheets repeated their title.
+- «درهم امارات» truncated on the market list.
+
+### Design tokens
+- Dark: base `#07080E`, surface `#11131E`, accent `#A78BFA` (text) /
+  `#6D4AFF` (fills), gold `#F5B84B`. Light: base `#F4F5FA`, accent `#6D28D9`.
+  All text pairs verified ≥ 4.5:1.
+
 ## [0.4.1] - 2026-09-27 — backend: stop exhausting the free Cloudflare budget
 
 ### Fixed

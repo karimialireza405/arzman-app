@@ -10,8 +10,25 @@
 **Git HEAD at the redesign handoff:** `8900c9d`  
 **Git HEAD after the audit session:** see §00.4  
 
-> Read **§0000, §000 and §00 first** — it is the most recent session and supersedes anything older it
+> Read **§00000, §0000, §000 and §00 first** — it is the most recent session and supersedes anything older it
 > contradicts, in particular the Expo Go instructions in §0 and in `README.md`.
+
+---
+
+## 00000. Professional redesign (2026-09-27)
+
+- Commits `aebc8e6` (Vazirmatn typography) and `7b33768` (brand redesign).
+  See CHANGELOG 0.5.0 for the full list.
+- **Design rules to keep:** all text through `Label` (it applies
+  `persianText`: Vazirmatn family by weight, line height ≥ 1.5625×, no
+  tracking on Persian); fills behind white text use `accentSolid`, never
+  `accent`; one brand surface (`QuoteHero`) per screen; sparklines only from
+  real observations (`useHistory`, cached 5 min — each call costs DO rows).
+- Verified in the web runtime at 393×852, dark and light. Native-only effects
+  (Liquid Glass tab bar over the new palette, Reanimated on-device, SF Symbols)
+  still need the owner's eyes on the iPhone.
+- Tests 43/43; iOS Hermes export builds (4.9 MB); expo-doctor 20/21 (the same
+  upstream patch-release advisory).
 
 ---
 
