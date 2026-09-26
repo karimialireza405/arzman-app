@@ -146,9 +146,11 @@ export function parseAmount(value: string): number {
     throw new Error("مقدار خارج از محدوده است");
   return result;
 }
-export function formatNumber(value: number, persian = true, digits = 2) {
+/** `minDigits` pads decimals (a column of percentages lines up); it never exceeds `digits`. */
+export function formatNumber(value: number, persian = true, digits = 2, minDigits = 0) {
   return new Intl.NumberFormat(persian ? "fa-IR" : "en-US", {
     maximumFractionDigits: digits,
+    minimumFractionDigits: Math.min(minDigits, digits),
   }).format(value);
 }
 export function convert(

@@ -41,7 +41,7 @@ export default function Detail() {
   const result = CurrencySchema.safeParse(params.code);
   if (!result.success) {
     return (
-      <Screen title="ارز نامعتبر">
+      <Screen title="ارز نامعتبر" floatingTabBar={false}>
         <EmptyState
           title="ارز پیدا نشد"
           description="کد ارز نامعتبر است. از فهرست بازار ارز مورد نظر را انتخاب کنید."
@@ -67,6 +67,7 @@ export default function Detail() {
 
   return (
     <Screen
+      floatingTabBar={false}
       title={names[code]}
       eyebrow={`${code} · بازار آزاد ایران`}
       refresh
@@ -106,7 +107,7 @@ export default function Detail() {
           <ChangePill value={q?.changePercent} size="medium" />
         </View>
 
-        <Price value={q?.priceToman} size="hero" align="flex-start" />
+        <Price value={q?.priceToman} size="hero" align="flex-end" />
 
         {q ? (
           <RangeMeter current={q.priceToman} low={q.lowToman} high={q.highToman} />
@@ -151,7 +152,8 @@ export default function Detail() {
             accessory="none"
             value={
               q?.change != null
-                ? `${q.change >= 0 ? "+" : ""}${fmt(q.change)} ${names[app.user.settings.unit]}`
+                ? // LRM keeps the sign on the number's left ("+۰"), not after it.
+                  `‎${q.change >= 0 ? "+" : ""}${fmt(q.change)} ${names[app.user.settings.unit]}`
                 : "—"
             }
           />

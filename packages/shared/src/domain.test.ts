@@ -33,6 +33,15 @@ describe("units and input", () => {
     for (const s of ["", "1x", "Infinity", "-3"])
       expect(() => parseAmount(s)).toThrow();
   });
+  it("pads decimals only when asked, so a column of percentages lines up", () => {
+    expect(formatNumber(0, false, 2)).toBe("0");
+    expect(formatNumber(0, false, 2, 2)).toBe("0.00");
+    expect(formatNumber(0.5, false, 2, 2)).toBe("0.50");
+    expect(formatNumber(1.234, false, 2, 2)).toBe("1.23");
+    // minDigits can never exceed digits — it would throw a RangeError in Intl.
+    expect(formatNumber(1, false, 0, 2)).toBe("1");
+    expect(formatNumber(0.43, true, 2, 2)).toBe("۰٫۴۳");
+  });
   it("converts both directions and cross rates", () => {
     const eur = {
       ...quote,

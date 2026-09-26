@@ -36,6 +36,20 @@ import {
 
 const codes = [...fiatCodes, "IRT", "IRR"] as const;
 
+/**
+ * Picker labels. Six full names ("دلار آمریکا", "درهم امارات") could not share
+ * one row on a phone, so "ریال" wrapped onto a line of its own. The card
+ * header above each picker still names the selection in full.
+ */
+const shortNames: Record<ConversionCurrency, string> = {
+  USD: "دلار",
+  EUR: "یورو",
+  AED: "درهم",
+  IQD: "دینار",
+  IRT: "تومان",
+  IRR: "ریال",
+};
+
 function CurrencyPicker({
   value,
   onChange,
@@ -46,7 +60,7 @@ function CurrencyPicker({
   const t = useTheme();
   const feedback = useFeedback();
   return (
-    <View style={{ flexDirection: "row-reverse", flexWrap: "wrap", gap: spacing.xxs }}>
+    <View style={{ flexDirection: "row-reverse", gap: 4 }}>
       {codes.map((code) => {
         const selected = code === value;
         return (
@@ -61,9 +75,10 @@ function CurrencyPicker({
               onChange(code);
             }}
             style={{
+              flex: 1,
               alignItems: "center",
               gap: 4,
-              paddingHorizontal: 8,
+              paddingHorizontal: 2,
               paddingVertical: 6,
               borderRadius: radii.control,
               borderCurve: curve.continuous,
@@ -74,12 +89,13 @@ function CurrencyPicker({
           >
             <CurrencyBadge code={code} size="sm" dark={t.dark} tone={selected ? "filled" : "tint"} />
             <Label
-              size={10}
+              size={11}
               weight={selected ? "700" : "500"}
+              numberOfLines={1}
               allowFontScaling={false}
               style={{ color: selected ? t.accent : t.textSecondary }}
             >
-              {names[code]}
+              {shortNames[code]}
             </Label>
           </Pressable>
         );
@@ -99,7 +115,7 @@ export default function Converter() {
       : "USD",
   );
   const [to, setTo] = useState<ConversionCurrency>("IRT");
-  const [amount, setAmount] = useState("1");
+  const [amount, setAmount] = useState(app.user.settings.persian ? "۱" : "1");
 
   const quotes = app.snapshot?.quotes ?? [];
   let result: number | null = null;
@@ -229,20 +245,23 @@ function ConverterBody({
 
         <View style={{ alignItems: "flex-end", gap: 2 }}>
           <Label tertiary size={12}>مبلغ محاسبه‌شده</Label>
-          <Label
-            allowFontScaling={false}
-            style={{
-              fontSize: 32,
-              lineHeight: 38,
-              fontWeight: "700",
-              letterSpacing: -0.4,
-              fontVariant: ["tabular-nums"],
-              writingDirection: "ltr",
-            }}
-          >
-            {result === null ? "—" : formatNumber(result, app.user.settings.persian, 4)}
-          </Label>
-          <Label secondary size={13} weight="600">{names[to]}</Label>
+          <View style={{ flexDirection: "row-reverse", alignItems: "baseline", gap: 6 }}>
+            <Label
+              allowFontScaling={false}
+              numberOfLines={1}
+              style={{
+                fontSize: 32,
+                lineHeight: 38,
+                fontWeight: "700",
+                letterSpacing: -0.4,
+                fontVariant: ["tabular-nums"],
+                writingDirection: "ltr",
+              }}
+            >
+              {result === null ? "—" : formatNumber(result, app.user.settings.persian, 4)}
+            </Label>
+            <Label secondary size={15} weight="500">{names[to]}</Label>
+          </View>
         </View>
 
         <CurrencyPicker value={to} onChange={setTo} />
@@ -260,7 +279,9 @@ function ConverterBody({
               size={12}
               weight="600"
               allowFontScaling={false}
-              style={{ writingDirection: "ltr", fontVariant: ["tabular-nums"] }}
+              // A Persian sentence with numbers inside: RTL base, or the leading
+              // "۱" is laid out at the opposite end of the line.
+              style={{ writingDirection: "rtl", fontVariant: ["tabular-nums"] }}
             >
               ۱ {names[from]} = {formatNumber(singleRate, app.user.settings.persian, 4)} {names[to]}
             </Label>

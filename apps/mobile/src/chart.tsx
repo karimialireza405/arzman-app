@@ -28,13 +28,14 @@ import {
 const ranges = ["1H", "1D", "1W", "1M", "3M", "1Y"] as const;
 type Range = (typeof ranges)[number];
 
+// Six segments share ~340pt; "۱ ساعت" truncated. Stocks-style short labels.
 const rangeLabels: Record<Range, string> = {
-  "1H": "۱ ساعت",
-  "1D": "۱ روز",
-  "1W": "۱ هفته",
-  "1M": "۱ ماه",
+  "1H": "ساعت",
+  "1D": "روز",
+  "1W": "هفته",
+  "1M": "ماه",
   "3M": "۳ ماه",
-  "1Y": "۱ سال",
+  "1Y": "سال",
 };
 
 export function ChartCard({ currency }: { currency: Currency }) {
@@ -99,7 +100,12 @@ export function ChartCard({ currency }: { currency: Currency }) {
   const values = points.map((p) => p.priceToman);
   const min = points.length ? Math.min(...values) : 0;
   const max = points.length ? Math.max(...values) : 1;
-  const spread = Math.max(1, max - min);
+  // Headroom above and below the line. When the price did not move at all the
+  // raw spread is zero, and without a floor the line would sit on the bottom
+  // edge and read as an empty chart; this centres it instead.
+  const pad = Math.max((max - min) * 0.12, Math.abs(max) * 0.0015, 1e-9);
+  const floor = min - pad;
+  const spread = max + pad - floor;
 
   const start = points.length ? Date.parse(points[0].timestamp) : 0;
   const end = points.length
@@ -118,7 +124,7 @@ export function ChartCard({ currency }: { currency: Currency }) {
     ((Date.parse(points[i].timestamp) - start) / timeSpread) * usableWidth;
 
   const y = (i: number) =>
-    chartHeight - paddingV - ((values[i] - min) / spread) * usableHeight;
+    chartHeight - paddingV - ((values[i] - floor) / spread) * usableHeight;
 
   // Stocks-style trend color
   const isUp =
@@ -183,15 +189,20 @@ export function ChartCard({ currency }: { currency: Currency }) {
             }}
           >
             <View style={{ gap: 2, alignItems: "flex-end" }}>
-              <Label size={24} weight="700" tabular style={{ writingDirection: "ltr" }}>
-                {formatNumber(
-                  activePoint.priceToman *
-                    (app.user.settings.unit === "IRR" ? 10 : 1),
-                  app.user.settings.persian,
-                  2,
-                )}{" "}
-                {app.user.settings.unit === "IRR" ? "ریال" : "تومان"}
-              </Label>
+              {/* Separate runs: a single LTR label put the unit before the number. */}
+              <View style={{ flexDirection: "row-reverse", alignItems: "baseline", gap: 5 }}>
+                <Label size={24} weight="700" tabular style={{ writingDirection: "ltr" }}>
+                  {formatNumber(
+                    activePoint.priceToman *
+                      (app.user.settings.unit === "IRR" ? 10 : 1),
+                    app.user.settings.persian,
+                    2,
+                  )}
+                </Label>
+                <Label secondary size={13} weight="500">
+                  {app.user.settings.unit === "IRR" ? "ریال" : "تومان"}
+                </Label>
+              </View>
               <Label secondary size={11}>
                 {new Date(activePoint.timestamp).toLocaleString(
                   app.user.settings.persian ? "fa-IR" : "en-US",

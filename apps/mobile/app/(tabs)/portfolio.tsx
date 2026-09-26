@@ -289,22 +289,24 @@ export default function Portfolio() {
             <Label tertiary size={12}>
               ارزش برآوردی کل
             </Label>
-            <Label
-              allowFontScaling={false}
-              style={{
-                fontSize: 36,
-                lineHeight: 44,
-                fontWeight: "700",
-                letterSpacing: -0.4,
-                fontVariant: ["tabular-nums"],
-                writingDirection: "ltr",
-              }}
-            >
-              {totalValue === null ? "—" : fmt(totalValue, 0)}
-            </Label>
-            <Label tertiary size={11} allowFontScaling={false}>
-              {names[app.user.settings.unit]}
-            </Label>
+            <View style={{ flexDirection: "row-reverse", alignItems: "baseline", gap: 6 }}>
+              <Label
+                allowFontScaling={false}
+                style={{
+                  fontSize: 36,
+                  lineHeight: 44,
+                  fontWeight: "700",
+                  letterSpacing: -0.4,
+                  fontVariant: ["tabular-nums"],
+                  writingDirection: "ltr",
+                }}
+              >
+                {totalValue === null ? "—" : fmt(totalValue, 0)}
+              </Label>
+              <Label secondary size={15} weight="500" allowFontScaling={false}>
+                {names[app.user.settings.unit]}
+              </Label>
+            </View>
           </View>
 
           {totalValue === null && <Label secondary size={13}>نرخ بعضی دارایی‌ها موجود نیست؛ ارزش کل و سود/زیان قابل محاسبه نیست.</Label>}

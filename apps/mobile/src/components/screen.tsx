@@ -19,6 +19,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { curve, iconSizes, radii, spacing } from "../design-system";
 import { useApp } from "../store";
 import { AppIcon, Label } from "./primitives";
@@ -110,15 +111,17 @@ export function Screen({
             paddingTop: spacing.xxs,
           }}
         >
+          {/* iOS large-title idiom: the title leads, context follows it in a
+              secondary tone. A tinted line *above* the title competed with it. */}
           <View style={{ flex: 1, gap: 2 }}>
-            {eyebrow ? (
-              <Label accent size={13} weight="600">
-                {eyebrow}
-              </Label>
-            ) : null}
             <Label variant="largeTitle" numberOfLines={1}>
               {title}
             </Label>
+            {eyebrow ? (
+              <Label secondary size={15} numberOfLines={1}>
+                {eyebrow}
+              </Label>
+            ) : null}
           </View>
           {trailing}
         </View>
@@ -133,7 +136,37 @@ export function Screen({
 
         {children}
       </ScrollView>
+      {floatingTabBar ? <ScrollEdgeFade height={TAB_BAR.clearance(insets.bottom)} /> : null}
     </SafeAreaView>
+  );
+}
+
+/**
+ * Scroll-edge effect under the floating tab bar.
+ *
+ * The system tab bar on iOS 26 softens the content scrolling beneath it; a
+ * custom floating bar gets no such treatment, so rows showed through the glass
+ * crisp enough to collide with the tab labels. This fades the content into the
+ * background behind the bar. It never takes touches.
+ */
+function ScrollEdgeFade({ height }: { height: number }) {
+  const t = useTheme();
+  return (
+    <View
+      pointerEvents="none"
+      style={{ position: "absolute", left: 0, right: 0, bottom: 0, height }}
+    >
+      <Svg width="100%" height="100%" preserveAspectRatio="none">
+        <Defs>
+          <LinearGradient id="scrollEdge" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor={t.background} stopOpacity={0} />
+            <Stop offset="0.45" stopColor={t.background} stopOpacity={0.82} />
+            <Stop offset="1" stopColor={t.background} stopOpacity={1} />
+          </LinearGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" fill="url(#scrollEdge)" />
+      </Svg>
+    </View>
   );
 }
 

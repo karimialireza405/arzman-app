@@ -192,7 +192,8 @@ export default function Transaction() {
                 fontSize: 17,
                 fontWeight: "700",
                 fontVariant: ["tabular-nums"],
-                writingDirection: "ltr",
+                // Number + Persian unit: RTL base keeps the unit after the number.
+                writingDirection: "rtl",
               }}
             >
               {formatNumber(totalEstimatedToman, app.user.settings.persian, 0)} تومان

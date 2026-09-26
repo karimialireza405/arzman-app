@@ -62,29 +62,37 @@ export function Price({
 
   const resolved = size ?? (large ? "hero" : "medium");
   const fontSize = { hero: 44, large: 28, medium: 22, small: 17 }[resolved];
-  const lineHeight = { hero: 50, large: 34, medium: 28, small: 22 }[resolved];
+  const lineHeight = { hero: 52, large: 34, medium: 28, small: 22 }[resolved];
+  const unitSize = { hero: 17, large: 15, medium: 13, small: 12 }[resolved];
 
+  // Number and unit share one baseline and read as a single phrase
+  // ("۲۳۴٬۶۱۵ تومان"); a unit stacked on its own line reads as a caption.
   return (
-    <View style={[{ gap: 2, alignItems: align }, style]}>
-      <Label
-        numberOfLines={1}
-        allowFontScaling={false}
-        style={{
-          fontSize,
-          lineHeight,
-          fontWeight: resolved === "small" ? "600" : "700",
-          letterSpacing: resolved === "hero" ? -0.6 : -0.2,
-          fontVariant: ["tabular-nums"],
-          writingDirection: "ltr",
-          textAlign: align === "flex-end" ? "right" : "left",
-          color: t.text,
-        }}
-      >
-        {fmt(value, digits ?? 2)}
-      </Label>
-      <Label secondary size={11} style={{ textAlign: align === "flex-end" ? "right" : "left" }}>
-        {unitLabel}
-      </Label>
+    <View style={[{ alignItems: align }, style]}>
+      <View style={{ flexDirection: "row-reverse", alignItems: "baseline", gap: 6 }}>
+        <Label
+          numberOfLines={1}
+          allowFontScaling={false}
+          style={{
+            fontSize,
+            lineHeight,
+            fontWeight: resolved === "small" ? "600" : "700",
+            letterSpacing: resolved === "hero" ? -0.8 : -0.2,
+            fontVariant: ["tabular-nums"],
+            writingDirection: "ltr",
+            color: t.text,
+          }}
+        >
+          {fmt(value, digits ?? 2)}
+        </Label>
+        <Label
+          secondary
+          allowFontScaling={false}
+          style={{ fontSize: unitSize, fontWeight: "500" }}
+        >
+          {unitLabel}
+        </Label>
+      </View>
     </View>
   );
 }
@@ -155,7 +163,7 @@ export function ChangePill({
         }}
       >
         {known
-          ? `${positive ? "+" : ""}${formatNumber(value as number, user.settings.persian, 2)}٪`
+          ? `${positive ? "+" : ""}${formatNumber(value as number, user.settings.persian, 2, 2)}٪`
           : "—"}
       </Label>
     </View>
@@ -266,74 +274,60 @@ export const SpreadBar = RangeMeter;
 export function MarketStatus() {
   const app = useApp();
   const t = useTheme();
-  const { user } = app;
 
   const statusColor = !app.online ? t.red : app.stale ? t.amber : t.green;
+  // Short labels: this is one quiet line of metadata, not content. The amber
+  // state stays honest — TGJU publishes no trade timestamp to verify against.
   const statusLabel = app.busy
-    ? "در حال به‌روزرسانی نرخ‌ها…"
+    ? "در حال به‌روزرسانی…"
     : !app.online
-      ? "آفلاین · نمایش نرخ‌های ذخیره‌شده"
+      ? "آفلاین · نرخ ذخیره‌شده"
       : app.stale
-        ? "متصل · تازگی منبع تأیید نشده"
+        ? "متصل · زمان منبع نامشخص"
         : "متصل · نرخ زنده";
+  const fetched = app.snapshot
+    ? new Date(app.snapshot.fetchedAt).toLocaleTimeString(
+        app.user.settings.persian ? "fa-IR" : "en-US",
+        { hour: "2-digit", minute: "2-digit" },
+      )
+    : null;
 
   return (
-    <View style={{ gap: spacing.xxs }}>
+    <View style={{ gap: spacing.xxxs }}>
       <View
         style={{
           flexDirection: "row-reverse",
           alignItems: "center",
-          justifyContent: "space-between",
-          gap: spacing.xs,
-          minHeight: 28,
+          gap: spacing.xxs,
+          minHeight: 32,
         }}
       >
         <View
-          style={{
-            flexDirection: "row-reverse",
-            alignItems: "center",
-            gap: spacing.xxs,
-            flex: 1,
-          }}
+          accessible
+          accessibilityLabel={`${statusLabel}، منبع TGJU${fetched ? `، دریافت ${fetched}` : ""}`}
+          style={{ flex: 1, flexDirection: "row-reverse", alignItems: "center", gap: spacing.xxs }}
         >
           <View
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: 4,
-              backgroundColor: statusColor,
-            }}
+            style={{ width: 7, height: 7, borderRadius: 3.5, backgroundColor: statusColor }}
           />
-          <Label size={13} weight="500" numberOfLines={1}>
-            {statusLabel}
+          <Label secondary size={13} numberOfLines={1} style={{ flex: 1 }}>
+            {/* Time before "TGJU": Persian digits that follow a Latin word are
+                pulled into its left-to-right run and render out of order. */}
+            {statusLabel}{fetched ? ` · ${fetched}` : ""} · TGJU
           </Label>
         </View>
-
-        <View
-          style={{ flexDirection: "row-reverse", alignItems: "center", gap: spacing.xs }}
-        >
-          {app.snapshot ? (
-            <Label tertiary size={11} allowFontScaling={false}>
-              {new Date(app.snapshot.fetchedAt).toLocaleTimeString("fa-IR", {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-              })}
-            </Label>
-          ) : null}
-          {app.busy ? (
-            <ActivityIndicator size="small" color={t.accent} />
-          ) : (
-            <IconButton
-              icon="refresh"
-              size={32}
-              variant="plain"
-              color={t.textSecondary}
-              accessibilityLabel="تازه‌سازی نرخ‌ها"
-              onPress={() => void app.refresh(true)}
-            />
-          )}
-        </View>
+        {app.busy ? (
+          <ActivityIndicator size="small" color={t.textSecondary} />
+        ) : (
+          <IconButton
+            icon="refresh"
+            size={32}
+            variant="plain"
+            color={t.textSecondary}
+            accessibilityLabel="تازه‌سازی نرخ‌ها"
+            onPress={() => void app.refresh(true)}
+          />
+        )}
       </View>
 
       {app.error ? (
@@ -341,10 +335,6 @@ export function MarketStatus() {
           {app.error}
         </Label>
       ) : null}
-
-      <Label tertiary size={10} allowFontScaling={false}>
-        منبع: TGJU · واحد پیش‌فرض: {names[user.settings.unit]}
-      </Label>
     </View>
   );
 }
@@ -394,7 +384,7 @@ export function MarketHero({ style }: { style?: StyleProp<ViewStyle> }) {
         <ChangePill value={usd?.changePercent} size="medium" />
       </View>
 
-      <Price value={usd?.priceToman} size="hero" digits={0} align="flex-start" />
+      <Price value={usd?.priceToman} size="hero" digits={0} align="flex-end" />
 
       {usd ? (
         <RangeMeter
@@ -484,62 +474,48 @@ export function CurrencyRow({
     }));
   };
 
-  const badgeSize = featured ? "lg" : "md";
-
+  // The favourite toggle is a *sibling* of the row's tap target, never a child:
+  // a button nested in a button is invalid on the web and ambiguous to VoiceOver.
   return (
-    <Animated.View style={press.style}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`جزئیات ${names[code]}`}
-        onPressIn={() => {
-          feedback.press();
-          press.handlers.onPressIn();
-        }}
-        onPressOut={press.handlers.onPressOut}
-        onPress={() => {
-          feedback.tap();
-          if (onPress) onPress();
-          else router.push(`/currency/${code}`);
-        }}
-        style={({ pressed }) => [
-          {
-            backgroundColor: pressed ? t.pressedOverlay : "transparent",
-            paddingHorizontal: spacing.sm,
-            paddingVertical: spacing.xs,
-            gap: spacing.xxs,
-          },
-          style,
-        ]}
-      >
-        <View
-          style={{
+    <View style={[{ flexDirection: "row-reverse", alignItems: "center" }, style]}>
+      <Animated.View style={[press.style, { flex: 1 }]}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${names[code]}، ${fmt(quote?.priceToman, 2)} ${names[app.user.settings.unit]}`}
+          onPressIn={() => {
+            feedback.press();
+            press.handlers.onPressIn();
+          }}
+          onPressOut={press.handlers.onPressOut}
+          onPress={() => {
+            feedback.tap();
+            if (onPress) onPress();
+            else router.push(`/currency/${code}`);
+          }}
+          style={({ pressed }) => ({
             flexDirection: "row-reverse",
             alignItems: "center",
             gap: spacing.xs,
-          }}
+            minHeight: featured ? 72 : 64,
+            paddingRight: spacing.sm,
+            paddingLeft: showFavorite ? spacing.xxxs : spacing.sm,
+            paddingVertical: spacing.xxs + 2,
+            backgroundColor: pressed ? t.pressedOverlay : "transparent",
+          })}
         >
-          <CurrencyBadge code={code} size={badgeSize} dark={t.dark} />
+          <CurrencyBadge code={code} size={featured ? "lg" : 40} dark={t.dark} />
 
-          <View style={{ flex: 1, gap: 1 }}>
-            <View
-              style={{
-                flexDirection: "row-reverse",
-                alignItems: "center",
-                gap: spacing.xxs,
-              }}
-            >
-              <Label size={17} weight="500" numberOfLines={1} style={{ lineHeight: 22 }}>
-                {names[code]}
-              </Label>
-              {isFavorite ? (
-                <AppIcon name="star" size={12} color={t.amber} />
-              ) : null}
-            </View>
-            <Label tertiary size={12} numberOfLines={1} allowFontScaling={false}>
-              {code} · بازار آزاد ایران
+          {/* Leading column: what it is. */}
+          <View style={{ flex: 1, gap: 2 }}>
+            <Label size={17} weight="600" numberOfLines={1} style={{ lineHeight: 22 }}>
+              {names[code]}
+            </Label>
+            <Label secondary size={13} numberOfLines={1} allowFontScaling={false}>
+              {code}
             </Label>
           </View>
 
+          {/* Trailing column: what it costs. One number, one delta. */}
           <View style={{ alignItems: "flex-start", gap: 4 }}>
             <Label
               numberOfLines={1}
@@ -557,42 +533,26 @@ export function CurrencyRow({
             </Label>
             <ChangePill value={quote?.changePercent} size="small" />
           </View>
+        </Pressable>
+      </Animated.View>
 
-          {showFavorite ? (
-            <IconButton
-              icon={isFavorite ? "star" : "star-outline"}
-              size={30}
-              variant="plain"
-              active={isFavorite}
-              activeColor={t.amber}
-              color={t.textTertiary}
-              accessibilityLabel={
-                isFavorite ? `حذف ${names[code]} از دنبال‌شده‌ها` : `افزودن ${names[code]} به دنبال‌شده‌ها`
-              }
-              onPress={toggleFavorite}
-            />
-          ) : null}
+      {showFavorite ? (
+        <View style={{ paddingLeft: spacing.xs }}>
+          <IconButton
+            icon={isFavorite ? "star" : "star-outline"}
+            size={30}
+            variant="plain"
+            active={isFavorite}
+            activeColor={t.amber}
+            color={t.textTertiary}
+            accessibilityLabel={
+              isFavorite ? `حذف ${names[code]} از دنبال‌شده‌ها` : `افزودن ${names[code]} به دنبال‌شده‌ها`
+            }
+            onPress={toggleFavorite}
+          />
         </View>
-
-        {quote && (quote.lowToman || quote.highToman) ? (
-          <View
-            style={{
-              flexDirection: "row-reverse",
-              justifyContent: "space-between",
-              alignItems: "center",
-              paddingStart: featured ? 58 : 50,
-            }}
-          >
-            <Label tertiary size={11} allowFontScaling={false}>
-              بازه امروز {fmt(quote.lowToman)} تا {fmt(quote.highToman)}
-            </Label>
-            <Label tertiary size={11} allowFontScaling={false}>
-              {quote.sourceTimeLabel}
-            </Label>
-          </View>
-        ) : null}
-      </Pressable>
-    </Animated.View>
+      ) : null}
+    </View>
   );
 }
 
@@ -608,8 +568,8 @@ export function CurrencyCard(props: {
 /**
  * Inset grouped list of currencies.
  *
- * The separator is inset so it lines up with the row text (badge 38 + gap 12 +
- * list padding 16), exactly like a native iOS list.
+ * The separator is inset so it lines up with the row text (avatar 40 + gap 12
+ * + list padding 16), exactly like a native iOS list.
  */
 export function CurrencyList({
   children,
@@ -624,7 +584,7 @@ export function CurrencyList({
       {items.map((child, index) => (
         <React.Fragment key={index}>
           {child}
-          {index < items.length - 1 ? <Divider inset={66} /> : null}
+          {index < items.length - 1 ? <Divider inset={68} /> : null}
         </React.Fragment>
       ))}
     </Surface>

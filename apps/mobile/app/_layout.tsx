@@ -13,7 +13,13 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AppProvider } from "../src/store";
 import { radii, useTheme } from "../src/ui";
 
-I18nManager.allowRTL(true);
+// ArzMan lays Persian out right-to-left *by hand*: every row is an explicit
+// `row-reverse` and the tab order is reversed in code. If the system were also
+// allowed to go RTL (an iPhone set to Persian, with "fa" in the bundle's
+// localizations), iOS would mirror all of it a second time and put everything
+// back on the wrong side. So the system direction is pinned to LTR.
+I18nManager.allowRTL(false);
+I18nManager.forceRTL(false);
 
 function Navigation() {
   const t = useTheme();

@@ -11,6 +11,7 @@ import { calculatePortfolio, names, valuation, totalValuation } from "@arzman/sh
 import { useApp } from "../../src/store";
 import {
   CurrencyList,
+  GroupedList,
   CurrencyRow,
   IconButton,
   Label,
@@ -75,17 +76,19 @@ export default function Home() {
       {/* Portfolio glance — one calm row, not a dashboard card */}
       {assets.length > 0 && !app.user.settings.privacy && (
         <Section title="دارایی من" action={{ title: "مدیریت", onPress: () => router.push("/portfolio") }}>
-          <SettingsRow
-            title="ارزش برآوردی کل"
-            icon="wallet"
-            value={
-              totalPortfolioValue !== null
-                ? `${fmt(totalPortfolioValue, 0)} ${unit}`
-                : "—"
-            }
-            onPress={() => router.push("/portfolio")}
-            accessory="chevron"
-          />
+          <GroupedList>
+            <SettingsRow
+              title="ارزش برآوردی کل"
+              icon="wallet"
+              value={
+                totalPortfolioValue !== null
+                  ? `${fmt(totalPortfolioValue, 0)} ${unit}`
+                  : "—"
+              }
+              onPress={() => router.push("/portfolio")}
+              accessory="chevron"
+            />
+          </GroupedList>
         </Section>
       )}
 
@@ -123,18 +126,20 @@ export default function Home() {
 
       {/* Compact converter teaser */}
       <Section title="مبدل سریع">
-        <SettingsRow
-          title={
-            usd
-              ? `۱۰۰ دلار آمریکا = ${fmt(usd.priceToman * 100, 0)} ${unit}`
-              : "تبدیل هوشمند با نرخ بازار آزاد"
-          }
-          icon="swap-horizontal"
-          iconColor={t.green}
-          value=""
-          onPress={() => router.push("/converter")}
-          accessory="chevron"
-        />
+        <GroupedList>
+          <SettingsRow
+            title={
+              usd
+                ? `۱۰۰ دلار آمریکا = ${fmt(usd.priceToman * 100, 0)} ${unit}`
+                : "تبدیل هوشمند با نرخ بازار آزاد"
+            }
+            icon="swap-horizontal"
+            iconColor={t.green}
+            value=""
+            onPress={() => router.push("/converter")}
+            accessory="chevron"
+          />
+        </GroupedList>
       </Section>
 
       <View style={{ paddingHorizontal: spacing.xxs }}>

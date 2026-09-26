@@ -326,7 +326,13 @@ export function SettingsRow({
       </View>
 
       {value ? (
-        <Label size={16} numberOfLines={1} style={{ color: t.textSecondary }}>
+        // Values are Persian phrases ("۱۵۲٫۷ تومان"); an LTR base direction put
+        // the unit before the number for a right-to-left reader.
+        <Label
+          size={16}
+          numberOfLines={1}
+          style={{ color: t.textSecondary, writingDirection: "rtl" }}
+        >
           {value}
         </Label>
       ) : null}
