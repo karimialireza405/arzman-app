@@ -1,7 +1,7 @@
 /**
  * Root stack.
  *
- * Screens that act as focused tasks (alerts, custom rate, transaction) present
+ * Screens that act as focused tasks (alerts, custom rate) present
  * as `formSheet`s — Apple's modal idiom — with the system sheet grabber. The
  * sheet corner radius comes from the design tokens (continuous geometry), and
  * the header uses the platform default back behavior (minimal, RTL-aware).
@@ -56,15 +56,6 @@ function Navigation() {
           name="custom-rates"
           options={{
             title: "نرخ من",
-            presentation: "formSheet",
-            sheetCornerRadius: radii.sheet,
-            sheetGrabberVisible: true,
-          }}
-        />
-        <Stack.Screen
-          name="transaction"
-          options={{
-            title: "ثبت تراکنش",
             presentation: "formSheet",
             sheetCornerRadius: radii.sheet,
             sheetGrabberVisible: true,

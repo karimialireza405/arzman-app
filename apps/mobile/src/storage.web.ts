@@ -1,4 +1,4 @@
-// Browser preview only. Financial data here is not encrypted; iPhone uses Keychain.
+// Browser preview only: settings and the market cache live in localStorage.
 export async function readLocal(key: string): Promise<string | null> {
   return localStorage.getItem(key);
 }
@@ -7,13 +7,4 @@ export async function writeLocal(key: string, value: string) {
 }
 export async function clearMarketCache() {
   localStorage.removeItem("market");
-}
-export async function readPrivate(key: string) {
-  return readLocal(`private-${key}`);
-}
-export async function writePrivate(key: string, value: string) {
-  return writeLocal(`private-${key}`, value);
-}
-export async function deletePrivate(key: string) {
-  localStorage.removeItem(`private-${key}`);
 }

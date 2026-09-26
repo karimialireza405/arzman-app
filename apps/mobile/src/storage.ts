@@ -1,6 +1,5 @@
 import { Platform } from "react-native";
 import * as SQLite from "expo-sqlite";
-import * as SecureStore from "expo-secure-store";
 
 let db: Promise<SQLite.SQLiteDatabase> | null = null;
 async function database() {
@@ -41,24 +40,4 @@ export async function clearMarketCache() {
     return;
   }
   await (await database()).runAsync("DELETE FROM kv WHERE key = ?", "market");
-}
-// Each transaction is a small Keychain item; the index is committed last to avoid dangling entries.
-export async function readPrivate(key: string) {
-  return Platform.OS === "web"
-    ? readLocal(`private-${key}`)
-    : SecureStore.getItemAsync(key);
-}
-export async function writePrivate(key: string, value: string) {
-  if (Platform.OS === "web") return writeLocal(`private-${key}`, value);
-  await SecureStore.setItemAsync(key, value, {
-    keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
-  });
-}
-/** Best-effort erase. The ledger index is authoritative; this only reclaims the item. */
-export async function deletePrivate(key: string) {
-  if (Platform.OS === "web") {
-    localStorage.removeItem(`private-${key}`);
-    return;
-  }
-  await SecureStore.deleteItemAsync(key);
 }

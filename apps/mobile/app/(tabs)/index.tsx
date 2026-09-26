@@ -2,12 +2,12 @@
  * Home — «خانه»
  *
  * Layout follows Apple's priority order: the single benchmark quote first,
- * then the user's own money, then the rest of the market. Secondary markets
- * sit in one inset grouped list instead of four equal-weight cards.
+ * then the rest of the market. Secondary markets sit in one inset grouped list
+ * instead of four equal-weight cards.
  */
 import { View } from "react-native";
 import { router } from "expo-router";
-import { calculatePortfolio, names, valuation, totalValuation } from "@arzman/shared";
+import { names } from "@arzman/shared";
 import { useApp } from "../../src/store";
 import {
   CurrencyList,
@@ -33,20 +33,6 @@ export default function Home() {
   const fmt = usePrice();
   const unit = names[app.user.settings.unit];
   const quotes = app.snapshot?.quotes ?? [];
-  const assets = calculatePortfolio(app.transactions);
-
-  const values = assets.map((a) =>
-    valuation(
-      a,
-      a.currency === "IRT"
-        ? 1
-        : // Market quote first; a personal rate only fills an absent quote.
-          (quotes.find((q) => q.currency === a.currency)?.priceToman ??
-          app.user.customRates.find((r) => r.currency === a.currency)?.priceToman ??
-          null),
-    ),
-  );
-  const totalPortfolioValue = totalValuation(values);
 
   // Followed currencies that are not already covered by the hero + majors.
   const extraWatchlist = app.user.watchlist.filter(
@@ -73,24 +59,6 @@ export default function Home() {
 
       <MarketHero />
 
-      {/* Portfolio glance — one calm row, not a dashboard card */}
-      {assets.length > 0 && !app.user.settings.privacy && (
-        <Section title="دارایی من" action={{ title: "مدیریت", onPress: () => router.push("/portfolio") }}>
-          <GroupedList>
-            <SettingsRow
-              title="ارزش برآوردی کل"
-              icon="wallet"
-              value={
-                totalPortfolioValue !== null
-                  ? `${fmt(totalPortfolioValue, 0)} ${unit}`
-                  : "—"
-              }
-              onPress={() => router.push("/portfolio")}
-              accessory="chevron"
-            />
-          </GroupedList>
-        </Section>
-      )}
 
       {/* Secondary markets in a single grouped list */}
       <Section

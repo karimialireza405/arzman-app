@@ -5,10 +5,9 @@
  * switches for on/off preferences, segmented controls for small choice sets,
  * and a chevron only when a row navigates somewhere.
  */
-import { Alert, Linking, Platform, View } from "react-native";
+import { Alert, Linking, View } from "react-native";
 import { router } from "expo-router";
 import Constants from "expo-constants";
-import * as LocalAuthentication from "expo-local-authentication";
 import { useApp } from "../../src/store";
 import {
   Button,
@@ -21,36 +20,17 @@ import {
   Surface,
   SwitchRow,
   spacing,
-  useFeedback,
   useTheme,
 } from "../../src/ui";
 
 export default function More() {
   const app = useApp();
   const t = useTheme();
-  const feedback = useFeedback();
   const settings = app.user.settings;
 
   const update = (next: Partial<typeof settings>) =>
     app.updateUser((u) => ({ ...u, settings: { ...u.settings, ...next } }));
 
-  const togglePrivacy = async () => {
-    if (Platform.OS === "web") {
-      Alert.alert("نیاز به دستگاه", "قفل حریم خصوصی در نسخهٔ وب فعال نمی‌شود");
-      return;
-    }
-    try {
-      const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: "تغییر وضعیت قفل بیومتریک دارایی",
-      });
-      if (result.success) {
-        update({ privacy: !settings.privacy });
-        feedback.success();
-      }
-    } catch {
-      Alert.alert("احراز هویت", "احراز هویت دستگاه در دسترس نیست");
-    }
-  };
 
   return (
     <Screen title="بیشتر" eyebrow="تنظیمات و منابع">
@@ -106,21 +86,14 @@ export default function More() {
         </GroupedList>
       </Section>
 
-      {/* Device & privacy */}
-      <Section title="دستگاه و حریم خصوصی">
+      {/* Device */}
+      <Section title="دستگاه">
         <GroupedList>
           <SwitchRow
             title="لمس لرزشی (Haptics)"
             subtitle="بازخورد لمسی هنگام تعامل با کنترل‌ها"
             value={settings.haptics}
             onValueChange={(haptics) => update({ haptics })}
-          />
-          <SettingsRow
-            title={settings.privacy ? "قفل بیومتریک: فعال" : "قفل بیومتریک: غیرفعال"}
-            subtitle="دارایی من فقط با Face ID یا رمز دستگاه باز می‌شود"
-            icon="lock-closed"
-            iconColor={settings.privacy ? t.green : t.amber}
-            onPress={() => void togglePrivacy()}
           />
         </GroupedList>
       </Section>

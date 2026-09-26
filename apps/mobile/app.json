@@ -19,14 +19,7 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store",
       "expo-sqlite",
-      [
-        "expo-local-authentication",
-        {
-          "faceIDPermission": "برای حفاظت از دارایی‌های شما از Face ID استفاده می‌شود."
-        }
-      ],
       [
         "expo-build-properties",
         {

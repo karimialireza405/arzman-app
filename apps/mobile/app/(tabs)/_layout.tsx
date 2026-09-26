@@ -37,7 +37,6 @@ const tabs: TabConfig[] = [
   { name: "index", title: "خانه", activeIcon: "home", inactiveIcon: "home-outline" },
   { name: "market", title: "بازار", activeIcon: "stats-chart", inactiveIcon: "stats-chart-outline" },
   { name: "converter", title: "مبدل", activeIcon: "swap-horizontal", inactiveIcon: "swap-horizontal" },
-  { name: "portfolio", title: "دارایی من", activeIcon: "wallet", inactiveIcon: "wallet-outline" },
   { name: "more", title: "بیشتر", activeIcon: "more", inactiveIcon: "ellipsis-horizontal-circle-outline" },
 ];
 

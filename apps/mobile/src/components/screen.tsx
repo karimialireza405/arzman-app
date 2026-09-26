@@ -264,7 +264,7 @@ export function EmptyState({
 }
 
 /**
- * Numeric amount field (converter, transaction, custom rate).
+ * Numeric amount field (converter, custom rate, alerts).
  *
  * Apple guidance for numeric entry: big, right-aligned tabular digits, a quiet
  * unit caption, and a clear control instead of a "delete" key dance. Keyboard

@@ -11,25 +11,15 @@ import * as Haptics from "expo-haptics";
 import { z } from "zod";
 import {
   MarketSnapshotSchema,
-  PortfolioTransactionSchema,
   PriceAlertSchema,
   CustomRateSchema,
   CurrencySchema,
-  calculatePortfolio,
   alertMatches,
   isStale,
   type MarketSnapshot,
-  type PortfolioTransaction,
   type HistoricalPoint,
 } from "@arzman/shared";
-import {
-  readLocal,
-  writeLocal,
-  readPrivate,
-  writePrivate,
-  deletePrivate,
-  clearMarketCache,
-} from "./storage";
+import { readLocal, writeLocal, clearMarketCache } from "./storage";
 
 export const apiUrl = (process.env.EXPO_PUBLIC_API_URL ?? "").replace(
   /\/$/,
@@ -46,7 +36,8 @@ const SettingsSchema = z.object({
     z.literal(120),
     z.literal(300),
   ]),
-  privacy: z.boolean(),
+  // `privacy` (the portfolio's Face ID lock) was removed with the portfolio.
+  // Saved settings that still carry it parse fine: z.object strips unknown keys.
 });
 const UserSchema = z.object({
   settings: SettingsSchema,
@@ -62,7 +53,6 @@ const initial: User = {
     haptics: true,
     appearance: "dark",
     refresh: 60,
-    privacy: false,
   },
   watchlist: ["USD", "EUR", "AED", "IQD"],
   alerts: [],
@@ -70,7 +60,6 @@ const initial: User = {
 };
 function useAppStore() {
   const [user, setUser] = useState(initial);
-  const [transactions, setTransactions] = useState<PortfolioTransaction[]>([]);
   const [snapshot, setSnapshot] = useState<MarketSnapshot | null>(null);
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
@@ -90,23 +79,10 @@ function useAppStore() {
     let mounted = true;
     (async () => {
       try {
-        const [u, m, index] = await Promise.all([
-          readLocal("user"),
-          readLocal("market"),
-          readLocal("portfolio-index"),
-        ]);
+        const [u, m] = await Promise.all([readLocal("user"), readLocal("market")]);
         const parsedUser = u ? UserSchema.parse(JSON.parse(u)) : initial;
-        const ids = z.array(z.string()).parse(index ? JSON.parse(index) : []);
-        const items = await Promise.all(
-          ids.map((id) => readPrivate(`tx-${id}`)),
-        );
-        const txs = items.map((item) =>
-          PortfolioTransactionSchema.parse(JSON.parse(item ?? "null")),
-        );
-        calculatePortfolio(txs);
         if (mounted) {
           setUser(parsedUser);
-          setTransactions(txs);
           if (m) {
             try {
               const data = MarketSnapshotSchema.parse(JSON.parse(m));
@@ -243,25 +219,6 @@ function useAppStore() {
       inFlight.current?.abort();
     };
   }, [ready, refresh]);
-  const saveTransaction = async (tx: PortfolioTransaction) => {
-    if (!ready || storageError) throw new Error(storageError || "داده‌ها هنوز آماده نیستند");
-    PortfolioTransactionSchema.parse(tx);
-    calculatePortfolio([...transactions,tx]);
-    await writePrivate(`tx-${tx.id}`, JSON.stringify(tx));
-    const next = [...transactions, tx];
-    await writeLocal("portfolio-index", JSON.stringify(next.map((t) => t.id)));
-    setTransactions(next);
-  };
-  const removeTransaction = async (id:string) => {
-    if (!ready || storageError) throw new Error(storageError || "داده‌ها هنوز آماده نیستند");
-    const next=transactions.filter(t=>t.id!==id);
-    calculatePortfolio(next);
-    // Commit the index first. An orphaned Keychain item is safer than a broken ledger,
-    // so the erase is a best-effort follow-up that can never strand the ledger.
-    await writeLocal("portfolio-index",JSON.stringify(next.map(t=>t.id)));
-    setTransactions(next);
-    await deletePrivate(`tx-${id}`).catch(() => undefined);
-  };
   const haptic = () => {
     if (user.settings.haptics && Platform.OS !== "web")
       void Haptics.selectionAsync().catch(() => undefined);
@@ -269,9 +226,6 @@ function useAppStore() {
   return {
     user,
     updateUser,
-    transactions,
-    saveTransaction,
-    removeTransaction,
     snapshot,
     busy,
     ready,

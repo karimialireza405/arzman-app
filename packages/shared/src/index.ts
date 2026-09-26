@@ -88,22 +88,6 @@ export const HistorySchema = z.object({
   points: z.array(HistoricalPointSchema),
   kind: z.literal("observations"),
 });
-export const PortfolioTransactionSchema = z.object({
-  id: z.string().min(1),
-  currency: AssetSchema,
-  type: z.enum(["buy", "sell", "adjustment"]),
-  quantity: positive,
-  costToman: z.number().finite().nonnegative().max(1e15),
-  timestamp: date,
-});
-export type PortfolioTransaction = z.infer<typeof PortfolioTransactionSchema>;
-export interface PortfolioAsset {
-  currency: Asset;
-  quantity: number;
-  averageCost: number;
-  costBasis: number;
-  realizedPnl: number;
-}
 export const PriceAlertSchema = z.object({
   id: z.string(),
   currency: CurrencySchema,
@@ -168,66 +152,6 @@ export function convert(
     return q.priceToman;
   };
   return (amount * rate(from)) / rate(to);
-}
-/** Adjustments set total quantity; costToman is the new average cost. Sells retain remaining average cost. */
-export function calculatePortfolio(
-  transactions: PortfolioTransaction[],
-): PortfolioAsset[] {
-  const assets = new Map<Asset, PortfolioAsset>();
-  for (const tx of transactions) {
-    PortfolioTransactionSchema.parse(tx);
-    const a = assets.get(tx.currency) ?? {
-      currency: tx.currency,
-      quantity: 0,
-      averageCost: 0,
-      costBasis: 0,
-      realizedPnl: 0,
-    };
-    if (tx.type === "adjustment") {
-      a.quantity = tx.quantity;
-      a.costBasis = tx.quantity * tx.costToman;
-      a.averageCost = tx.quantity > 0 ? tx.costToman : 0;
-    } else if (tx.type === "buy") {
-      a.quantity += tx.quantity;
-      a.costBasis += tx.quantity * tx.costToman;
-      a.averageCost = a.quantity > 1e-9 ? a.costBasis / a.quantity : 0;
-    } else {
-      if (tx.quantity > a.quantity + 1e-9)
-        throw new Error("مقدار فروش بیشتر از موجودی است");
-      const sellQty = Math.min(tx.quantity, a.quantity);
-      a.realizedPnl += sellQty * (tx.costToman - a.averageCost);
-      a.costBasis -= sellQty * a.averageCost;
-      a.quantity = Math.max(0, a.quantity - sellQty);
-      if (a.quantity < 1e-9) {
-        a.quantity = 0;
-        a.costBasis = 0;
-        a.averageCost = 0;
-      } else {
-        // Selling part of a position preserves the remaining average cost
-        a.costBasis = a.quantity * a.averageCost;
-      }
-    }
-    // Keep accounting precision between transactions. Round only for display.
-    assets.set(tx.currency, a);
-  }
-  return [...assets.values()];
-}
-export function valuation(asset: PortfolioAsset, price: number | null) {
-  if (asset.quantity === 0) return { value: 0, pnl: 0, pnlPercent: null, breakEven: 0 };
-  if (price === null) return null;
-  const value = Math.round(asset.quantity * price * 100) / 100;
-  const pnl = Math.round((value - asset.costBasis) * 100) / 100;
-  return {
-    value,
-    pnl,
-    pnlPercent: asset.costBasis > 0 ? Math.round((pnl / asset.costBasis) * 10000) / 100 : null,
-    breakEven: asset.averageCost,
-  };
-}
-/** A missing market price is unknown, never a zero-valued holding. */
-export function totalValuation(values: (ReturnType<typeof valuation>)[]) {
-  if (values.some((value) => value === null)) return null;
-  return values.reduce((sum, value) => sum + (value?.value ?? 0), 0);
 }
 /**
  * Display freshness: can ArzMan vouch for the *trade time* behind this price?

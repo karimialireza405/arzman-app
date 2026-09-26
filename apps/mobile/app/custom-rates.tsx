@@ -76,13 +76,12 @@ export default function CustomRates() {
         <AppIcon name="info" size={18} color={t.accent} style={{ marginTop: 2 }} />
         <View style={{ flex: 1, gap: 2 }}>
           <Label size={13} weight="600" accent>
-            نرخ اختصاصی و ارزش‌گذاری تتر
+            نرخ اختصاصی شما
           </Label>
           <Label secondary size={12} style={{ lineHeight: 18 }}>
-            برای تتر — که نرخ بازار ندارد — و برای زمانی که نرخ بازار یک ارز در
-            دسترس نیست، نرخ تومانی خود را ثبت کنید تا دارایی شما ارزش‌گذاری شود.
-            تا وقتی نرخ بازار موجود باشد، همان نرخ ملاک است و مبدل همیشه از نرخ
-            بازار استفاده می‌کند.
+            نرخ صرافی یا نرخ توافقی خود را ثبت کنید تا اختلافش را با نرخ بازار
+            آزاد ببینید. تتر نرخ بازار ندارد؛ نرخ آن فقط برای یادداشت شما ذخیره
+            می‌شود. مبدل همیشه از نرخ بازار استفاده می‌کند.
           </Label>
         </View>
       </Surface>
@@ -90,7 +89,7 @@ export default function CustomRates() {
       <Section title="ثبت یا ویرایش نرخ دستی">
         <Surface style={{ gap: spacing.sm }}>
           <View style={{ gap: spacing.xxs }}>
-            <Label secondary size={13} weight="600">انتخاب دارایی</Label>
+            <Label secondary size={13} weight="600">انتخاب ارز</Label>
             <SegmentedControl
               values={customCurrencyOptions}
               value={currency}

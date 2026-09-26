@@ -186,14 +186,6 @@ export default function Detail() {
           fullWidth
           onPress={toggleFavorite}
         />
-        <Button
-          title="ثبت تراکنش در دارایی من"
-          icon="add"
-          variant="glass"
-          size="medium"
-          fullWidth
-          onPress={() => router.push("/transaction")}
-        />
       </View>
     </Screen>
   );
