@@ -5,17 +5,24 @@
  * rendered as a bare text glyph inside an ad-hoc circle with hand-written
  * colors, so USD/EUR/AED/IQD never looked like one icon family.
  *
- * Design rules (documented in docs/apple-references/apple-ui-findings.md):
- * - One badge family: continuous-corner squircle, identical metrics per size.
- * - Subtle semantic tint per currency, derived from the currencies' glyphs —
- *   never flags, never emoji, never a "logo wall".
- * - Text is set at a consistent visual weight (SF Semibold/Bold at a fixed
- *   optical size) instead of "huge currency letters".
- * - The glyph direction is explicit per currency so Persian glyphs
- *   (د.إ · ع.د) lay out right-to-left while $ / € / ₮ stay left-to-right.
+ * Design rules:
+ * - Currencies are identified by a round country flag, the convention of
+ *   Wise, Revolut and every bank app a user already reads fluently. (The
+ *   earlier rule "never flags" was overruled by the owner after on-device use:
+ *   glyph squircles read as placeholders, not as currencies.)
+ * - Flags are vector (react-native-svg, included in Expo Go), drawn from a set
+ *   made for square crops, and never mirrored by the RTL layout.
+ * - A hairline inner ring keeps white-heavy flags (US, IQ, IR) from dissolving
+ *   into a light background.
+ * - USDT has no country, so it keeps a glyph disc in Tether green.
+ * - `tone` is still accepted so existing call sites compile; flags ignore it
+ *   except `neutral`, which dims them for metadata contexts.
  */
+import { useMemo } from "react";
 import { Text, View, useColorScheme, type StyleProp, type ViewStyle } from "react-native";
-import { colors, curve, radii } from "./tokens";
+import { SvgXml } from "react-native-svg";
+import { flagSvg, type FlagCode } from "./flags";
+import { colors } from "./tokens";
 
 /** The currencies ArzMan can display, plus the two Iranian denominations. */
 export type BadgeCurrency =
@@ -98,6 +105,19 @@ export const badgeSizes = {
 
 export type BadgeSize = keyof typeof badgeSizes;
 
+/** Which flag stands for which currency. Both Iranian units share Iran's. */
+export const currencyFlags: Partial<Record<BadgeCurrency, FlagCode>> = {
+  USD: "US",
+  EUR: "EU",
+  AED: "AE",
+  IQD: "IQ",
+  IRT: "IR",
+  IRR: "IR",
+};
+
+/** Tether's own green, so USDT is recognisable without a flag. */
+const TETHER_GREEN = "#26A17B";
+
 export function currencyTint(
   code: string,
   dark: boolean,
@@ -107,11 +127,10 @@ export function currencyTint(
 }
 
 /**
- * A single, consistent currency badge.
+ * A single, consistent currency avatar: a round country flag.
  *
- * - `tone="tint"`    translucent tint behind a tinted glyph (default, list rows)
- * - `tone="filled"`  solid tint with a white glyph (hero / detail screens)
- * - `tone="neutral"` neutral fill, secondary glyph (metadata contexts)
+ * Every currency renders at the same edge size and with the same ring, so a
+ * column of them lines up like a native list.
  */
 export function CurrencyBadge({
   code,
@@ -131,62 +150,79 @@ export function CurrencyBadge({
   const isDark = dark ?? scheme !== "light";
 
   const edge = typeof size === "number" ? size : badgeSizes[size];
+  const flag = currencyFlags[code as BadgeCurrency];
+  const ring = isDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.10)";
+  const xml = useMemo(() => (flag ? flagSvg[flag] : null), [flag]);
+
+  const frame: StyleProp<ViewStyle> = [
+    {
+      width: edge,
+      height: edge,
+      borderRadius: edge / 2,
+      overflow: "hidden",
+      justifyContent: "center",
+      alignItems: "center",
+      opacity: tone === "neutral" ? 0.55 : 1,
+    },
+    style,
+  ];
+
+  if (xml) {
+    return (
+      <View accessibilityRole="image" accessibilityLabel={code} style={frame}>
+        <SvgXml
+          xml={xml}
+          width={edge}
+          height={edge}
+          preserveAspectRatio="xMidYMid slice"
+        />
+        {/* The ring sits above the artwork so every flag gets the same edge. */}
+        <View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            borderRadius: edge / 2,
+            borderWidth: 1,
+            borderColor: ring,
+          }}
+        />
+      </View>
+    );
+  }
+
+  // No country behind this currency (USDT) or an unknown code: a glyph disc.
   const entry = currencyGlyphs[code as BadgeCurrency];
-  const tint = entry ? entry.tint[isDark ? "dark" : "light"] : (isDark ? colors.dark.accent : colors.light.accent);
+  const background =
+    code === "USDT"
+      ? TETHER_GREEN
+      : entry
+        ? entry.tint[isDark ? "dark" : "light"]
+        : isDark
+          ? colors.dark.accent
+          : colors.light.accent;
   const glyph = entry?.glyph ?? code.slice(0, 2).toUpperCase();
   const scale = entry?.scale ?? 0.6;
-  const direction = entry?.direction ?? "ltr";
-
-  const glyphSize = Math.max(11, Math.round(edge * 0.46 * scale + edge * 0.06));
-
-  let background: string;
-  let borderColor: string;
-  let glyphColor: string;
-
-  if (tone === "filled") {
-    background = tint;
-    borderColor = "transparent";
-    glyphColor = "#FFFFFF";
-  } else if (tone === "neutral") {
-    background = isDark ? colors.dark.fillTertiary : colors.light.fillTertiary;
-    borderColor = isDark ? colors.dark.glassRim : colors.light.glassRim;
-    glyphColor = isDark ? colors.dark.textSecondary : colors.light.textSecondary;
-  } else {
-    background = tint + (isDark ? "2E" : "1F");
-    borderColor = tint + (isDark ? "4D" : "33");
-    glyphColor = tint;
-  }
 
   return (
     <View
       accessibilityRole="image"
       accessibilityLabel={code}
-      style={[
-        {
-          width: edge,
-          height: edge,
-          borderRadius: radii.currencyBadge * (edge / badgeSizes.md),
-          borderCurve: curve.continuous,
-          backgroundColor: background,
-          borderWidth: 0.5,
-          borderColor,
-          justifyContent: "center",
-          alignItems: "center",
-          overflow: "hidden",
-        },
-        style,
-      ]}
+      style={[frame, { backgroundColor: background }]}
     >
       <Text
         allowFontScaling={false}
         numberOfLines={1}
         adjustsFontSizeToFit
         style={{
-          color: glyphColor,
-          fontSize: glyphSize,
+          color: "#FFFFFF",
+          fontSize: Math.max(11, Math.round(edge * 0.5 * scale + edge * 0.06)),
           fontWeight: "700",
           textAlign: "center",
-          writingDirection: direction,
+          writingDirection: entry?.direction ?? "ltr",
           includeFontPadding: false,
         }}
       >
