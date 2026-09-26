@@ -73,18 +73,23 @@ and nothing was documented or committed.
   owner chooses: `npx wrangler deploy --config server/wrangler.jsonc`.
 - **API URL mode:** `apps/mobile/.env.local` (git-ignored) points at the deployed HTTPS
   Worker. The local Worker on `:8787` is therefore **not** needed for iPhone testing.
-- **Expo Go:** no dependency in this project is incompatible with it — every native module
-  used is in the Expo Go bundle, and `npx expo start --go` serves a working
-  `exposdk:57.0.0` iOS bundle. But Expo Go on iOS is **no longer a free App Store install**:
-  the current docs require a paid Apple Developer Program subscription, `npx eas-cli@latest
-  go`, and TestFlight.
+- **Expo Go (corrected 2026-09-26):** no dependency in this project is incompatible with it —
+  every native module used is in the Expo Go bundle, and `npx expo start --go` serves a
+  working `exposdk:57.0.0` iOS bundle. Expo Go **is** a free App Store install
+  (`id982107779`) and its current build runs React Native 0.86, this project's exact
+  version. An earlier revision of this handoff claimed otherwise; that came from the
+  `set-up-your-environment` docs page, which describes building a *private* Expo Go with
+  `npx eas-cli@latest go` — a different thing from the App Store build. `docs/engineering-audit.md`
+  §5 records both sources.
 - **Development build:** the docs state that *all* builds running on an iPhone device require
-  a paid Apple Developer account for signing, on macOS, Windows and Linux alike.
-- **iPhone readiness:** the application is ready. The only blocker is an Apple Developer
-  Program membership (US$99/year); there is no free route from Windows without a Mac.
-  Recommended route: **EAS development build**, `npx eas-cli@latest build --profile
-  development --platform ios`, then `npx expo start --dev-client`.
-- **Next task:** run that build on the owner's iPhone and complete the on-device QA
+  a paid Apple Developer account for signing, on macOS, Windows and Linux alike. This is the
+  upgrade path, not the entry point — take it when the app's own identity, the Persian Face
+  ID string, `ios.enableSceneSupport` or a native extension is needed.
+- **iPhone readiness:** ready, and reachable **for free** through Expo Go. The owner has
+  already run `eas login` and `eas init` (an EAS `projectId` and `owner` are now in
+  `apps/mobile/app.json`, currently uncommitted) and enabled Developer Mode on the phone, so
+  Route B is also open to them the moment they want it.
+- **Next task:** run the app in Expo Go on the owner's iPhone and complete the on-device QA
   checklist in `TODO.md`.
 
 ### 00.4 Commits from this session

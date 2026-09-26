@@ -165,27 +165,34 @@ is in the Expo Go bundle. Verified empirically: `npx expo start --go` serves a m
 `runtimeVersion: "exposdk:57.0.0"` and the iOS Hermes bundle builds and is served (HTTP 200,
 8.0 MB).
 
-### The part the old README got wrong
+### Expo Go on iOS — the actual situation (corrected 2026-09-26)
 
-Expo Go for iOS is **no longer a free App Store install**. The current official setup for a
-physical iPhone requires an **active paid Apple Developer Program subscription**, building
-Expo Go yourself with `npx eas-cli@latest go`, installing it through TestFlight, and signing
-both Expo CLI and Expo Go into the same Expo account.
+Two Expo sources say different things, and the difference matters:
 
-And for development builds, the docs state it plainly for macOS, Windows and Linux alike:
-*all builds that run on an iPhone device require a paid Apple Developer account for build
-signing.*
+- **`expo.dev/go` → SDK 57 → iOS device** links to the **App Store**
+  (`id982107779`). That listing is **Free**, and its own technical note reads
+  *"this version of Expo uses React Native 0.86"* — which is exactly this project's
+  React Native version. So the free App Store Expo Go does support SDK 57 today.
+- **`docs.expo.dev/get-started/set-up-your-environment` → iOS → Expo Go** describes a
+  *build-your-own* Expo Go instead: enroll in the Apple Developer Program, run
+  `npx eas-cli@latest go`, distribute through TestFlight. That is the path for an Expo Go
+  you control (for instance an SDK the App Store build does not carry), not a statement that
+  the App Store build has gone away.
 
-**Conclusion:** from Windows, with no Mac, **every** route to a physical iPhone requires the
-paid Apple Developer Program (US$99/year). Given that, the development build is the better
-route — it is fewer steps than building a private Expo Go, and it is the real app: correct
-name, icon, bundle id, Persian Face ID prompt and `enableSceneSupport`.
+**Therefore the free route is real and is the one to try first**: install Expo Go from the
+App Store, run `npx expo start --go`, scan the QR. It costs nothing and needs no Apple
+Developer Program membership.
+
+A **development build** is still the better artifact, and its requirement is unchanged — the
+docs state for macOS, Windows and Linux alike that *all builds that run on an iPhone device
+require a paid Apple Developer account for build signing*. Move to it when you want what
+Expo Go structurally cannot give: the app's own identity (name «ارز من», icon,
+`com.arzman.personal`), the Persian Face ID permission string, `ios.enableSceneSupport`, or
+any future native extension.
 
 Expo Web remains fully usable on Windows for logic and layout work, but it is **not**
 evidence of iPhone-native behaviour: no Keychain, no Face ID, no SF Symbols, no Liquid
 Glass, no haptics.
-
----
 
 ## 6. Network topology
 

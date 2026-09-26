@@ -68,15 +68,18 @@
 
 ---
 
-## Next — on-device QA (blocked only on an Apple Developer Program membership)
+## Next — on-device QA (not blocked; Expo Go is free)
 
-- [ ] Create the EAS development build and install it on the iPhone
-      (`npx eas-cli@latest build --profile development --platform ios`).
+- [ ] Install Expo Go from the App Store and run `npm run start -w @arzman/mobile -- --go`.
+- [ ] Commit the EAS `projectId`/`owner` that `eas init` added to `apps/mobile/app.json`.
+- [ ] Later, when the app's own identity / Persian Face ID string / `enableSceneSupport` are
+      wanted: EAS development build (needs a paid Apple Developer account for signing).
 - [ ] On-device checklist: home · USD/EUR/AED/IQD detail · pull-to-refresh · converter ·
       portfolio (buy → partial sell → close) · Face ID gate · manual USDT rate ·
       offline (airplane mode) · Toman ⇄ Rial · RTL · dark/light · charts · tab bar ·
       Dynamic Type · VoiceOver.
-- [ ] Confirm the Persian Face ID permission string appears (it will not in Expo Go).
+- [ ] Confirm the Persian Face ID permission string appears — this only happens on a
+      development build; Expo Go shows its own permission text.
 
 ## Deferred / not implemented
 

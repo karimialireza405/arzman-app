@@ -52,10 +52,18 @@ Continues and completes the previous agent's unfinished audit. Full detail in
   **35 tests** in total, up from 24.
 
 ### Documentation
-- **The README's iPhone instructions were wrong and are corrected.** Expo Go on iOS is no
-  longer a free App Store install, and every build that runs on a physical iPhone requires a
-  paid Apple Developer account for signing — on Windows as much as on macOS. The guide now
-  gives one route, the EAS development build, with the prerequisite stated up front.
+- **The README's iPhone instructions were wrong and are corrected.** It told the reader to
+  point the app at a LAN backend on `:8787`, which the deployed HTTPS Worker makes
+  unnecessary. It now gives two routes: Expo Go first (free App Store install, whose current
+  build runs React Native 0.86 — this project's exact version), and an EAS development build
+  as the upgrade path when the app's own identity, the Persian Face ID string,
+  `ios.enableSceneSupport` or a native extension is needed. That second route does require a
+  paid Apple Developer account for signing, on Windows as much as on macOS.
+
+  *A revision of this entry published on 2026-09-22 claimed Expo Go for iOS was no longer a
+  free App Store install. That was wrong — it came from the `set-up-your-environment` docs
+  page, which describes building a private Expo Go with `npx eas-cli@latest go`, not the
+  App Store build. Corrected 2026-09-26; `docs/engineering-audit.md` §5 records both sources.*
 - The compatibility matrix was rebuilt from each library's own SDK 57 page. Previous claims
   that Expo Go lacks Keychain, Face ID and SF Symbols were wrong; all three are included.
   What Expo Go really cannot do for this project is apply `ios.enableSceneSupport` or carry

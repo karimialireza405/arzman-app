@@ -81,7 +81,7 @@ npm run start -w @arzman/mobile
 
 Press `w` for a browser preview, or open [the local preview](http://localhost:8081). Environment changes require restarting Metro.
 
-**Which runtime can run this app** — see the matrix below, and read [`docs/engineering-audit.md`](docs/engineering-audit.md) §5 before choosing. Short version, verified against the current SDK 57 docs: every native module this project uses *is* in Expo Go, but **Expo Go on iOS is no longer a free App Store install**, and a development build on a physical iPhone also requires signing. Either way a **paid Apple Developer Program membership is required**. The development build is the recommended route.
+**Which runtime can run this app** — see the matrix below, and read [`docs/engineering-audit.md`](docs/engineering-audit.md) §5 before choosing. Short version: every native module this project uses *is* included in Expo Go, and Expo Go is a **free App Store install** whose current build runs React Native 0.86 — this project's exact version. So the free route works. Move to a development build when you need the app's own identity, the Persian Face ID string, `ios.enableSceneSupport`, or a native extension; that route requires a paid Apple Developer account for signing.
 
 ## Backend Endpoints and Deployment
 
@@ -215,32 +215,48 @@ See [QA status](docs/QA.md), [TGJU research](docs/TGJU-RESEARCH.md), [TODO](TODO
 
 ### Step-by-Step: Run ArzMan on Your iPhone (Windows Host)
 
-**Read this first.** Apple requires code signing for anything that runs on a physical
-iPhone. The current Expo documentation states it for macOS, Windows and Linux alike: *all
-builds that run on an iPhone device require a paid Apple Developer account for build
-signing.* Expo Go is not an escape route any more — installing Expo Go on iOS now requires
-an active paid Apple Developer Program subscription, building it yourself with
-`npx eas-cli@latest go`, and distributing it through TestFlight.
+There are two routes. **Start with Expo Go** — it is free, takes about two minutes, and
+every native module this project uses is included in it.
 
-So there is exactly one sensible route from Windows without a Mac, and it needs an
-[Apple Developer Program](https://developer.apple.com/programs/) membership (US$99/year):
-an **EAS development build**. It is also the better one — it is the real app, with the
-correct name, icon, bundle id, Persian Face ID prompt and scene support, and after the
-one-time build you get instant JavaScript reloads exactly like Expo Go.
+#### Route A — Expo Go (free, recommended first)
 
-**One-time prerequisites**
+**On the iPhone:** install **Expo Go** from the App Store (free, `id982107779`). Its current
+build runs React Native 0.86, which is this project's exact version.
 
-1. Node.js 24 LTS from [nodejs.org](https://nodejs.org/) and Git for Windows.
-2. A free [expo.dev](https://expo.dev/) account.
-3. An active Apple Developer Program membership, and your Apple ID to hand.
-
-**Build it (about 15 minutes, mostly waiting)**
+**On Windows:**
 
 ```powershell
 cd D:\MY_APP\Arz_Man
 npm ci
+npm run start -w @arzman/mobile -- --go
+```
 
-cd apps\mobile
+A QR code appears in the terminal. Open the iPhone **Camera** app, point it at the QR, and
+tap the Expo Go banner. Keep both devices on the same private Wi-Fi (not a guest network,
+no VPN). If Windows asks about the firewall, allow Node.js for **Private networks** only.
+
+Market data arrives from the deployed HTTPS Worker over the internet, so **the local `:8787`
+backend is not involved** and no LAN backend URL is needed.
+
+What you give up in Expo Go, and only this: the app runs inside the Expo Go shell rather
+than under its own name, icon and bundle id; the Face ID prompt shows Expo Go's permission
+text instead of ArzMan's Persian one; and `ios.enableSceneSupport` is not applied, because a
+config plugin cannot change Expo Go's prebuilt binary. Everything else — Keychain, Face ID
+itself, SF Symbols, Liquid Glass, haptics, charts, the full portfolio — works.
+
+#### Route B — EAS development build (when Expo Go is not enough)
+
+Use this when you want the real app: its own identity, the Persian Face ID string, scene
+support, or any future native extension (widgets, Live Activities, App Intents).
+
+**Prerequisite:** an active [Apple Developer Program](https://developer.apple.com/programs/)
+membership (US$99/year). The Expo docs state it for macOS, Windows and Linux alike — *all
+builds that run on an iPhone device require a paid Apple Developer account for build
+signing*. Also enable **Developer Mode** on the iPhone (Settings → Privacy & Security),
+which iOS 16+ requires before it will run a development-signed app.
+
+```powershell
+cd D:\MY_APP\Arz_Manpps\mobile
 npx eas-cli@latest login
 npx eas-cli@latest init
 npx eas-cli@latest device:create
@@ -248,37 +264,26 @@ npx eas-cli@latest build --profile development --platform ios
 ```
 
 `device:create` prints a registration link — open it **on the iPhone** and install the
-profile, so Apple will let this build run on that specific device. `build` then asks for
-your Apple ID, creates the signing credentials for you, uploads the project and compiles it
-on EAS servers. No Xcode, no Mac. When it finishes it prints an install link and a QR code:
-open that on the iPhone and install ArzMan.
+profile. `build` then asks for your Apple ID, creates the signing credentials, and compiles
+on EAS servers (10–20 minutes). No Xcode, no Mac. It ends with an install link and QR.
 
-**Run it (every time after that)**
+Afterwards, run the dev server with `npx expo start --dev-client` and open **ArzMan** on the
+phone.
 
-```powershell
-cd D:\MY_APP\Arz_Manpps\mobile
-npx expo start --dev-client
-```
+**Troubleshooting (both routes)**
 
-Keep the iPhone on the same Wi-Fi as this PC, open **ArzMan** on the phone, and it connects
-to Metro. `.env.local` already points the app at the deployed HTTPS Worker, so the market
-data arrives over the internet and **the local `:8787` backend is not involved**.
-
-**Troubleshooting**
-
-- *The app cannot reach Metro*: iPhone and PC must be on the same private Wi-Fi (not a guest
-  or isolated network, no VPN). Allow Node.js through Windows Defender Firewall for
-  **Private networks** only. As a fallback, `npx expo start --dev-client --tunnel`.
+- *The phone cannot reach Metro*: same private Wi-Fi, no VPN, Node.js allowed through
+  Windows Defender Firewall for **Private networks**. Fallback: add `--tunnel`.
 - *«ارتباط با سرویس برقرار نشد»*: that is the market API, not Metro. Check
   `EXPO_PUBLIC_API_URL` in `apps/mobile/.env.local` and restart Metro after any change.
 - *Blank screen*: read the Metro terminal for red errors, then run `npm run check` at the
   repository root.
-- *Build fails on signing*: confirm the bundle id `com.arzman.personal` is free on your
-  account, or change `ios.bundleIdentifier` in `apps/mobile/app.json` to your own.
+- *Build fails on signing (Route B)*: confirm the bundle id `com.arzman.personal` is free on
+  your account, or change `ios.bundleIdentifier` in `apps/mobile/app.json`.
 
 **Windows-only preview.** `npm run start -w @arzman/mobile` then `w` runs the app in a
-browser. It is useful for logic and layout, but it is **not** evidence of iPhone behaviour:
-no Keychain, no Face ID, no SF Symbols, no Liquid Glass, no haptics.
+browser. Useful for logic and layout, but **not** evidence of iPhone behaviour: no Keychain,
+no Face ID, no SF Symbols, no Liquid Glass, no haptics.
 
 ---
 

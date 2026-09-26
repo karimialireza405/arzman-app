@@ -11,7 +11,10 @@
       "bundleIdentifier": "com.arzman.personal",
       "infoPlist": {
         "CFBundleAllowMixedLocalizations": true,
-        "CFBundleLocalizations": ["fa", "en"]
+        "CFBundleLocalizations": [
+          "fa",
+          "en"
+        ]
       }
     },
     "plugins": [
@@ -34,10 +37,15 @@
       ]
     ],
     "extra": {
-      "supportsRTL": true
+      "supportsRTL": true,
+      "router": {},
+      "eas": {
+        "projectId": "b55903ac-8938-4cdf-9dd0-581fe0c53d8f"
+      }
     },
     "web": {
       "bundler": "metro"
-    }
+    },
+    "owner": "alirezkarimi"
   }
 }
