@@ -10,8 +10,23 @@
 **Git HEAD at the redesign handoff:** `8900c9d`  
 **Git HEAD after the audit session:** see §00.4  
 
-> Read **§000 then §00 first** — it is the most recent session and supersedes anything older it
+> Read **§0000, §000 and §00 first** — it is the most recent session and supersedes anything older it
 > contradicts, in particular the Expo Go instructions in §0 and in `README.md`.
+
+---
+
+## 0000. Portfolio removed; deployed backend down (2026-09-27)
+
+- The owner asked to remove «دارایی من» completely. Done: tab, screens,
+  transaction sheet, home summary, detail action, biometric lock and `privacy`
+  setting, `expo-local-authentication`, `expo-secure-store`, and the shared
+  portfolio domain + its tests. The app is now market · converter · alerts ·
+  personal rates. Last commit that still had the portfolio: `41adbc9`.
+- Tests 23/23, typecheck and lint clean, iOS Hermes export builds, expo-doctor
+  20/21 (the same upstream patch-release advisory as before).
+- **Deployed Worker: every Durable Object call returns 503** (see CHANGELOG
+  0.4.0). Likely a Workers Free daily limit; unconfirmed. Not deployed, not
+  logged in. This is the most important open item — the phone shows «آفلاین».
 
 ---
 

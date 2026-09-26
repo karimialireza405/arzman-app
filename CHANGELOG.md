@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2026-09-27 — portfolio removed
+
+### Removed (owner's request: «بخش دارایی من رو کامل حذف کن»)
+- The «دارایی من» tab, the portfolio screen, the transaction sheet, the home
+  portfolio summary and the «ثبت تراکنش در دارایی من» action on currency detail.
+- The biometric privacy lock (it existed only to guard the portfolio) and its
+  `privacy` setting. Settings saved by older versions still load: the schema
+  strips the unknown key.
+- `expo-local-authentication` and `expo-secure-store`, with their config
+  plugins — nothing else used them. Lockfile change: those two packages only.
+- The portfolio domain in `@arzman/shared` (`calculatePortfolio`, `valuation`,
+  `totalValuation`, the transaction schema) and its 14 tests. Two IQD
+  display-formatting assertions that lived among them were kept as a test.
+- Everything is recoverable from git (`41adbc9` is the last version with it).
+
+### Changed
+- «نرخ من» now describes what it does without a portfolio: compare a personal
+  rate with the market; a USDT rate is a note only.
+
+### Not removed, deliberately
+- Transactions an owner already entered on a phone stay dormant in that app's
+  Keychain; nothing reads or shows them. They are not deleted automatically,
+  because deletion cannot be undone.
+
+### Found during verification — not caused by this change
+- The **deployed** Worker answers `/health` but every Durable Object call,
+  including the trivial `/api/market/XXX` → 404 path, returns
+  `503 SERVICE_UNAVAILABLE`. TGJU itself is fine (`npm run verify` 4/4). This
+  matches a Workers Free daily Durable Object limit being exhausted — Cloudflare:
+  exceeding a free limit makes "further operations of that type fail with an
+  error"; limits reset 00:00 UTC. Unconfirmed until someone with dashboard
+  access checks the Worker's metrics. Nothing was deployed.
+
 ## [0.3.2] - 2026-09-27 — first on-device pass: flags and visual anomalies
 
 The app ran on the owner's iPhone in Expo Go for the first time. Every issue

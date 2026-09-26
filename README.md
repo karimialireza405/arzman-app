@@ -15,7 +15,7 @@ A Persian-first personal iPhone currency dashboard built on **Expo SDK 57, React
   USD/EUR/AED/IQD (+USDT/IRT) with semantic tints — no flags, no emoji.
 - Native navigation sheets, safe-area layout (Dynamic Island, home indicator, floating tab bar).
 - Rial/toman preferences, Persian/English number formatting and explicit source quote sizes.
-- Local transactions, weighted average cost, realized/unrealized P&L, allocation, daily estimated change and device-authentication guards.
+- Personal rates (e.g. your exchange's or USDT) compared with the open market. *(The portfolio / transaction ledger was removed on 2026-09-27 at the owner's request; it is recoverable from git history.)*
 - Foreground-only threshold, percentage and rapid-movement alerts, disabled for stale prices.
 - Real backend observation history across 1H/1D/1W/1M/3M/1Y, with touch selection and no generated price history.
 - Shared schemas, parser fixtures, protected last-known-good cache and restart-persistent server history.
@@ -81,7 +81,7 @@ npm run start -w @arzman/mobile
 
 Press `w` for a browser preview, or open [the local preview](http://localhost:8081). Environment changes require restarting Metro.
 
-**Which runtime can run this app** — see the matrix below, and read [`docs/engineering-audit.md`](docs/engineering-audit.md) §5 before choosing. Short version: every native module this project uses *is* included in Expo Go, and Expo Go is a **free App Store install** whose current build runs React Native 0.86 — this project's exact version. So the free route works. Move to a development build when you need the app's own identity, the Persian Face ID string, `ios.enableSceneSupport`, or a native extension; that route requires a paid Apple Developer account for signing.
+**Which runtime can run this app** — see the matrix below, and read [`docs/engineering-audit.md`](docs/engineering-audit.md) §5 before choosing. Short version: every native module this project uses *is* included in Expo Go, and Expo Go is a **free App Store install** whose current build runs React Native 0.86 — this project's exact version. So the free route works. Move to a development build when you need the app's own identity, `ios.enableSceneSupport`, or a native extension; that route requires a paid Apple Developer account for signing.
 
 ## Backend Endpoints and Deployment
 
@@ -138,10 +138,7 @@ serves an `exposdk:57.0.0` manifest and a working iOS Hermes bundle for this pro
 |---------|----------|---------------|-------------------|-------|
 | Market data, converter, alert logic | ✅ | ✅ | ✅ | Plain JS over an HTTPS API |
 | Charts (`react-native-svg`) | ✅ | ✅ | ✅ | Bundled in Expo Go |
-| Portfolio ledger | ⚠️ `localStorage` | ✅ Keychain | ✅ Keychain | |
-| `expo-secure-store` | ❌ falls back | ✅ | ✅ | Included in Expo Go |
 | `expo-sqlite` | ❌ falls back | ✅ | ✅ | Included in Expo Go |
-| Face ID (`expo-local-authentication`) | ❌ | ✅ | ✅ | Included in Expo Go — but the prompt shows **Expo Go's** permission text, not ArzMan's Persian one |
 | Liquid Glass (`expo-glass-effect`) | ❌ falls back | ✅ iOS 26+ | ✅ iOS 26+ | Included in Expo Go; plain view below iOS 26 |
 | `expo-blur` | approximation | ✅ | ✅ | Included in Expo Go |
 | SF Symbols (`expo-symbols`) | ❌ Ionicons | ✅ | ✅ | Included in Expo Go |
@@ -153,10 +150,7 @@ serves an `exposdk:57.0.0` manifest and a working iOS Hermes bundle for this pro
 
 ## Data Privacy and Limitations
 
-- Portfolio transactions remain on the device. iPhone stores each transaction as a small Keychain item; only its opaque ID index is in SQLite. Settings, watchlist, alerts, custom rates and market cache occupy separate keys. Cache clearing does not erase transactions.
-- The browser preview uses localStorage and does **not** offer encrypted portfolio storage or device authentication. Use sample data there.
-- The privacy switch guards portfolio/transaction screens and hides the home portfolio summary, relocking when backgrounded or when leaving the portfolio. Native Face ID, app-switcher snapshots and VoiceOver still require device QA. It is not a claim of a hardened encrypted wallet.
-- There is no portfolio export/recovery flow yet; do not rely on this development build as your only transaction record.
+- ArzMan stores no financial data. Settings, watchlist, alerts, personal rates and the market cache live in SQLite on the device (localStorage in the browser preview). Cache clearing removes only the market cache.
 - TGJU publishes no trade timestamp (only a clock or day/month label), so the status pill honestly reads «تازگی منبع تأیید نشده» and `sourceTimestamp` stays `null`. Alerts are evaluated against *retrieval* freshness instead, which ArzMan does know, so they fire while the app is open. There is no closed-app push delivery.
 - The history starts with this backend's actual collection period. Lines connect observed samples, not fabricated exchange ticks. One-year retention is implemented; one year's data does not appear immediately.
 - Watchlist order persists; removing/re-adding moves a currency to the end. Drag reordering is not implemented.
@@ -239,14 +233,13 @@ Market data arrives from the deployed HTTPS Worker over the internet, so **the l
 backend is not involved** and no LAN backend URL is needed.
 
 What you give up in Expo Go, and only this: the app runs inside the Expo Go shell rather
-than under its own name, icon and bundle id; the Face ID prompt shows Expo Go's permission
-text instead of ArzMan's Persian one; and `ios.enableSceneSupport` is not applied, because a
-config plugin cannot change Expo Go's prebuilt binary. Everything else — Keychain, Face ID
-itself, SF Symbols, Liquid Glass, haptics, charts, the full portfolio — works.
+than under its own name, icon and bundle id; and `ios.enableSceneSupport` is not applied,
+because a config plugin cannot change Expo Go's prebuilt binary. Everything else — SF
+Symbols, Liquid Glass, haptics, charts, flags, the converter and alerts — works.
 
 #### Route B — EAS development build (when Expo Go is not enough)
 
-Use this when you want the real app: its own identity, the Persian Face ID string, scene
+Use this when you want the real app: its own identity, scene
 support, or any future native extension (widgets, Live Activities, App Intents).
 
 **Prerequisite:** an active [Apple Developer Program](https://developer.apple.com/programs/)
@@ -282,8 +275,8 @@ phone.
   your account, or change `ios.bundleIdentifier` in `apps/mobile/app.json`.
 
 **Windows-only preview.** `npm run start -w @arzman/mobile` then `w` runs the app in a
-browser. Useful for logic and layout, but **not** evidence of iPhone behaviour: no Keychain,
-no Face ID, no SF Symbols, no Liquid Glass, no haptics.
+browser. Useful for logic and layout, but **not** evidence of iPhone behaviour: no SF
+Symbols, no Liquid Glass, no haptics.
 
 ---
 

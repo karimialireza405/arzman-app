@@ -2,6 +2,20 @@
 
 ## Completed Milestones
 
+### Milestone 0.4.0 — portfolio removed (2026-09-27)
+
+- [x] Remove the «دارایی من» tab, screens, transaction sheet, home summary,
+      detail action, biometric lock, Keychain/Face ID modules and shared domain.
+
+## Open — backend
+
+- [ ] **Deployed Worker returns 503 on every Durable Object call** (health is
+      200, TGJU is fine). Owner checks Cloudflare dashboard → Workers →
+      `arzman-market` → Metrics for an exhausted Free-plan limit; recheck after
+      00:00 UTC (03:30 Tehran). If a limit is the cause, cut Durable Object work
+      (e.g. stop the 24/7 45-second alarm loop when nobody is reading) before
+      redeploying.
+
 ### Milestone 0.3.2 — first on-device pass (2026-09-27)
 
 - [x] Run in Expo Go on the owner's iPhone (free App Store install) — works.
@@ -88,18 +102,15 @@
 - [ ] Later, when the app's own identity / Persian Face ID string / `enableSceneSupport` are
       wanted: EAS development build (needs a paid Apple Developer account for signing).
 - [ ] On-device checklist: home · USD/EUR/AED/IQD detail · pull-to-refresh · converter ·
-      portfolio (buy → partial sell → close) · Face ID gate · manual USDT rate ·
+      manual USDT rate ·
       offline (airplane mode) · Toman ⇄ Rial · RTL · dark/light · charts · tab bar ·
       Dynamic Type · VoiceOver.
-- [ ] Confirm the Persian Face ID permission string appears — this only happens on a
-      development build; Expo Go shows its own permission text.
 
 ## Deferred / not implemented
 
 - [ ] **Deploy the Worker** — the deployed one predates the P0 parser fix and the
       `Object.hasOwn` range guard: `npx wrangler deploy --config server/wrangler.jsonc`.
       Re-run `npx tsx scripts/audit-api.ts <url>` afterwards; it should be 14/14.
-- [ ] Portfolio export / recovery flow (there is none today).
 - [ ] WidgetKit extension (Lock Screen / Home Screen widgets).
 - [ ] ActivityKit Live Activity + Dynamic Island.
 - [ ] Siri / App Intents.
