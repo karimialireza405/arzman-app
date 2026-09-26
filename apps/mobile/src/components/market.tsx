@@ -32,6 +32,7 @@ import type { StyleProp, ViewStyle } from "react-native";
 export { usePrice } from "./price";
 import { QuoteHero } from "./quote-hero";
 import { Sparkline } from "./sparkline";
+import { Skeleton } from "./skeleton";
 import { useHistory } from "../history";
 import { usePrice } from "./price";
 
@@ -274,22 +275,32 @@ export function MarketStatus() {
   const app = useApp();
   const t = useTheme();
 
-  const statusColor = !app.online ? t.red : app.stale ? t.amber : t.green;
-  // Short labels: this is one quiet line of metadata, not content. The amber
-  // state stays honest — TGJU publishes no trade timestamp to verify against.
+  // What the app can truthfully say is *when it received* the rates. TGJU
+  // publishes no trade timestamp, so that caveat lives on the currency card
+  // ("زمان منبع"), not in an amber warning on every screen.
+  const fetchedAt = app.snapshot ? Date.parse(app.snapshot.fetchedAt) : null;
+  const ageMs = fetchedAt === null ? null : app.clock - fetchedAt;
+  const fresh = ageMs !== null && ageMs <= 3 * 60_000;
+  const time =
+    fetchedAt === null
+      ? null
+      : new Date(fetchedAt).toLocaleTimeString(app.user.settings.persian ? "fa-IR" : "en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+  const statusColor = !app.online ? t.red : fresh ? t.green : t.amber;
   const statusLabel = app.busy
     ? "در حال به‌روزرسانی…"
     : !app.online
-      ? "آفلاین · نرخ ذخیره‌شده"
-      : app.stale
-        ? "متصل · زمان منبع نامشخص"
-        : "متصل · نرخ زنده";
-  const fetched = app.snapshot
-    ? new Date(app.snapshot.fetchedAt).toLocaleTimeString(
-        app.user.settings.persian ? "fa-IR" : "en-US",
-        { hour: "2-digit", minute: "2-digit" },
-      )
-    : null;
+      ? time
+        ? `آفلاین · آخرین نرخ ${time}`
+        : "اتصال برقرار نیست"
+      : fresh
+        ? `به‌روز · ${time}`
+        : time
+          ? `آخرین به‌روزرسانی ${time}`
+          : "در انتظار نرخ";
 
   return (
     <View style={{ gap: spacing.xxxs }}>
@@ -303,16 +314,14 @@ export function MarketStatus() {
       >
         <View
           accessible
-          accessibilityLabel={`${statusLabel}، منبع TGJU${fetched ? `، دریافت ${fetched}` : ""}`}
+          accessibilityLabel={`${statusLabel}، منبع TGJU`}
           style={{ flex: 1, flexDirection: "row-reverse", alignItems: "center", gap: spacing.xxs }}
         >
           <View
             style={{ width: 7, height: 7, borderRadius: 3.5, backgroundColor: statusColor }}
           />
           <Label secondary size={13} numberOfLines={1} style={{ flex: 1 }}>
-            {/* Time before "TGJU": Persian digits that follow a Latin word are
-                pulled into its left-to-right run and render out of order. */}
-            {statusLabel}{fetched ? ` · ${fetched}` : ""} · TGJU
+            {statusLabel} · TGJU
           </Label>
         </View>
         {app.busy ? (
@@ -329,7 +338,9 @@ export function MarketStatus() {
         )}
       </View>
 
-      {app.error ? (
+      {/* With cached rates on screen the status line already says "offline";
+          the error text only earns its place when there is nothing to show. */}
+      {app.error && !app.snapshot ? (
         <Label red size={12}>
           {app.error}
         </Label>
@@ -423,6 +434,7 @@ export function CurrencyRow({
   const isFavorite = app.user.watchlist.includes(code);
   const history = useHistory(code, "1D");
   const tick = usePriceTick(quote?.priceToman);
+  const waiting = !quote && (app.busy || !app.error);
 
   const toggleFavorite = () => {
     app.updateUser((u) => ({
@@ -483,30 +495,39 @@ export function CurrencyRow({
 
           {/* Trailing column: what it costs. One number, one delta. */}
           <View style={{ alignItems: "flex-start", gap: 4, minWidth: showFavorite ? 74 : 84 }}>
-            <View>
-              <Reanimated.View
-                pointerEvents="none"
-                style={[
-                  { position: "absolute", top: 0, bottom: 0, left: -6, right: -6, borderRadius: 8 },
-                  tick,
-                ]}
-              />
-              <Label
-              numberOfLines={1}
-              allowFontScaling={false}
-              style={{
-                fontSize: 17,
-                lineHeight: 22,
-                fontWeight: "600",
-                fontVariant: ["tabular-nums"],
-                writingDirection: "ltr",
-                color: t.text,
-              }}
-            >
-              {fmt(quote?.priceToman)}
-              </Label>
-            </View>
-            <ChangePill value={quote?.changePercent} size="small" />
+            {waiting ? (
+              <>
+                <Skeleton width={78} height={18} />
+                <Skeleton width={52} height={18} radius={9} />
+              </>
+            ) : (
+              <>
+                <View>
+                  <Reanimated.View
+                    pointerEvents="none"
+                    style={[
+                      { position: "absolute", top: 0, bottom: 0, left: -6, right: -6, borderRadius: 8 },
+                      tick,
+                    ]}
+                  />
+                  <Label
+                  numberOfLines={1}
+                  allowFontScaling={false}
+                  style={{
+                    fontSize: 17,
+                    lineHeight: 22,
+                    fontWeight: "600",
+                    fontVariant: ["tabular-nums"],
+                    writingDirection: "ltr",
+                    color: t.text,
+                  }}
+                >
+                  {fmt(quote?.priceToman)}
+                  </Label>
+                </View>
+                <ChangePill value={quote?.changePercent} size="small" />
+              </>
+            )}
           </View>
         </Pressable>
       </Animated.View>

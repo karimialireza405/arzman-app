@@ -22,7 +22,6 @@ import {
   GlassSegmentedControl,
   MarketChangeBadge,
   useTheme,
-  radii,
 } from "./ui";
 
 const ranges = ["1H", "1D", "1W", "1M", "3M", "1Y"] as const;
@@ -126,19 +125,17 @@ export function ChartCard({ currency }: { currency: Currency }) {
   const y = (i: number) =>
     chartHeight - paddingV - ((values[i] - floor) / spread) * usableHeight;
 
-  // Stocks-style trend color
-  const isUp =
-    points.length >= 2
-      ? values[values.length - 1] >= values[0]
-      : true;
-  const strokeColor = isUp ? t.green : t.red;
-  const fillColor = isUp ? t.green : t.red;
+  // Stocks convention: green up, red down. A series that did not move is not
+  // "up" — it gets the brand colour instead of a misleading green.
+  const first = values[0];
+  const last = values[values.length - 1];
+  const strokeColor =
+    points.length < 2 || last === first ? t.accent : last > first ? t.green : t.red;
+  const fillColor = strokeColor;
+  const periodPercent =
+    points.length >= 2 && first > 0 ? ((last - first) / first) * 100 : null;
 
   const activePoint = points[selected] ?? points[points.length - 1];
-  const baselinePrice = points[0]?.priceToman ?? 0;
-  const activePrice = activePoint?.priceToman ?? 0;
-  const diffPrice = activePrice - baselinePrice;
-  const diffPercent = baselinePrice > 0 ? (diffPrice / baselinePrice) * 100 : null;
 
   // Build SVG polygon for gradient fill
   const polylineCoords = points.map((_, i) => `${x(i)},${y(i)}`).join(" ");
@@ -148,7 +145,7 @@ export function ChartCard({ currency }: { currency: Currency }) {
 
   return (
     <Card style={{ padding: 18, gap: 14 }}>
-      {/* 1. Header with Range Picker */}
+      {/* Title and the change over the selected range. */}
       <View
         style={{
           flexDirection: "row-reverse",
@@ -157,9 +154,13 @@ export function ChartCard({ currency }: { currency: Currency }) {
         }}
       >
         <Label size={17} weight="700">
-          روند واقعی مشاهدات بازار
+          نمودار قیمت
         </Label>
-        {loading && <ActivityIndicator size="small" color={t.accent} />}
+        {loading ? (
+          <ActivityIndicator size="small" color={t.accent} />
+        ) : periodPercent !== null ? (
+          <MarketChangeBadge value={periodPercent} size="small" />
+        ) : null}
       </View>
 
       <GlassSegmentedControl
@@ -170,51 +171,40 @@ export function ChartCard({ currency }: { currency: Currency }) {
         size="compact"
       />
 
-      {/* 2. Interactive Scrubber HUD */}
-      {activePoint && points.length >= 2 && (
+      {/* Scrub readout: the touched observation, compact and unboxed. */}
+      {activePoint && points.length >= 2 ? (
         <View
           style={{
-            backgroundColor: t.fillQuaternary,
-            padding: 12,
-            borderRadius: radii.controlSmall,
-            borderCurve: "continuous",
-            gap: 4,
+            flexDirection: "row-reverse",
+            justifyContent: "space-between",
+            alignItems: "baseline",
           }}
         >
-          <View
-            style={{
-              flexDirection: "row-reverse",
-              justifyContent: "space-between",
-              alignItems: "baseline",
-            }}
-          >
-            <View style={{ gap: 2, alignItems: "flex-end" }}>
-              {/* Separate runs: a single LTR label put the unit before the number. */}
-              <View style={{ flexDirection: "row-reverse", alignItems: "baseline", gap: 5 }}>
-                <Label size={24} weight="700" tabular style={{ writingDirection: "ltr" }}>
-                  {formatNumber(
-                    activePoint.priceToman *
-                      (app.user.settings.unit === "IRR" ? 10 : 1),
-                    app.user.settings.persian,
-                    2,
-                  )}
-                </Label>
-                <Label secondary size={13} weight="500">
-                  {app.user.settings.unit === "IRR" ? "ریال" : "تومان"}
-                </Label>
-              </View>
-              <Label secondary size={11}>
-                {new Date(activePoint.timestamp).toLocaleString(
-                  app.user.settings.persian ? "fa-IR" : "en-US",
-                )}
-                {activePoint.stale ? " · تازگی منبع تأیید نشده" : ""}
-              </Label>
-            </View>
-
-            <MarketChangeBadge value={diffPercent} size="small" />
+          <View style={{ flexDirection: "row-reverse", alignItems: "baseline", gap: 5 }}>
+            <Label size={20} weight="700" tabular style={{ writingDirection: "ltr" }}>
+              {formatNumber(
+                activePoint.priceToman * (app.user.settings.unit === "IRR" ? 10 : 1),
+                app.user.settings.persian,
+                2,
+              )}
+            </Label>
+            <Label secondary size={13} weight="500">
+              {app.user.settings.unit === "IRR" ? "ریال" : "تومان"}
+            </Label>
           </View>
+          <Label tertiary size={12}>
+            {range === "1H" || range === "1D"
+              ? new Date(activePoint.timestamp).toLocaleTimeString(
+                  app.user.settings.persian ? "fa-IR" : "en-US",
+                  { hour: "2-digit", minute: "2-digit" },
+                )
+              : new Date(activePoint.timestamp).toLocaleDateString(
+                  app.user.settings.persian ? "fa-IR" : "en-US",
+                  { month: "long", day: "numeric" },
+                )}
+          </Label>
         </View>
-      )}
+      ) : null}
 
       {/* 3. Stocks-Style Chart Graphic */}
       {points.length >= 2 ? (
@@ -360,7 +350,7 @@ export function ChartCard({ currency }: { currency: Currency }) {
 
       {/* 4. Truthful Disclosure */}
       <Label tertiary size={11} style={{ textAlign: "center" }}>
-        مشاهدات بر اساس داده‌های ذخیره‌شدهٔ سرور؛ زمان‌ها بر حسب دریافت است و داده‌های خالی دستکاری نمی‌شوند.
+        فقط مشاهدات ثبت‌شده؛ هیچ نقطه‌ای ساخته یا درون‌یابی نمی‌شود.
       </Label>
     </Card>
   );

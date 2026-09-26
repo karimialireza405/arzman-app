@@ -17,6 +17,7 @@ import { curve, spacing } from "../design-system";
 import { useHistory } from "../history";
 import { useApp } from "../store";
 import { AppIcon, Label } from "./primitives";
+import { Skeleton } from "./skeleton";
 import { Sparkline } from "./sparkline";
 import { useFeedback, usePressFeedback } from "./theme";
 import { usePrice } from "./price";
@@ -168,6 +169,7 @@ export function QuoteHero({
   subtitle,
   actions,
   footer,
+  trend = true,
   style,
 }: {
   code: Currency;
@@ -176,11 +178,16 @@ export function QuoteHero({
   actions?: HeroAction[];
   /** Small print under the card body (source unit, time). */
   footer?: string;
+  /** Today's trend line. Off where a full chart follows (currency detail). */
+  trend?: boolean;
   style?: StyleProp<ViewStyle>;
 }) {
   const fmt = usePrice();
-  const { user } = useApp();
-  const history = useHistory(code, "1D");
+  const app = useApp();
+  const { user } = app;
+  const history = useHistory(code, "1D", trend);
+  // Loading until a request has actually failed; then honest dashes instead.
+  const waiting = !quote && (app.busy || !app.error);
   const [chartWidth, setChartWidth] = useState(0);
 
   return (
@@ -217,35 +224,45 @@ export function QuoteHero({
           accessibilityLabel={quote ? `${fmt(quote.priceToman, 2)} ${names[user.settings.unit]}` : "در انتظار نرخ"}
           style={{ flexDirection: "row-reverse", alignItems: "baseline", gap: 8 }}
         >
-          <Label
-            size={46}
-            weight="700"
-            numberOfLines={1}
-            allowFontScaling={false}
-            style={{ color: ON_BRAND, writingDirection: "ltr", letterSpacing: -1 }}
-          >
-            {fmt(quote?.priceToman)}
-          </Label>
+          {waiting ? (
+            <Skeleton width={190} height={46} radius={12} color={GLASS_STRONG} style={{ marginVertical: 12 }} />
+          ) : (
+            <Label
+              size={46}
+              weight="700"
+              numberOfLines={1}
+              allowFontScaling={false}
+              style={{ color: ON_BRAND, writingDirection: "ltr", letterSpacing: -1 }}
+            >
+              {fmt(quote?.priceToman)}
+            </Label>
+          )}
           <Label size={17} weight="500" style={{ color: ON_BRAND_MUTED }}>
             {names[user.settings.unit]}
           </Label>
         </View>
 
         {/* Today's real observations, not a decoration. */}
-        <View onLayout={(e) => setChartWidth(Math.floor(e.nativeEvent.layout.width))} style={{ height: 52 }}>
-          {chartWidth > 0 ? (
-            <Sparkline
-              values={history ? history.map((p) => p.priceToman) : null}
-              width={chartWidth}
-              height={52}
-              color={ON_BRAND}
-            />
-          ) : null}
-        </View>
+        {trend ? (
+          <View onLayout={(e) => setChartWidth(Math.floor(e.nativeEvent.layout.width))} style={{ height: 52 }}>
+            {chartWidth > 0 ? (
+              <Sparkline
+                values={history ? history.map((p) => p.priceToman) : null}
+                width={chartWidth}
+                height={52}
+                color={ON_BRAND}
+              />
+            ) : null}
+          </View>
+        ) : null}
 
-        {quote ? <BrandRange quote={quote} /> : (
+        {quote ? (
+          <BrandRange quote={quote} />
+        ) : waiting ? (
+          <Skeleton width="100%" height={10} radius={5} color={GLASS} />
+        ) : (
           <Label size={13} style={{ color: ON_BRAND_MUTED }}>
-            در انتظار دریافت نخستین نرخ از سرویس بازار…
+            نرخ در دسترس نیست؛ اتصال را بررسی کنید.
           </Label>
         )}
 

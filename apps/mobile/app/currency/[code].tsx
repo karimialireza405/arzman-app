@@ -82,6 +82,7 @@ export default function Detail() {
       <QuoteHero
         code={code}
         quote={q}
+        trend={false}
         footer={`زمان منبع: ${q?.sourceTimeLabel || "نامشخص"} · واحد منبع: ${
           q?.rawUnit === "IRR" ? "ریال" : "تومان"
         } · هر ${formatNumber(q?.quoteSize ?? 1, app.user.settings.persian, 0)} واحد`}

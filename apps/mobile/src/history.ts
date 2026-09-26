@@ -45,11 +45,12 @@ async function load(currency: Currency, range: HistoryRange): Promise<Historical
 }
 
 /** Observation series for a currency, or null while unknown/unavailable. */
-export function useHistory(currency: Currency, range: HistoryRange = "1D") {
+export function useHistory(currency: Currency, range: HistoryRange = "1D", enabled = true) {
   const [points, setPoints] = useState<HistoricalPoint[] | null>(
     () => cache.get(`${currency}:${range}`)?.points ?? null,
   );
   useEffect(() => {
+    if (!enabled) return;
     let current = true;
     void load(currency, range).then((result) => {
       if (current && result) setPoints(result);
@@ -57,6 +58,6 @@ export function useHistory(currency: Currency, range: HistoryRange = "1D") {
     return () => {
       current = false;
     };
-  }, [currency, range]);
+  }, [currency, range, enabled]);
   return points;
 }
