@@ -2,6 +2,45 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.2] - 2026-09-27 — first on-device pass: flags and visual anomalies
+
+The app ran on the owner's iPhone in Expo Go for the first time. Every issue
+below was seen there, then reproduced and fixed at 393×852 in the web runtime.
+
+### Added
+- **Round country flags** for every currency (🇺🇸 USD, 🇪🇺 EUR, 🇦🇪 AED, 🇮🇶 IQD,
+  🇮🇷 IRT/IRR; USDT keeps a Tether-green ₮ disc). `CurrencyBadge` renders them,
+  so every screen picked them up without call-site changes. Five 1×1 SVGs are
+  vendored from `country-flag-icons` (MIT) in `src/design-system/flags.ts` and
+  drawn with `react-native-svg`'s `SvgXml` — no new dependency, Expo Go safe.
+
+### Fixed
+- Currency rows: three cluttered lines → two (flag · name · code | price · change).
+- Units stacked under big numbers → one baseline ("۲۳۴٬۶۱۵ تومان") for prices,
+  the portfolio total and the converter result; hero price leading-aligned.
+- Large-title subtitle moved below the title in a secondary tone.
+- Status strip: three lines of metadata → one quiet line.
+- Content bled crisply through the floating tab bar → scroll-edge fade behind it
+  (screens without a tab bar opt out).
+- Converter picker orphaned «ریال» on a second row → one row, short labels;
+  default amount in Persian digits.
+- Chart: truncated «۱ ساعت» → short range labels; a flat series is centred
+  instead of lying on the floor.
+- Persian phrases with numbers rendered unit-before-number and `+۰` as `۰+`
+  (stats, chart readout, converter base rate, transaction total) → RTL base +
+  LRM, verified by measuring glyph positions.
+- System RTL pinned off: the app mirrors itself by hand, so a Persian-locale
+  iPhone would have flipped everything twice.
+- Nested button (favourite star inside the row) → sibling elements.
+- Home's portfolio and quick-converter rows now sit on grouped surfaces.
+
+### Not changed
+- `expo-doctor` now reports 20/21: Expo shipped new patch releases (e.g.
+  `expo` 57.0.25) after the last check. Nothing installed changed; upgrading is
+  left as a separate, deliberate step.
+- The blue gear and the grey chevron tab seen on the phone are **Expo Go's**
+  developer overlay; no ArzMan code draws them and they do not exist in a build.
+
 ## [0.3.1] - 2026-09-22 — engineering audit, market-data correctness, iPhone readiness
 
 Continues and completes the previous agent's unfinished audit. Full detail in

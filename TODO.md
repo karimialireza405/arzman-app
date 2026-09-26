@@ -2,6 +2,15 @@
 
 ## Completed Milestones
 
+### Milestone 0.3.2 — first on-device pass (2026-09-27)
+
+- [x] Run in Expo Go on the owner's iPhone (free App Store install) — works.
+- [x] Round country flags for every currency.
+- [x] Fix the visual anomalies found on-device (rows, units, header, status,
+      tab-bar bleed, converter picker, chart labels/flat line, RTL text order,
+      nested button, bare home rows).
+- [x] Pin system RTL off (the app mirrors by hand).
+
 ### Milestone 0.3.1 — engineering audit & iPhone readiness (2026-09-22)
 
 - [x] Recover, finish and commit the previous agent's uncommitted work (nothing discarded).
@@ -70,8 +79,12 @@
 
 ## Next — on-device QA (not blocked; Expo Go is free)
 
-- [ ] Install Expo Go from the App Store and run `npm run start -w @arzman/mobile -- --go`.
-- [ ] Commit the EAS `projectId`/`owner` that `eas init` added to `apps/mobile/app.json`.
+- [x] Install Expo Go from the App Store and run `npm run start -w @arzman/mobile -- --go`.
+- [x] Commit the EAS `projectId`/`owner` that `eas init` added to `apps/mobile/app.json`.
+- [ ] Owner re-checks the redesigned screens on the iPhone and reports what still
+      looks wrong (light mode, portfolio with data, detail chart).
+- [ ] Upgrade the five Expo patch releases `expo-doctor` flags
+      (`npx expo install --check`), then re-run the full verification.
 - [ ] Later, when the app's own identity / Persian Face ID string / `enableSceneSupport` are
       wanted: EAS development build (needs a paid Apple Developer account for signing).
 - [ ] On-device checklist: home · USD/EUR/AED/IQD detail · pull-to-refresh · converter ·

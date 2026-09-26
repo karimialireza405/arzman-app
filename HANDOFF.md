@@ -10,8 +10,28 @@
 **Git HEAD at the redesign handoff:** `8900c9d`  
 **Git HEAD after the audit session:** see §00.4  
 
-> Read **§00 first** — it is the most recent session and supersedes anything older it
+> Read **§000 then §00 first** — it is the most recent session and supersedes anything older it
 > contradicts, in particular the Expo Go instructions in §0 and in `README.md`.
+
+---
+
+## 000. First on-device pass (2026-09-27)
+
+ArzMan runs on the owner's iPhone through **Expo Go** (free App Store build,
+signed in to the same Expo account as the CLI — Expo Go requires that on a
+physical iOS device). The owner judged the UI weak and asked for flags; this
+session fixed what was visible on the phone. See CHANGELOG 0.3.2 for the list.
+
+- Commits: `561a8fe` (flags), `5daef79` (anomalies), plus this docs commit.
+- Tests 36/36, typecheck and lint clean, iOS Hermes export builds.
+- `expo-doctor` 20/21: five Expo **patch** releases appeared upstream; not
+  caused by this work, deliberately not upgraded mid-UI-change.
+- How it was verified: web runtime at 393×852, dark and light, with sample
+  holdings; RTL order measured from DOM glyph rects. Native-only surfaces
+  (Liquid Glass, SF Symbols, the tab-bar fade over real glass) still need the
+  owner's eyes on the phone.
+- The blue gear / grey edge chevron on the phone are Expo Go's dev overlay.
+- **Next:** owner reloads the app on the phone and reports remaining issues.
 
 ---
 
