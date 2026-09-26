@@ -19,8 +19,9 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
-import { curve, iconSizes, radii, spacing } from "../design-system";
+import Svg, { Defs, LinearGradient, RadialGradient, Rect, Stop } from "react-native-svg";
+import Reanimated, { FadeInDown } from "react-native-reanimated";
+import { curve, fontFamilies, iconSizes, radii, spacing } from "../design-system";
 import { useApp } from "../store";
 import { AppIcon, Label } from "./primitives";
 import { Button } from "./controls";
@@ -52,6 +53,7 @@ export function Screen({
   floatingTabBar = true,
   contentStyle,
   headerAccessory,
+  largeTitle = true,
 }: {
   title: string;
   eyebrow?: string;
@@ -62,6 +64,8 @@ export function Screen({
   floatingTabBar?: boolean;
   contentStyle?: StyleProp<ViewStyle>;
   headerAccessory?: React.ReactNode;
+  /** False on pushed screens whose navigation bar already shows the title. */
+  largeTitle?: boolean;
 }) {
   const t = useTheme();
   const app = useApp();
@@ -72,6 +76,7 @@ export function Screen({
       edges={["top", "left", "right"]}
       style={{ flex: 1, backgroundColor: t.background }}
     >
+      <AmbientGlow />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
@@ -102,29 +107,31 @@ export function Screen({
           ) : undefined
         }
       >
-        <View
-          style={{
-            flexDirection: "row-reverse",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
-            gap: spacing.xs,
-            paddingTop: spacing.xxs,
-          }}
-        >
-          {/* iOS large-title idiom: the title leads, context follows it in a
-              secondary tone. A tinted line *above* the title competed with it. */}
-          <View style={{ flex: 1, gap: 2 }}>
-            <Label variant="largeTitle" numberOfLines={1}>
-              {title}
-            </Label>
-            {eyebrow ? (
-              <Label secondary size={15} numberOfLines={1}>
-                {eyebrow}
+        {largeTitle ? (
+          <View
+            style={{
+              flexDirection: "row-reverse",
+              justifyContent: "space-between",
+              alignItems: "flex-end",
+              gap: spacing.xs,
+              paddingTop: spacing.xxs,
+            }}
+          >
+            {/* iOS large-title idiom: the title leads, context follows it in a
+                secondary tone. A tinted line *above* the title competed with it. */}
+            <View style={{ flex: 1, gap: 2 }}>
+              <Label variant="largeTitle" numberOfLines={1}>
+                {title}
               </Label>
-            ) : null}
+              {eyebrow ? (
+                <Label secondary size={15} numberOfLines={1}>
+                  {eyebrow}
+                </Label>
+              ) : null}
+            </View>
+            {trailing}
           </View>
-          {trailing}
-        </View>
+        ) : null}
 
         {headerAccessory}
 
@@ -134,10 +141,44 @@ export function Screen({
           </Label>
         ) : null}
 
-        {children}
+        {/* Sections arrive in order, 60 ms apart — once, on first mount (tabs
+            stay mounted, so switching tabs does not replay it). Reanimated
+            skips layout animations when the system Reduce Motion is on. */}
+        {React.Children.toArray(children).map((child, index) => (
+          <Reanimated.View
+            key={index}
+            entering={FadeInDown.duration(420).delay(Math.min(index, 6) * 60)}
+          >
+            {child}
+          </Reanimated.View>
+        ))}
       </ScrollView>
       {floatingTabBar ? <ScrollEdgeFade height={TAB_BAR.clearance(insets.bottom)} /> : null}
     </SafeAreaView>
+  );
+}
+
+/**
+ * Soft brand light behind the top of every screen — the depth cue the dark
+ * fintech references use instead of flat black. Decorative and non-interactive.
+ */
+function AmbientGlow() {
+  const t = useTheme();
+  return (
+    <View
+      pointerEvents="none"
+      style={{ position: "absolute", top: 0, left: 0, right: 0, height: 420 }}
+    >
+      <Svg width="100%" height="100%" preserveAspectRatio="none">
+        <Defs>
+          <RadialGradient id="ambient" cx="0.9" cy="0" rx="0.9" ry="0.8" fx="0.9" fy="0">
+            <Stop offset="0" stopColor={t.dark ? "#6247E0" : "#8B5CF6"} stopOpacity={t.dark ? 0.32 : 0.14} />
+            <Stop offset="1" stopColor={t.dark ? "#6247E0" : "#8B5CF6"} stopOpacity={0} />
+          </RadialGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" fill="url(#ambient)" />
+      </Svg>
+    </View>
   );
 }
 
@@ -343,9 +384,9 @@ export function AmountInput({
           style={{
             flex: 1,
             color: t.text,
+            fontFamily: fontFamilies.semibold,
             fontSize: 24,
-            lineHeight: 30,
-            fontWeight: "600",
+            lineHeight: 38,
             fontVariant: ["tabular-nums"],
             textAlign: "right",
             writingDirection: "rtl",

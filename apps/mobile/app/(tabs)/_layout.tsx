@@ -21,6 +21,7 @@ import {
   Glass,
   TAB_BAR,
   curve,
+  persianText,
   spacing,
   useFeedback,
   useTheme,
@@ -53,6 +54,9 @@ export default function TabLayout() {
       initialRouteName="index"
       screenOptions={{
         headerShown: false,
+        // A short horizontal shift between tabs. The navigator order is the
+        // mirrored (RTL) order, so screens slide in from the side their tab is on.
+        animation: "shift",
         tabBarActiveTintColor: t.accent,
         tabBarInactiveTintColor: t.textTertiary,
         tabBarStyle: {
@@ -121,14 +125,16 @@ export default function TabLayout() {
             tabBarLabel: ({ focused, color, children }) => (
               <Text
                 allowFontScaling={false}
-                style={{
-                  color,
-                  fontSize: 10,
-                  fontWeight: focused ? "700" : "500",
-                  textAlign: "center",
-                  writingDirection: "rtl",
-                  marginTop: 1,
-                }}
+                style={persianText(
+                  {
+                    color,
+                    fontSize: 10,
+                    fontWeight: focused ? "700" : "500",
+                    textAlign: "center",
+                    writingDirection: "rtl",
+                  },
+                  children,
+                )}
               >
                 {children}
               </Text>

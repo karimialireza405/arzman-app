@@ -9,6 +9,8 @@ export * from "./primitives";
 export * from "./surfaces";
 export * from "./controls";
 export * from "./market";
+export * from "./quote-hero";
+export * from "./sparkline";
 export * from "./screen";
 
 export {
@@ -16,6 +18,10 @@ export {
   colors as systemColors,
   concentricRadius,
   curve,
+  fontFamilies,
+  fontFamilyFor,
+  persianText,
+  PERSIAN_LINE_HEIGHT,
   iconSizes,
   materials,
   motion,

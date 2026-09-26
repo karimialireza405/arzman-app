@@ -10,31 +10,30 @@
  * showed a decorative "sparkline", we now render the currency's *real* daily
  * low→high range with the current price marked on it.
  */
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import Reanimated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 import { ActivityIndicator, Animated, Pressable, View } from "react-native";
 import { router } from "expo-router";
 import { formatNumber, names, type Currency, type CurrencyQuote } from "@arzman/shared";
 import { curve, radii, spacing } from "../design-system";
 import { CurrencyBadge } from "../design-system/currency-icons";
 import { useApp } from "../store";
-import { Button, IconButton } from "./controls";
+import { IconButton } from "./controls";
 import { AppIcon, Divider, Label } from "./primitives";
 import { Surface } from "./surfaces";
 import { useFeedback, usePressFeedback, useTheme } from "./theme";
 import type { StyleProp, ViewStyle } from "react-native";
 
-/** Formats Toman values using the user's unit + digit preferences. */
-export function usePrice() {
-  const { user } = useApp();
-  return (value: number | null | undefined, digits = 2) =>
-    value == null
-      ? "—"
-      : formatNumber(
-          value * (user.settings.unit === "IRR" ? 10 : 1),
-          user.settings.persian,
-          digits,
-        );
-}
+export { usePrice } from "./price";
+import { QuoteHero } from "./quote-hero";
+import { Sparkline } from "./sparkline";
+import { useHistory } from "../history";
+import { usePrice } from "./price";
 
 /**
  * Price with its unit caption.
@@ -350,87 +349,19 @@ export { MarketStatus as MarketStatusBar };
  */
 export function MarketHero({ style }: { style?: StyleProp<ViewStyle> }) {
   const app = useApp();
-  const t = useTheme();
   const usd = app.snapshot?.quotes.find((q) => q.currency === "USD");
-
   return (
-    <Surface
-      elevated
-      radius={radii.cardLarge}
-      style={[
-        { padding: spacing.md, gap: spacing.sm, backgroundColor: t.surfaceElevated },
-        style,
+    <QuoteHero
+      code="USD"
+      quote={usd}
+      subtitle="شاخص اصلی بازار آزاد · USD"
+      style={style}
+      actions={[
+        { title: "مبدل", icon: "swap-horizontal", primary: true, onPress: () => router.push("/converter") },
+        { title: "هشدار", icon: "notifications-outline", onPress: () => router.push("/alerts") },
+        { title: "نرخ من", icon: "pricetag-outline", onPress: () => router.push("/custom-rates") },
       ]}
-    >
-      <View
-        style={{
-          flexDirection: "row-reverse",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-        }}
-      >
-        <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: spacing.xs }}>
-          <CurrencyBadge code="USD" size="lg" tone="filled" dark={t.dark} />
-          <View style={{ gap: 2 }}>
-            <Label size={17} weight="600">
-              {names.USD}
-            </Label>
-            <Label tertiary size={11} allowFontScaling={false}>
-              شاخص اصلی بازار آزاد · USD
-            </Label>
-          </View>
-        </View>
-
-        <ChangePill value={usd?.changePercent} size="medium" />
-      </View>
-
-      <Price value={usd?.priceToman} size="hero" digits={0} align="flex-end" />
-
-      {usd ? (
-        <RangeMeter
-          current={usd.priceToman}
-          low={usd.lowToman}
-          high={usd.highToman}
-        />
-      ) : (
-        <Label secondary size={12}>
-          در انتظار دریافت نخستین نرخ از سرویس بازار…
-        </Label>
-      )}
-
-      <Divider />
-
-      {/* Horizontal row of chrome actions → capsule shape (HIG · Buttons). */}
-      <View style={{ flexDirection: "row-reverse", gap: spacing.xxs }}>
-        <Button
-          title="مبدل"
-          icon="swap-horizontal"
-          variant="tinted"
-          size="small"
-          shape="capsule"
-          style={{ flex: 1 }}
-          onPress={() => router.push("/converter")}
-        />
-        <Button
-          title="هشدار"
-          icon="notifications-outline"
-          variant="glass"
-          size="small"
-          shape="capsule"
-          style={{ flex: 1 }}
-          onPress={() => router.push("/alerts")}
-        />
-        <Button
-          title="نرخ من"
-          icon="pricetag-outline"
-          variant="glass"
-          size="small"
-          shape="capsule"
-          style={{ flex: 1 }}
-          onPress={() => router.push("/custom-rates")}
-        />
-      </View>
-    </Surface>
+    />
   );
 }
 
@@ -443,6 +374,32 @@ export { MarketHero as HeroQuote };
  * draw their own card, which is what made the previous UI look like a web
  * dashboard full of equal-weight boxes.
  */
+/**
+ * A brief green/red wash behind a price when it actually changes, the cue
+ * trading apps use for "this just moved". Nothing happens on first render or
+ * when the value is unchanged. Reanimated honours the system Reduce Motion
+ * setting for withTiming by default.
+ */
+function usePriceTick(value: number | null | undefined) {
+  const t = useTheme();
+  const previous = useRef(value);
+  const flash = useSharedValue(0);
+  const direction = useSharedValue(0);
+  useEffect(() => {
+    const before = previous.current;
+    previous.current = value;
+    if (before == null || value == null || before === value) return;
+    direction.value = value > before ? 1 : -1;
+    flash.value = withSequence(withTiming(1, { duration: 140 }), withTiming(0, { duration: 900 }));
+  }, [value, flash, direction]);
+  const up = t.green;
+  const down = t.red;
+  return useAnimatedStyle(() => ({
+    backgroundColor: direction.value >= 0 ? up : down,
+    opacity: flash.value * 0.22,
+  }));
+}
+
 export function CurrencyRow({
   code,
   quote,
@@ -464,6 +421,8 @@ export function CurrencyRow({
   const press = usePressFeedback(0.985);
   const fmt = usePrice();
   const isFavorite = app.user.watchlist.includes(code);
+  const history = useHistory(code, "1D");
+  const tick = usePriceTick(quote?.priceToman);
 
   const toggleFavorite = () => {
     app.updateUser((u) => ({
@@ -515,9 +474,24 @@ export function CurrencyRow({
             </Label>
           </View>
 
+          {/* Rows that also carry a favourite star get a narrower trend so the
+              currency name ("درهم امارات") is never truncated. */}
+          <Sparkline
+            values={history ? history.map((p) => p.priceToman) : null}
+            width={showFavorite ? 40 : 58}
+          />
+
           {/* Trailing column: what it costs. One number, one delta. */}
-          <View style={{ alignItems: "flex-start", gap: 4 }}>
-            <Label
+          <View style={{ alignItems: "flex-start", gap: 4, minWidth: showFavorite ? 74 : 84 }}>
+            <View>
+              <Reanimated.View
+                pointerEvents="none"
+                style={[
+                  { position: "absolute", top: 0, bottom: 0, left: -6, right: -6, borderRadius: 8 },
+                  tick,
+                ]}
+              />
+              <Label
               numberOfLines={1}
               allowFontScaling={false}
               style={{
@@ -530,7 +504,8 @@ export function CurrencyRow({
               }}
             >
               {fmt(quote?.priceToman)}
-            </Label>
+              </Label>
+            </View>
             <ChangePill value={quote?.changePercent} size="small" />
           </View>
         </Pressable>

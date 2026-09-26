@@ -5,31 +5,24 @@
  * observation chart, then a grouped stats list, then a small set of actions.
  * One prominent action only (HIG · Buttons).
  */
-import { useLocalSearchParams, router } from "expo-router";
+import { Stack, useLocalSearchParams, router } from "expo-router";
 import { View } from "react-native";
 import { CurrencySchema, formatNumber, names } from "@arzman/shared";
 import { useApp } from "../../src/store";
 import { ChartCard } from "../../src/chart";
 import {
   Button,
-  ChangePill,
-  CurrencyBadge,
-  Divider,
   EmptyState,
   GroupedList,
   IconButton,
-  Label,
   MarketStatus,
-  Price,
-  RangeMeter,
+  QuoteHero,
   Screen,
   Section,
   SettingsRow,
-  Surface,
-  radii,
   spacing,
-  useTheme,
   usePrice,
+  useTheme,
 } from "../../src/ui";
 
 export default function Detail() {
@@ -66,65 +59,33 @@ export default function Detail() {
 
 
   return (
-    <Screen
-      floatingTabBar={false}
-      title={names[code]}
-      eyebrow={`${code} · بازار آزاد ایران`}
-      refresh
-      trailing={
-        <IconButton
-          icon={isFavorite ? "star" : "star-outline"}
-          size={38}
-          active={isFavorite}
-          activeColor={t.amber}
-          accessibilityLabel={isFavorite ? "حذف از دنبال‌شده‌ها" : "افزودن به دنبال‌شده‌ها"}
-          onPress={toggleFavorite}
-        />
-      }
-    >
+    <Screen floatingTabBar={false} title={names[code]} largeTitle={false} refresh>
+      <Stack.Screen
+        options={{
+          title: names[code],
+          headerRight: () => (
+            <IconButton
+              icon={isFavorite ? "star" : "star-outline"}
+              size={34}
+              variant="plain"
+              active={isFavorite}
+              activeColor={t.amber}
+              accessibilityLabel={isFavorite ? "حذف از دنبال‌شده‌ها" : "افزودن به دنبال‌شده‌ها"}
+              onPress={toggleFavorite}
+            />
+          ),
+        }}
+      />
       <MarketStatus />
 
-      {/* Hero */}
-      <Surface elevated radius={radii.cardLarge} style={{ gap: spacing.sm }}>
-        <View
-          style={{
-            flexDirection: "row-reverse",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-          }}
-        >
-          <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: spacing.xs }}>
-            <CurrencyBadge code={code} size="lg" tone="filled" dark={t.dark} />
-            <View style={{ gap: 2 }}>
-              <Label size={17} weight="600">
-                {names[code]}
-              </Label>
-              <Label tertiary size={11} allowFontScaling={false}>
-                کد استاندارد {code}
-              </Label>
-            </View>
-          </View>
-          <ChangePill value={q?.changePercent} size="medium" />
-        </View>
-
-        <Price value={q?.priceToman} size="hero" align="flex-end" />
-
-        {q ? (
-          <RangeMeter current={q.priceToman} low={q.lowToman} high={q.highToman} />
-        ) : null}
-
-        <Divider />
-
-        <View style={{ flexDirection: "row-reverse", justifyContent: "space-between" }}>
-          <Label tertiary size={11} allowFontScaling={false}>
-            زمان منبع: {q?.sourceTimeLabel || "نامشخص"}
-          </Label>
-          <Label tertiary size={11} allowFontScaling={false}>
-            واحد منبع: {q?.rawUnit === "IRR" ? "ریال" : "تومان"} · هر{" "}
-            {formatNumber(q?.quoteSize ?? 1, app.user.settings.persian, 0)} واحد
-          </Label>
-        </View>
-      </Surface>
+      {/* Same brand card as Home, for this currency. */}
+      <QuoteHero
+        code={code}
+        quote={q}
+        footer={`زمان منبع: ${q?.sourceTimeLabel || "نامشخص"} · واحد منبع: ${
+          q?.rawUnit === "IRR" ? "ریال" : "تومان"
+        } · هر ${formatNumber(q?.quoteSize ?? 1, app.user.settings.persian, 0)} واحد`}
+      />
 
       {/* Observation chart (real data only) */}
       <ChartCard currency={code} />

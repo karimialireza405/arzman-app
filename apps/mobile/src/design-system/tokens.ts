@@ -24,49 +24,50 @@ export const colors = {
   // --- Dark Mode (OLED True Black) ---
   dark: {
     // Base surfaces
-    background: "#000000",              // OLED true black
-    backgroundSecondary: "#0C0C0C",     // Subtle elevation
-    surface: "#1C1C1E",                 // Apple systemBackground (dark)
-    surfaceElevated: "#2C2C2E",         // Apple secondarySystemBackground
-    surfaceOverlay: "#3A3A3C",          // Apple tertiarySystemBackground
+    background: "#07080E",              // OLED true black
+    backgroundSecondary: "#0B0D16",     // Subtle elevation
+    surface: "#11131E",                 // Apple systemBackground (dark)
+    surfaceElevated: "#171A28",         // Apple secondarySystemBackground
+    surfaceOverlay: "#20243A",          // Apple tertiarySystemBackground
 
     // Semantic text (vibrancy-ready)
-    text: "#FFFFFF",                    // .primary - vibrant on glass
-    textSecondary: "#EBEBF599",         // .secondary - 60% opacity white
-    textTertiary: "#EBEBF566",          // .tertiary - 40% opacity white
-    textQuaternary: "#EBEBF533",        // .quaternary - 20% opacity white
+    text: "#F5F6FA",                    // .primary - vibrant on glass
+    textSecondary: "rgba(235, 237, 250, 0.64)",         // .secondary - 60% opacity white
+    textTertiary: "rgba(235, 237, 250, 0.46)",          // .tertiary - 40% opacity white
+    textQuaternary: "rgba(235, 237, 250, 0.24)",        // .quaternary - 20% opacity white
 
     // System accent colors (exact iOS values)
-    accent: "#0A84FF",                  // iOS Blue
-    accentSecondary: "#5E5CE6",         // iOS Purple
-    accentTertiary: "#FF9F0A",          // iOS Orange
+    accent: "#A78BFA",                  // iOS Blue
+    accentSolid: "#6D4AFF",             // brand fill behind white text (5.15:1)
+    accentSecondary: "#7C5CFF",         // iOS Purple
+    accentTertiary: "#F5B84B",          // iOS Orange
 
     // Directional (with vibrancy)
     green: "#30D158",                   // iOS Green
     greenBackground: "rgba(48, 209, 88, 0.15)",
-    red: "#FF453A",                     // iOS Red
+    red: "#FF6B61",                     // iOS Red
     redBackground: "rgba(255, 69, 58, 0.15)",
-    amber: "#FF9F0A",                   // iOS Orange/Amber
-    amberBackground: "rgba(255, 159, 10, 0.15)",
+    amber: "#F5B84B",                   // iOS Orange/Amber
+    amberBackground: "rgba(245, 184, 75, 0.15)",
 
     // Glass Materials (matching iOS material recipes)
-    glassRegular: "rgba(28, 28, 30, 0.72)",      // .regularMaterial
-    glassThick: "rgba(28, 28, 30, 0.88)",        // .thickMaterial
-    glassThin: "rgba(28, 28, 30, 0.52)",         // .thinMaterial
-    glassUltraThin: "rgba(28, 28, 30, 0.32)",    // .ultraThinMaterial
+    glassRegular: "rgba(17, 19, 30, 0.72)",      // .regularMaterial
+    glassThick: "rgba(17, 19, 30, 0.88)",        // .thickMaterial
+    glassThin: "rgba(17, 19, 30, 0.52)",         // .thinMaterial
+    glassUltraThin: "rgba(17, 19, 30, 0.32)",    // .ultraThinMaterial
 
     // Glass borders & highlights
-    glassRim: "rgba(255, 255, 255, 0.18)",       // Inner stroke
+    glassRim: "rgba(255, 255, 255, 0.10)",       // Inner stroke
     glassSpecular: "rgba(255, 255, 255, 0.25)",  // Top-edge highlight
     glassSeparator: "rgba(255, 255, 255, 0.1)",  // Hairline separator
 
     // Dividers
-    separator: "rgba(255, 255, 255, 0.12)",
-    separatorOpaque: "#38383A",
+    separator: "rgba(255, 255, 255, 0.08)",
+    separatorOpaque: "#1F2233",
 
     // Interactive states
-    pressedOverlay: "rgba(255, 255, 255, 0.08)",
-    selectedOverlay: "rgba(10, 132, 255, 0.15)",
+    pressedOverlay: "rgba(255, 255, 255, 0.06)",
+    selectedOverlay: "rgba(139, 92, 246, 0.18)",
 
     // Shadows (dark mode - more subtle)
     shadowLevel1: "rgba(0, 0, 0, 0.15)",
@@ -75,29 +76,29 @@ export const colors = {
     shadowLevel4: "rgba(0, 0, 0, 0.30)",
 
     // Hairlines (never pure black/white — Apple uses translucent separators)
-    lineSubtle: "rgba(255, 255, 255, 0.06)",
+    lineSubtle: "rgba(255, 255, 255, 0.05)",
 
     // Control fills (Apple fill colors, dark)
-    fillPrimary: "rgba(120, 120, 128, 0.36)",     // systemFill
-    fillSecondary: "rgba(120, 120, 128, 0.32)",   // secondarySystemFill
-    fillTertiary: "rgba(118, 118, 128, 0.24)",    // tertiarySystemFill
-    fillQuaternary: "rgba(116, 118, 128, 0.18)",  // quaternarySystemFill
+    fillPrimary: "rgba(120, 122, 150, 0.30)",     // systemFill
+    fillSecondary: "rgba(120, 122, 150, 0.24)",   // secondarySystemFill
+    fillTertiary: "rgba(120, 122, 150, 0.18)",    // tertiarySystemFill
+    fillQuaternary: "rgba(120, 122, 150, 0.12)",  // quaternarySystemFill
 
     // Legacy aliases (kept so partially migrated screens keep compiling)
     muted: "#8E8E93",
-    line: "rgba(255, 255, 255, 0.12)",
-    raised: "#2C2C2E",
-    surfaceHover: "#3A3A3C",
-    glassClear: "rgba(28, 28, 30, 0.45)",
-    glassProminent: "rgba(44, 44, 46, 0.88)",
-    accentGlass: "rgba(10, 132, 255, 0.18)",
-    accentFill: "rgba(10, 132, 255, 0.15)",
+    line: "rgba(255, 255, 255, 0.08)",
+    raised: "#171A28",
+    surfaceHover: "#20243A",
+    glassClear: "rgba(17, 19, 30, 0.45)",
+    glassProminent: "rgba(23, 26, 40, 0.88)",
+    accentGlass: "rgba(139, 92, 246, 0.20)",
+    accentFill: "rgba(139, 92, 246, 0.18)",
     greenFill: "rgba(48, 209, 88, 0.15)",
     greenGlass: "rgba(48, 209, 88, 0.15)",
-    redFill: "rgba(255, 69, 58, 0.15)",
-    redGlass: "rgba(255, 69, 58, 0.15)",
-    amberFill: "rgba(255, 159, 10, 0.15)",
-    amberGlass: "rgba(255, 159, 10, 0.15)",
+    redFill: "rgba(255, 107, 97, 0.15)",
+    redGlass: "rgba(255, 107, 97, 0.15)",
+    amberFill: "rgba(245, 184, 75, 0.15)",
+    amberGlass: "rgba(245, 184, 75, 0.15)",
     greenText: "#30D158",
     redText: "#FF453A",
     amberText: "#FF9F0A",
@@ -106,29 +107,30 @@ export const colors = {
   // --- Light Mode (Apple System Grouped) ---
   light: {
     // Base surfaces
-    background: "#F2F2F7",              // Apple systemGroupedBackground
+    background: "#F4F5FA",              // Apple systemGroupedBackground
     backgroundSecondary: "#FFFFFF",     // White
     surface: "#FFFFFF",                 // Apple systemBackground
-    surfaceElevated: "#F2F2F7",         // Apple secondarySystemBackground
-    surfaceOverlay: "#E8E8ED",          // Apple tertiarySystemBackground
+    surfaceElevated: "#F4F5FA",         // Apple secondarySystemBackground
+    surfaceOverlay: "#EBEDF5",          // Apple tertiarySystemBackground
 
     // Semantic text
-    text: "#000000",                    // .primary
-    textSecondary: "#3C3C4399",         // .secondary - 60% opacity black
-    textTertiary: "#3C3C4366",          // .tertiary - 40% opacity black
-    textQuaternary: "#3C3C4333",        // .quaternary - 20% opacity black
+    text: "#0B0D17",                    // .primary
+    textSecondary: "rgba(11, 13, 23, 0.62)",         // .secondary - 60% opacity black
+    textTertiary: "rgba(11, 13, 23, 0.48)",          // .tertiary - 40% opacity black
+    textQuaternary: "rgba(11, 13, 23, 0.24)",        // .quaternary - 20% opacity black
 
     // System accent colors
-    accent: "#007AFF",                  // iOS Blue
-    accentSecondary: "#5856D6",         // iOS Purple
-    accentTertiary: "#FF9500",          // iOS Orange
+    accent: "#6D28D9",                  // iOS Blue
+    accentSolid: "#6D28D9",             // brand fill behind white text (7.10:1)
+    accentSecondary: "#7C3AED",         // iOS Purple
+    accentTertiary: "#B7791F",          // iOS Orange
 
     // Directional
-    green: "#34C759",                   // iOS Green
+    green: "#177A34",                   // iOS Green
     greenBackground: "rgba(52, 199, 89, 0.12)",
-    red: "#FF3B30",                     // iOS Red
+    red: "#D92D20",                     // iOS Red
     redBackground: "rgba(255, 59, 48, 0.12)",
-    amber: "#FF9500",                   // iOS Orange
+    amber: "#B7791F",                   // iOS Orange
     amberBackground: "rgba(255, 149, 0, 0.12)",
 
     // Glass Materials
@@ -143,12 +145,12 @@ export const colors = {
     glassSeparator: "rgba(0, 0, 0, 0.06)",
 
     // Dividers
-    separator: "rgba(0, 0, 0, 0.18)",
+    separator: "rgba(11, 13, 23, 0.08)",
     separatorOpaque: "#C6C6C8",
 
     // Interactive states
-    pressedOverlay: "rgba(0, 0, 0, 0.04)",
-    selectedOverlay: "rgba(0, 122, 255, 0.12)",
+    pressedOverlay: "rgba(11, 13, 23, 0.05)",
+    selectedOverlay: "rgba(109, 40, 217, 0.10)",
 
     // Shadows (light mode)
     shadowLevel1: "rgba(0, 0, 0, 0.05)",
@@ -157,7 +159,7 @@ export const colors = {
     shadowLevel4: "rgba(0, 0, 0, 0.16)",
 
     // Hairlines
-    lineSubtle: "rgba(60, 60, 67, 0.12)",
+    lineSubtle: "rgba(11, 13, 23, 0.05)",
 
     // Control fills (Apple fill colors, light)
     fillPrimary: "rgba(120, 120, 128, 0.20)",
@@ -167,13 +169,13 @@ export const colors = {
 
     // Legacy aliases (kept so partially migrated screens keep compiling)
     muted: "#8E8E93",
-    line: "rgba(0, 0, 0, 0.18)",
-    raised: "#F2F2F7",
+    line: "rgba(11, 13, 23, 0.08)",
+    raised: "#FFFFFF",
     surfaceHover: "#E5E5EA",
     glassClear: "rgba(255, 255, 255, 0.55)",
     glassProminent: "rgba(255, 255, 255, 0.95)",
-    accentGlass: "rgba(0, 122, 255, 0.12)",
-    accentFill: "rgba(0, 122, 255, 0.12)",
+    accentGlass: "rgba(109, 40, 217, 0.12)",
+    accentFill: "rgba(109, 40, 217, 0.10)",
     greenFill: "rgba(52, 199, 89, 0.12)",
     greenGlass: "rgba(52, 199, 89, 0.12)",
     redFill: "rgba(255, 59, 48, 0.12)",

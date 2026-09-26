@@ -18,7 +18,7 @@ import {
   View,
   type LayoutChangeEvent,
 } from "react-native";
-import { curve, radii, spacing, springs } from "../design-system";
+import { curve, radii, spacing, springs, fontFamilies } from "../design-system";
 import { AppIcon, Label } from "./primitives";
 import { Glass } from "./surfaces";
 import { useFeedback, usePressFeedback, useReduceMotion, useTheme } from "./theme";
@@ -115,7 +115,9 @@ export function Button({
   let iconColor = t.text;
 
   if (resolved === "prominent") {
-    background = t.accent;
+    // accent is tuned for text on dark; as a fill under white text it gave
+    // 2.72:1. accentSolid is the fill-safe brand colour.
+    background = t.accentSolid;
     labelColor = "#FFFFFF";
     iconColor = "#FFFFFF";
   } else if (resolved === "destructive") {
@@ -391,7 +393,9 @@ export function SegmentedControl<T extends string | number>({
             width: segmentWidth,
             borderRadius: radii.controlSmall - 2,
             borderCurve: curve.continuous,
-            backgroundColor: t.dark ? "#636366" : "#FFFFFF",
+            backgroundColor: t.dark ? t.surfaceOverlay : "#FFFFFF",
+            borderWidth: t.dark ? 1 : 0,
+            borderColor: "rgba(255, 255, 255, 0.10)",
             transform: [{ translateX: offset }],
             shadowColor: "#000000",
             shadowOffset: { width: 0, height: 1 },
@@ -512,8 +516,9 @@ export function SearchField({
         style={{
           flex: 1,
           color: t.text,
+          fontFamily: fontFamilies.regular,
           fontSize: 17,
-          lineHeight: 22,
+          lineHeight: 27,
           textAlign: "right",
           writingDirection: "rtl",
           paddingVertical: 0,
