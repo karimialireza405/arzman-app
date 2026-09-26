@@ -10,7 +10,7 @@ import React from "react";
 import { Platform, Text, View, StyleSheet } from "react-native";
 import { SymbolView, type SFSymbol } from "expo-symbols";
 import { Ionicons } from "@expo/vector-icons";
-import { curve, iconSizes, radii, spacing } from "../design-system";
+import { curve, iconSizes, persianText, radii, spacing } from "../design-system";
 import { textStyle, useTheme } from "./theme";
 import type {
   ColorValue,
@@ -171,20 +171,27 @@ export function Label({
         fontWeight: weight,
       };
 
+  // Every string in the app funnels through here, so Vazirmatn, the measured
+  // Persian line height and the no-tracking rule are applied in one place.
+  const resolved = persianText(
+    StyleSheet.flatten([
+      {
+        color: textColor,
+        textAlign: align ?? "right",
+        writingDirection: "rtl",
+        fontVariant: tabular ? ["tabular-nums"] : base.fontVariant,
+      },
+      base,
+      style,
+    ]) as TextStyle,
+    children,
+  );
+
   return (
     <Text
       numberOfLines={numberOfLines}
       allowFontScaling={allowFontScaling}
-      style={[
-        {
-          color: textColor,
-          textAlign: align ?? "right",
-          writingDirection: "rtl",
-          fontVariant: tabular ? ["tabular-nums"] : base.fontVariant,
-        },
-        base,
-        style,
-      ]}
+      style={resolved}
     >
       {children}
     </Text>

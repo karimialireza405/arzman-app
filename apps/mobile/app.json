@@ -27,7 +27,8 @@
             "enableSceneSupport": true
           }
         }
-      ]
+      ],
+      "expo-font"
     ],
     "extra": {
       "supportsRTL": true,

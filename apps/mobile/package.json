@@ -4,6 +4,7 @@
   "main": "expo-router/entry",
   "dependencies": {
     "@arzman/shared": "*",
+    "@expo-google-fonts/vazirmatn": "^0.4.1",
     "@expo/vector-icons": "^15.0.2",
     "expo": "~57.0.24",
     "expo-blur": "~57.0.3",
@@ -11,6 +12,7 @@
     "expo-clipboard": "~57.0.2",
     "expo-constants": "~57.0.19",
     "expo-dev-client": "~57.0.19",
+    "expo-font": "~57.0.4",
     "expo-glass-effect": "~57.0.3",
     "expo-haptics": "~57.0.3",
     "expo-linking": "~57.0.10",

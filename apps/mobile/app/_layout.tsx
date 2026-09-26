@@ -10,6 +10,15 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { I18nManager, Platform } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+// Per-weight subpaths: the package's main entry references all nine weights,
+// which put three unused .ttf files (~380 KB) into the bundle.
+import { useFonts } from "expo-font";
+import { Vazirmatn_300Light } from "@expo-google-fonts/vazirmatn/300Light";
+import { Vazirmatn_400Regular } from "@expo-google-fonts/vazirmatn/400Regular";
+import { Vazirmatn_500Medium } from "@expo-google-fonts/vazirmatn/500Medium";
+import { Vazirmatn_600SemiBold } from "@expo-google-fonts/vazirmatn/600SemiBold";
+import { Vazirmatn_700Bold } from "@expo-google-fonts/vazirmatn/700Bold";
+import { Vazirmatn_800ExtraBold } from "@expo-google-fonts/vazirmatn/800ExtraBold";
 import { AppProvider } from "../src/store";
 import { radii, useTheme } from "../src/ui";
 
@@ -67,6 +76,19 @@ function Navigation() {
 }
 
 export default function Layout() {
+  // Bundled assets, so this resolves in a frame or two. Rendering before it
+  // would draw every Persian string in the system font and then jump.
+  const [fontsLoaded, fontError] = useFonts({
+    Vazirmatn_300Light,
+    Vazirmatn_400Regular,
+    Vazirmatn_500Medium,
+    Vazirmatn_600SemiBold,
+    Vazirmatn_700Bold,
+    Vazirmatn_800ExtraBold,
+  });
+  // A font failure must never lock the user out: fall back to the system face.
+  if (!fontsLoaded && !fontError) return null;
+
   return (
     <SafeAreaProvider>
       <AppProvider>
