@@ -21,7 +21,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Defs, LinearGradient, RadialGradient, Rect, Stop } from "react-native-svg";
 import Reanimated, { FadeInDown } from "react-native-reanimated";
-import { curve, fontFamilies, iconSizes, radii, spacing } from "../design-system";
+import { appFont, curve, fontFamilies, iconSizes, radii, spacing } from "../design-system";
 import { useApp } from "../store";
 import { AppIcon, Label } from "./primitives";
 import { Button } from "./controls";
@@ -384,7 +384,7 @@ export function AmountInput({
           style={{
             flex: 1,
             color: t.text,
-            fontFamily: fontFamilies.semibold,
+            fontFamily: appFont(fontFamilies.semibold),
             fontSize: 24,
             lineHeight: 38,
             fontVariant: ["tabular-nums"],

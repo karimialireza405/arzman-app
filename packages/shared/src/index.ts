@@ -137,6 +137,17 @@ export function formatNumber(value: number, persian = true, digits = 2, minDigit
     minimumFractionDigits: Math.min(minDigits, digits),
   }).format(value);
 }
+/**
+ * A converted amount, readable at any magnitude. Four decimals are enough for
+ * "۲۳۳٬۳۰۰" but turn 1 Toman in dollars (0.0000042863) into "0", which is
+ * simply wrong; below 1, keep enough decimals for four significant digits.
+ */
+export function formatAmount(value: number, persian = true, significant = 4) {
+  const magnitude = Math.abs(value);
+  if (magnitude === 0 || magnitude >= 1) return formatNumber(value, persian, 4);
+  const decimals = Math.min(12, Math.ceil(-Math.log10(magnitude)) + significant - 1);
+  return formatNumber(value, persian, decimals);
+}
 export function convert(
   amount: number,
   from: ConversionCurrency,

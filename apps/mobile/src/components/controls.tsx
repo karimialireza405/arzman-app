@@ -18,7 +18,7 @@ import {
   View,
   type LayoutChangeEvent,
 } from "react-native";
-import { curve, radii, spacing, springs, fontFamilies } from "../design-system";
+import { curve, radii, spacing, springs, fontFamilies, appFont } from "../design-system";
 import { AppIcon, Label } from "./primitives";
 import { Glass } from "./surfaces";
 import { useFeedback, usePressFeedback, useReduceMotion, useTheme } from "./theme";
@@ -516,7 +516,7 @@ export function SearchField({
         style={{
           flex: 1,
           color: t.text,
-          fontFamily: fontFamilies.regular,
+          fontFamily: appFont(fontFamilies.regular),
           fontSize: 17,
           lineHeight: 27,
           textAlign: "right",

@@ -8,6 +8,7 @@ import {
   isStale,
   isFetchFresh,
   formatNumber,
+  formatAmount,
   type CurrencyQuote,
 } from "./index";
 import { parseTgju } from "../../../server/src/providers/tgju";
@@ -42,6 +43,15 @@ describe("units and input", () => {
     // TGJU quotes one IQD in Rial: 1486 IRR is 148.6 Toman, never 148.60000000003.
     expect(formatNumber(1486 / 10, false, 2)).toBe("148.6");
     expect(formatNumber(1486 / 10 - 1479 / 10, false, 2)).toBe("0.7");
+  });
+  it("never rounds a real conversion down to zero", () => {
+    // 1 Toman in dollars at 233,300: 0.0000042863...
+    expect(formatAmount(1 / 233_300, false)).toBe("0.000004286");
+    expect(formatAmount(1 / 233_300, true)).toBe("۰٫۰۰۰۰۰۴۲۸۶");
+    expect(formatAmount(0.5, false)).toBe("0.5");
+    expect(formatAmount(233_300, false)).toBe("233,300");
+    expect(formatAmount(1.23456, false)).toBe("1.2346");
+    expect(formatAmount(0, false)).toBe("0");
   });
   it("converts both directions and cross rates", () => {
     const eur = {

@@ -21,6 +21,7 @@ import { Vazirmatn_700Bold } from "@expo-google-fonts/vazirmatn/700Bold";
 import { Vazirmatn_800ExtraBold } from "@expo-google-fonts/vazirmatn/800ExtraBold";
 import { AppProvider } from "../src/store";
 import { radii, useTheme } from "../src/ui";
+import { setFontsAvailable } from "../src/design-system";
 
 // ArzMan lays Persian out right-to-left *by hand*: every row is an explicit
 // `row-reverse` and the tab order is reversed in code. If the system were also
@@ -88,6 +89,7 @@ export default function Layout() {
   });
   // A font failure must never lock the user out: fall back to the system face.
   if (!fontsLoaded && !fontError) return null;
+  setFontsAvailable(!fontError);
 
   return (
     <SafeAreaProvider>

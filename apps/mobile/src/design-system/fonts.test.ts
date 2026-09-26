@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fontFamilyFor, hasPersianLetters, persianText, PERSIAN_LINE_HEIGHT } from "./fonts";
+import { appFont, fontFamilyFor, hasPersianLetters, persianText, PERSIAN_LINE_HEIGHT, setFontsAvailable } from "./fonts";
 
 describe("Persian text resolution", () => {
   it("never lets a line be shorter than Vazirmatn's measured height", () => {
@@ -31,5 +31,19 @@ describe("Persian text resolution", () => {
     expect(hasPersianLetters("۱۴۸٫۶")).toBe(false);
     expect(hasPersianLetters(["۱۲", " ", "ریال"])).toBe(true);
     expect(hasPersianLetters(42)).toBe(false);
+  });
+
+  it("falls back to the system font, weight intact, if Vazirmatn failed to load", () => {
+    setFontsAvailable(false);
+    try {
+      const s = persianText({ fontSize: 17, fontWeight: "700" });
+      expect(s.fontFamily).toBeUndefined();
+      expect(s.fontWeight).toBe("700");
+      expect(s.lineHeight).toBe(Math.ceil(17 * PERSIAN_LINE_HEIGHT));
+      expect(appFont("Vazirmatn_400Regular")).toBeUndefined();
+    } finally {
+      setFontsAvailable(true);
+    }
+    expect(appFont("Vazirmatn_400Regular")).toBe("Vazirmatn_400Regular");
   });
 });

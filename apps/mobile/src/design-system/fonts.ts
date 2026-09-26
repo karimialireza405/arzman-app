@@ -31,6 +31,21 @@ export const fontFamilies = {
   heavy: "Vazirmatn_800ExtraBold",
 } as const;
 
+/**
+ * Whether Vazirmatn actually loaded. If loading failed, naming the family
+ * anyway is worse than the system face: the web falls back to a serif, and iOS
+ * logs "Unrecognized font family". The root layout sets this before any text
+ * renders; everything below reads it through `appFont` / `persianText`.
+ */
+let fontsAvailable = true;
+export function setFontsAvailable(available: boolean) {
+  fontsAvailable = available;
+}
+/** A Vazirmatn family if it loaded, otherwise undefined (system font). */
+export function appFont(family: string): string | undefined {
+  return fontsAvailable ? family : undefined;
+}
+
 /** (ascender − descender) / unitsPerEm, measured from the shipped .ttf files. */
 export const PERSIAN_LINE_HEIGHT = 1.5625;
 
@@ -63,8 +78,9 @@ export function persianText(style: TextStyle, content?: unknown): TextStyle {
   const minimum = Math.ceil(fontSize * PERSIAN_LINE_HEIGHT);
   const next: TextStyle = {
     ...style,
-    fontFamily: fontFamilyFor(style.fontWeight),
-    fontWeight: undefined,
+    // Without Vazirmatn the system font needs its fontWeight back.
+    fontFamily: appFont(fontFamilyFor(style.fontWeight)),
+    fontWeight: fontsAvailable ? undefined : style.fontWeight,
     lineHeight: Math.max(style.lineHeight ?? 0, minimum),
   };
   if (next.letterSpacing && hasPersianLetters(content)) next.letterSpacing = undefined;
