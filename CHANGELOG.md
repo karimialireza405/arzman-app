@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.1] - 2026-09-27 — second design pass
+
+### Changed
+- **Converter**: two compact one-row cards with currency pills, a native
+  currency sheet with live rates, a brand swap button and quick-amount chips.
+- **Currency detail chart**: period change as a pill, compact scrub readout,
+  violet for a flat series; the hero no longer repeats the trend.
+- **Status line**: states when the rates were received, coloured by freshness,
+  instead of a permanent amber "source time unknown".
+- **Loading**: skeleton placeholders instead of bare dashes.
+
+### Fixed
+- The converter showed small results as **۰** (1 Toman = 0.0000043 USD);
+  `formatAmount` keeps four significant digits.
+- A failed font load rendered text in a serif / unknown family; the app now
+  falls back to the system font.
+- Opening the converter from Toman no longer starts as Toman → Toman, and
+  picking the currency already on the other side swaps them.
+
 ## [0.5.0] - 2026-09-27 — professional redesign
 
 References: Dribbble currency-exchange shots (Kites Design dark exchange UI,
