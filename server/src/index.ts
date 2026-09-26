@@ -6,14 +6,24 @@ import {
 } from "@arzman/shared";
 import { TGJUProvider } from "./providers/tgju";
 import { refreshSnapshot, staleSnapshot } from "./cache";
+import {
+  HISTORY_QUERY,
+  INSERT_OBSERVATION,
+  OBSERVATIONS_SCHEMA,
+  RETENTION_DELETE,
+  retentionParams,
+} from "./sql";
+import {
+  ACTIVE_INTERVAL_MS,
+  alarmToWrite,
+  cooldownMs,
+  nextRefreshDelayMs,
+} from "./schedule";
 
 interface Env {
   MARKET: DurableObjectNamespace<MarketStore>;
   ALLOWED_ORIGIN: string;
 }
-const REFRESH_INTERVAL_MS = 45_000; // Target 45 seconds (30-60s range)
-const BASE_BACKOFF_MS = 15_000;     // 15 seconds initial backoff on failure
-const MAX_BACKOFF_MS = 300_000;     // 5 minutes max backoff cap
 const ranges: Record<string, number> = {
   "1H": 3600_000,
   "1D": 86400_000,
@@ -24,11 +34,16 @@ const ranges: Record<string, number> = {
 };
 export class MarketStore extends DurableObject<Env> {
   private pending: Promise<void> | null = null;
+  /**
+   * When a client last asked for data. Deliberately in memory, not storage:
+   * persisting it would cost a row written per request, and losing it on
+   * eviction is harmless — the store simply falls back to the idle cadence
+   * until the next request, which refreshes immediately anyway.
+   */
+  private lastClientAt: number | null = null;
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
-    ctx.storage.sql.exec(
-      "CREATE TABLE IF NOT EXISTS observations (currency TEXT NOT NULL, timestamp TEXT NOT NULL, price REAL NOT NULL, stale INTEGER NOT NULL, PRIMARY KEY(currency,timestamp))",
-    );
+    ctx.storage.sql.exec(OBSERVATIONS_SCHEMA);
   }
   async refresh() {
     if (this.pending) return this.pending;
@@ -42,12 +57,14 @@ export class MarketStore extends DurableObject<Env> {
   private async update() {
     const attempt = (await this.ctx.storage.get<number>("lastAttempt")) ?? 0;
     const failures = (await this.ctx.storage.get<number>("consecutiveFailures")) ?? 0;
-    const cooldown = failures > 0
-      ? Math.min(MAX_BACKOFF_MS, BASE_BACKOFF_MS * Math.pow(2, Math.min(failures - 1, 5)))
-      : REFRESH_INTERVAL_MS;
+    const cooldown = cooldownMs(failures);
 
     if (Date.now() - attempt < cooldown) {
-      await this.ctx.storage.setAlarm(attempt + cooldown + 500);
+      const next = alarmToWrite(
+        await this.ctx.storage.getAlarm(),
+        attempt + cooldown + 500,
+      );
+      if (next !== null) await this.ctx.storage.setAlarm(next);
       return;
     }
     await this.ctx.storage.put("lastAttempt", Date.now());
@@ -57,34 +74,39 @@ export class MarketStore extends DurableObject<Env> {
     });
     if (!result.failed && result.snapshot) {
       const snapshot = result.snapshot;
-      await this.ctx.storage.delete("lastError");
-      await this.ctx.storage.put("consecutiveFailures", 0);
-      await this.ctx.storage.put("lastSuccessfulFetch", snapshot.fetchedAt);
+      // Only a failure ever sets these, so only a recovery needs to clear them.
+      if (failures > 0) {
+        await this.ctx.storage.delete("lastError");
+        await this.ctx.storage.put("consecutiveFailures", 0);
+      }
       for (const q of snapshot.quotes)
         this.ctx.storage.sql.exec(
-          "INSERT OR IGNORE INTO observations VALUES (?, ?, ?, ?)",
+          INSERT_OBSERVATION,
           q.currency,
           q.fetchedAt,
           q.priceToman,
           q.stale ? 1 : 0,
         );
       this.ctx.storage.sql.exec(
-        "DELETE FROM observations WHERE timestamp < ?",
-        new Date(Date.now() - ranges["1Y"]).toISOString(),
+        RETENTION_DELETE,
+        ...retentionParams(new Date(Date.now() - ranges["1Y"]).toISOString()),
       );
-      await this.ctx.storage.setAlarm(Date.now() + REFRESH_INTERVAL_MS);
+      const now = Date.now();
+      await this.ctx.storage.setAlarm(
+        now + nextRefreshDelayMs(now, this.lastClientAt, 0),
+      );
     } else {
       const nextFailures = failures + 1;
       await this.ctx.storage.put("consecutiveFailures", nextFailures);
       await this.ctx.storage.put("lastError", true);
-      const nextBackoff = Math.min(MAX_BACKOFF_MS, BASE_BACKOFF_MS * Math.pow(2, Math.min(nextFailures - 1, 5)));
-      await this.ctx.storage.setAlarm(Date.now() + nextBackoff);
+      await this.ctx.storage.setAlarm(Date.now() + cooldownMs(nextFailures));
     }
   }
   async alarm() {
     await this.refresh();
   }
   async fetch(request: Request) {
+    this.lastClientAt = Date.now();
     const url = new URL(request.url);
     if (url.pathname.startsWith("/api/history/")) {
       const code = CurrencySchema.safeParse(url.pathname.split("/").pop());
@@ -98,7 +120,7 @@ export class MarketStore extends DurableObject<Env> {
       const bucket = Math.max(300_000, Math.ceil(ranges[range] / 240));
       const rows = this.ctx.storage.sql
         .exec<{ timestamp: string; price: number; stale: number }>(
-          "SELECT timestamp, price, stale FROM observations WHERE currency = ? AND timestamp >= ? GROUP BY CAST(unixepoch(timestamp) * 1000 / ? AS INTEGER) HAVING timestamp = MAX(timestamp) ORDER BY timestamp",
+          HISTORY_QUERY,
           code.data,
           new Date(Date.now() - ranges[range]).toISOString(),
           bucket,
@@ -138,7 +160,7 @@ export class MarketStore extends DurableObject<Env> {
       );
     const failed = await this.ctx.storage.get<boolean>("lastError");
     const snapshot =
-      failed || Date.now() - Date.parse(saved.fetchedAt) > REFRESH_INTERVAL_MS * 2
+      failed || Date.now() - Date.parse(saved.fetchedAt) > ACTIVE_INTERVAL_MS * 2
         ? staleSnapshot(saved)
         : saved;
     return Response.json(
