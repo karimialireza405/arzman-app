@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.1] - 2026-09-27 — backend: stop exhausting the free Cloudflare budget
+
+### Fixed
+- **Root cause of the daily 503 outage, measured.** Every refresh ran
+  `DELETE FROM observations WHERE timestamp < ?`, which cannot use the
+  `(currency, timestamp)` primary key and scans the whole table. Measured in
+  workerd with the cursor's billing counters on a 40,000-row table: **40,000
+  rows read per run** (deleting nothing), against a Workers Free budget of
+  5,000,000 rows read per day. The budget ran out ~90 minutes after each
+  00:00 UTC reset and all storage then failed — which matches every
+  observation (up 03:30–05:00 Tehran, down afterwards). The new predicate names
+  the currencies: **8 rows read**. A test checks every statement's query plan.
+- Refresh every 45 s only while a client asked within 10 minutes, every 10
+  minutes otherwise (idle refreshes 1,920 → 144/day; TGJU loads 7,680 → 576/day).
+- No alarm rewrite on every request; no redundant writes after a success.
+
+### Estimated daily use afterwards
+- App open 24/7: ~26k rows read (0.5 % of limit), ~21k rows written (21 %).
+
+### Not done
+- **Not deployed.** Deploying ships this and the earlier parser fixes. Today's
+  budget is already spent, so the deployed API recovers at 00:00 UTC
+  (03:30 Tehran) and should then stay up.
+
 ## [0.4.0] - 2026-09-27 — portfolio removed
 
 ### Removed (owner's request: «بخش دارایی من رو کامل حذف کن»)

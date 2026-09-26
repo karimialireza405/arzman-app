@@ -9,12 +9,12 @@
 
 ## Open — backend
 
-- [ ] **Deployed Worker returns 503 on every Durable Object call** (health is
-      200, TGJU is fine). Owner checks Cloudflare dashboard → Workers →
-      `arzman-market` → Metrics for an exhausted Free-plan limit; recheck after
-      00:00 UTC (03:30 Tehran). If a limit is the cause, cut Durable Object work
-      (e.g. stop the 24/7 45-second alarm loop when nobody is reading) before
-      redeploying.
+- [x] Find why the deployed Worker 503s: full-table-scan retention delete
+      exhausted the Free plan's 5M rows-read/day (measured, fixed in `4745059`).
+- [ ] **Owner deploys**: `npm run deploy -w @arzman/server` (this PC is already
+      signed in to Wrangler). Service returns after 00:00 UTC (03:30 Tehran).
+- [ ] After deploy: `npx tsx scripts/audit-api.ts <worker URL>` should be 14/14,
+      and the app should stay online past 05:00 Tehran.
 
 ### Milestone 0.3.2 — first on-device pass (2026-09-27)
 

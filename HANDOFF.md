@@ -24,9 +24,12 @@
   personal rates. Last commit that still had the portfolio: `41adbc9`.
 - Tests 23/23, typecheck and lint clean, iOS Hermes export builds, expo-doctor
   20/21 (the same upstream patch-release advisory as before).
-- **Deployed Worker: every Durable Object call returns 503** (see CHANGELOG
-  0.4.0). Likely a Workers Free daily limit; unconfirmed. Not deployed, not
-  logged in. This is the most important open item — the phone shows «آفلاین».
+- **Deployed Worker 503 — cause found and fixed (`4745059`), not yet deployed.**
+  The retention delete scanned the whole observations table every refresh
+  (measured: 40,000 rows read per run → 8 after the fix), exhausting the Free
+  plan's 5M rows-read/day ~90 min after each 00:00 UTC reset. Also added an
+  idle refresh cadence. Deploy: `npm run deploy -w @arzman/server` (Wrangler is
+  already signed in on this PC; dry run passes). See CHANGELOG 0.4.1.
 
 ---
 
