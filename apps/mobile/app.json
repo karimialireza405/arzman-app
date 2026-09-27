@@ -11,6 +11,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.arzman.personal",
       "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
         "CFBundleAllowMixedLocalizations": true,
         "CFBundleLocalizations": [
           "fa",
