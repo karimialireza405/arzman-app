@@ -58,6 +58,7 @@ export const iconMapping: Record<
   chevron: { sf: "chevron.left", ion: "chevron-back" },
   "chevron-down": { sf: "chevron.down", ion: "chevron-down" },
   info: { sf: "info.circle", ion: "information-circle-outline" },
+  mail: { sf: "envelope", ion: "mail-outline" },
   sparkles: { sf: "sparkles", ion: "sparkles-outline" },
   trash: { sf: "trash", ion: "trash-outline" },
   shield: { sf: "lock.shield.fill", ion: "shield-checkmark" },

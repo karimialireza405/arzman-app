@@ -5,11 +5,12 @@
  * switches for on/off preferences, segmented controls for small choice sets,
  * and a chevron only when a row navigates somewhere.
  */
-import { Alert, Linking, View } from "react-native";
+import { Alert, Linking, Pressable, View } from "react-native";
 import { router } from "expo-router";
 import Constants from "expo-constants";
 import { useApp } from "../../src/store";
 import {
+  AppIcon,
   Button,
   GroupedList,
   Label,
@@ -22,6 +23,30 @@ import {
   spacing,
   useTheme,
 } from "../../src/ui";
+
+/** A tappable developer contact in the footer; Latin text stays left-to-right. */
+function ContactLink({ icon, text, url }: { icon: string; text: string; url: string }) {
+  const t = useTheme();
+  return (
+    <Pressable
+      accessibilityRole="link"
+      accessibilityLabel={text}
+      hitSlop={8}
+      onPress={() => void Linking.openURL(url)}
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 5,
+        opacity: pressed ? 0.5 : 1,
+      })}
+    >
+      <AppIcon name={icon} size={13} color={t.accent} />
+      <Label accent size={12} weight="500" align="left" style={{ writingDirection: "ltr" }}>
+        {text}
+      </Label>
+    </Pressable>
+  );
+}
 
 export default function More() {
   const app = useApp();
@@ -155,13 +180,15 @@ export default function More() {
           </View>
         </Surface>
 
-        <View style={{ alignItems: "center", gap: 2, paddingVertical: spacing.xs }}>
-          <Label secondary size={12} weight="600">
+        <View style={{ alignItems: "center", gap: 4, paddingVertical: spacing.xs }}>
+          <Label secondary size={12} weight="600" align="center">
             «ارز من» · نسخهٔ {Constants.expoConfig?.version ?? "0.1.0"}
           </Label>
-          <Label tertiary size={10}>
-            طراحی‌شده برای آیفون · زبان طراحی Liquid Glass
+          <Label tertiary size={12} align="center">
+            توسعه‌دهنده: علیرضا کریمی
           </Label>
+          <ContactLink icon="logo-github" text="github.com/karimialireza405" url="https://github.com/karimialireza405" />
+          <ContactLink icon="mail" text="alirezkarimi0021@gmail.com" url="mailto:alirezkarimi0021@gmail.com" />
         </View>
       </Section>
     </Screen>
