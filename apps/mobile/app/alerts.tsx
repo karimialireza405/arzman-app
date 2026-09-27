@@ -87,7 +87,7 @@ export default function Alerts() {
   };
 
   return (
-    <Screen title="هشدارهای قیمت" eyebrow="نظارت لحظه‌ای بر بازار" floatingTabBar={false} largeTitle={false}>
+    <Screen title="هشدارهای قیمت" eyebrow="نظارت لحظه‌ای بر بازار" largeTitle={false}>
       {/* Honest capability note — apple-style inline notice, not a banner card */}
       <Surface
         style={{

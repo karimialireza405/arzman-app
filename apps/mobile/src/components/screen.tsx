@@ -1,12 +1,9 @@
 /**
  * Screen scaffold, form field and empty state.
  *
- * Safe-area contract (HIG · Layout):
- *  - the scroll view accounts for the top inset (Dynamic Island) via
- *    SafeAreaView, and
- *  - reserves exactly the floating tab bar's height + home-indicator inset at
- *    the bottom, so no content is ever hidden behind chrome.
- * Sheet screens pass `floatingTabBar={false}` because they have no tab bar.
+ * Safe-area contract (HIG · Layout): the scroll view accounts for the top inset
+ * (Dynamic Island) via SafeAreaView. The bottom belongs to the native tab bar,
+ * which insets the first ScrollView of each tab automatically on iOS.
  */
 import React, { useState } from "react";
 import {
@@ -18,8 +15,8 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { Defs, LinearGradient, RadialGradient, Rect, Stop } from "react-native-svg";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Svg, { Defs, RadialGradient, Rect, Stop } from "react-native-svg";
 import Reanimated, { FadeInDown } from "react-native-reanimated";
 import { appFont, curve, fontFamilies, iconSizes, radii, spacing } from "../design-system";
 import { useApp } from "../store";
@@ -28,32 +25,12 @@ import { Button } from "./controls";
 import { useTheme } from "./theme";
 import type { StyleProp, ViewStyle } from "react-native";
 
-/**
- * Floating tab bar metrics (iOS 26 Liquid Glass floating tab bar).
- * Screens import this so the scroll inset and the bar geometry can never drift.
- */
-export const TAB_BAR = {
-  height: 62,
-  radius: 31,
-  /** Gap to the screen edges, matching the iOS 26 floating tab bar. */
-  sideInset: 20,
-  /**
-   * Distance from the bottom edge: it sits in the home-indicator area (as the
-   * system bar does) but always clears the indicator itself.
-   */
-  bottomOffset: (insetBottom: number) => Math.max(insetBottom - 12, 12),
-  /** Scroll padding so the last row can scroll clear of the bar. */
-  clearance: (insetBottom: number) =>
-    TAB_BAR.height + TAB_BAR.bottomOffset(insetBottom) + spacing.sm,
-};
-
 export function Screen({
   title,
   eyebrow,
   children,
   refresh = false,
   trailing,
-  floatingTabBar = true,
   contentStyle,
   headerAccessory,
   largeTitle = true,
@@ -63,8 +40,6 @@ export function Screen({
   children: React.ReactNode;
   refresh?: boolean;
   trailing?: React.ReactNode;
-  /** Set false on modal sheets that are not presented over the tab bar. */
-  floatingTabBar?: boolean;
   contentStyle?: StyleProp<ViewStyle>;
   headerAccessory?: React.ReactNode;
   /** False on pushed screens whose navigation bar already shows the title. */
@@ -72,7 +47,6 @@ export function Screen({
 }) {
   const t = useTheme();
   const app = useApp();
-  const insets = useSafeAreaInsets();
 
   return (
     <SafeAreaView
@@ -90,9 +64,9 @@ export function Screen({
           {
             paddingHorizontal: spacing.sm,
             paddingTop: spacing.xxs,
-            paddingBottom: floatingTabBar
-              ? TAB_BAR.clearance(insets.bottom)
-              : spacing.xl,
+            // The native tab bar insets this ScrollView automatically (iOS)
+            // or wraps the screen in a bottom safe area (Android).
+            paddingBottom: spacing.xl,
             gap: spacing.lg,
             maxWidth: 720,
             width: "100%",
@@ -156,7 +130,6 @@ export function Screen({
           </Reanimated.View>
         ))}
       </ScrollView>
-      {floatingTabBar ? <ScrollEdgeFade height={TAB_BAR.clearance(insets.bottom)} /> : null}
     </SafeAreaView>
   );
 }
@@ -180,35 +153,6 @@ function AmbientGlow() {
           </RadialGradient>
         </Defs>
         <Rect x="0" y="0" width="100%" height="100%" fill="url(#ambient)" />
-      </Svg>
-    </View>
-  );
-}
-
-/**
- * Scroll-edge effect under the floating tab bar.
- *
- * The system tab bar on iOS 26 softens the content scrolling beneath it; a
- * custom floating bar gets no such treatment, so rows showed through the glass
- * crisp enough to collide with the tab labels. This fades the content into the
- * background behind the bar. It never takes touches.
- */
-function ScrollEdgeFade({ height }: { height: number }) {
-  const t = useTheme();
-  return (
-    <View
-      pointerEvents="none"
-      style={{ position: "absolute", left: 0, right: 0, bottom: 0, height }}
-    >
-      <Svg width="100%" height="100%" preserveAspectRatio="none">
-        <Defs>
-          <LinearGradient id="scrollEdge" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor={t.background} stopOpacity={0} />
-            <Stop offset="0.45" stopColor={t.background} stopOpacity={0.82} />
-            <Stop offset="1" stopColor={t.background} stopOpacity={1} />
-          </LinearGradient>
-        </Defs>
-        <Rect x="0" y="0" width="100%" height="100%" fill="url(#scrollEdge)" />
       </Svg>
     </View>
   );

@@ -64,7 +64,7 @@ export default function CustomRates() {
   };
 
   return (
-    <Screen title="نرخ من" eyebrow="تعیین نرخ صرافی یا توافقی شما" floatingTabBar={false} largeTitle={false}>
+    <Screen title="نرخ من" eyebrow="تعیین نرخ صرافی یا توافقی شما" largeTitle={false}>
       <Surface
         style={{
           flexDirection: "row-reverse",

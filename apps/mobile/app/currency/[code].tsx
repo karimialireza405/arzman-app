@@ -34,7 +34,7 @@ export default function Detail() {
   const result = CurrencySchema.safeParse(params.code);
   if (!result.success) {
     return (
-      <Screen title="ارز نامعتبر" floatingTabBar={false}>
+      <Screen title="ارز نامعتبر">
         <EmptyState
           title="ارز پیدا نشد"
           description="کد ارز نامعتبر است. از فهرست بازار ارز مورد نظر را انتخاب کنید."
@@ -59,7 +59,7 @@ export default function Detail() {
 
 
   return (
-    <Screen floatingTabBar={false} title={names[code]} largeTitle={false} refresh>
+    <Screen title={names[code]} largeTitle={false} refresh>
       <Stack.Screen
         options={{
           title: names[code],
