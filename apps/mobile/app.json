@@ -41,6 +41,9 @@
     },
     "web": {
       "bundler": "metro",
+      "output": "single",
+      "lang": "fa",
+      "description": "نبض بازار آزاد، در دستان شما",
       "favicon": "./assets/favicon.png"
     },
     "owner": "alirezkarimi"
