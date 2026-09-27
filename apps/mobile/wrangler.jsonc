@@ -1,0 +1,13 @@
+// Web version of ArzMan (Safari "Add to Home Screen"), served as static files
+// by a Cloudflare Worker. Build first with `npm run build:web -w @arzman/mobile`,
+// then run `npx wrangler deploy` from apps/mobile.
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "arzman",
+  "compatibility_date": "2026-09-20",
+  "assets": {
+    "directory": "./dist",
+    // Deep links such as /market or /currency/USD load the app, which routes itself.
+    "not_found_handling": "single-page-application",
+  },
+}
