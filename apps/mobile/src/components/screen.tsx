@@ -33,15 +33,18 @@ import type { StyleProp, ViewStyle } from "react-native";
  * Screens import this so the scroll inset and the bar geometry can never drift.
  */
 export const TAB_BAR = {
-  height: 58,
-  radius: radii.tabBar,
-  sideInset: spacing.sm,
-  bottomGap: spacing.xxs,
+  height: 62,
+  radius: 31,
+  /** Gap to the screen edges, matching the iOS 26 floating tab bar. */
+  sideInset: 20,
+  /**
+   * Distance from the bottom edge: it sits in the home-indicator area (as the
+   * system bar does) but always clears the indicator itself.
+   */
+  bottomOffset: (insetBottom: number) => Math.max(insetBottom - 12, 12),
+  /** Scroll padding so the last row can scroll clear of the bar. */
   clearance: (insetBottom: number) =>
-    TAB_BAR.height +
-    Math.max(insetBottom, TAB_BAR.sideInset) +
-    TAB_BAR.bottomGap +
-    spacing.sm,
+    TAB_BAR.height + TAB_BAR.bottomOffset(insetBottom) + spacing.sm,
 };
 
 export function Screen({

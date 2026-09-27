@@ -10,10 +10,10 @@ import { router } from "expo-router";
 import { names } from "@arzman/shared";
 import { useApp } from "../../src/store";
 import {
+  BrandHeader,
   CurrencyList,
   GroupedList,
   CurrencyRow,
-  IconButton,
   Label,
   MarketHero,
   MarketStatus,
@@ -42,19 +42,9 @@ export default function Home() {
   const usd = quotes.find((q) => q.currency === "USD");
 
   return (
-    <Screen
-      title="ارز من"
-      eyebrow="نبض بازار آزاد، در دستان شما"
-      refresh
-      trailing={
-        <IconButton
-          icon="search"
-          size={38}
-          accessibilityLabel="جستجو در بازار"
-          onPress={() => router.push("/market")}
-        />
-      }
-    >
+    <Screen title="ArzMan" largeTitle={false} refresh>
+      <BrandHeader tagline="نبض بازار آزاد، در دستان شما" onSearch={() => router.push("/market")} />
+
       <MarketStatus />
 
       <MarketHero />

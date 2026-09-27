@@ -12,6 +12,7 @@ export * from "./market";
 export * from "./quote-hero";
 export * from "./sparkline";
 export * from "./skeleton";
+export * from "./brand-header";
 export * from "./screen";
 
 export {

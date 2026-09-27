@@ -29,9 +29,21 @@ const GLASS_STRONG = "rgba(255, 255, 255, 0.24)";
 const GLASS_RIM = "rgba(255, 255, 255, 0.18)";
 const RADIUS = 28;
 
-function BrandBackground() {
+/**
+ * Drawn at the card's *measured* size. A "100%" SVG kept its first-layout
+ * height on iPhone when the card grew (skeleton → price), leaving the bottom of
+ * the card — the action buttons — outside the gradient.
+ */
+function BrandBackground({ width, height }: { width: number; height: number }) {
+  if (width <= 0 || height <= 0) return null;
   return (
-    <Svg style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }} width="100%" height="100%" preserveAspectRatio="none">
+    <Svg
+      style={{ position: "absolute", top: 0, left: 0 }}
+      width={width}
+      height={height}
+      viewBox={`0 0 ${width} ${height}`}
+      preserveAspectRatio="none"
+    >
       <Defs>
         <LinearGradient id="heroBase" x1="0" y1="0" x2="1" y2="1">
           <Stop offset="0" stopColor="#6247E0" />
@@ -43,8 +55,8 @@ function BrandBackground() {
           <Stop offset="1" stopColor="#C4B5FD" stopOpacity={0} />
         </RadialGradient>
       </Defs>
-      <Rect x="0" y="0" width="100%" height="100%" fill="url(#heroBase)" />
-      <Rect x="0" y="0" width="100%" height="100%" fill="url(#heroGlow)" />
+      <Rect x="0" y="0" width={width} height={height} fill="url(#heroBase)" />
+      <Rect x="0" y="0" width={width} height={height} fill="url(#heroGlow)" />
     </Svg>
   );
 }
@@ -189,11 +201,27 @@ export function QuoteHero({
   // Loading until a request has actually failed; then honest dashes instead.
   const waiting = !quote && (app.busy || !app.error);
   const [chartWidth, setChartWidth] = useState(0);
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  // Only real, drawable history earns space; otherwise the card closes up
+  // instead of showing an empty band (offline, or a new server).
+  const trendValues =
+    trend && history && history.length >= 2 ? history.map((p) => p.priceToman) : null;
 
   return (
     <View
+      onLayout={(e) => {
+        const { width, height } = e.nativeEvent.layout;
+        setSize((prev) =>
+          Math.abs(prev.width - width) < 0.5 && Math.abs(prev.height - height) < 0.5
+            ? prev
+            : { width, height },
+        );
+      }}
       style={[
         {
+          // Solid brand colour under the gradient: the card is never dark,
+          // not even for the frame before the first measurement.
+          backgroundColor: "#4530B8",
           borderRadius: RADIUS,
           borderCurve: curve.continuous,
           overflow: "hidden",
@@ -204,7 +232,7 @@ export function QuoteHero({
         style,
       ]}
     >
-      <BrandBackground />
+      <BrandBackground width={size.width} height={size.height} />
       <View style={{ padding: spacing.md, gap: spacing.sm }}>
         <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: spacing.xs }}>
           <CurrencyBadge code={code} size={46} dark />
@@ -243,11 +271,11 @@ export function QuoteHero({
         </View>
 
         {/* Today's real observations, not a decoration. */}
-        {trend ? (
+        {trendValues ? (
           <View onLayout={(e) => setChartWidth(Math.floor(e.nativeEvent.layout.width))} style={{ height: 52 }}>
             {chartWidth > 0 ? (
               <Sparkline
-                values={history ? history.map((p) => p.priceToman) : null}
+                values={trendValues}
                 width={chartWidth}
                 height={52}
                 color={ON_BRAND}
