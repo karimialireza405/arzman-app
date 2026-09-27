@@ -49,6 +49,29 @@ export function appFont(family: string): string | undefined {
 /** (ascender − descender) / unitsPerEm, measured from the shipped .ttf files. */
 export const PERSIAN_LINE_HEIGHT = 1.5625;
 
+/** Vertical metrics read from the Vazirmatn .ttf files (hhea + OS/2 v4). */
+export const VAZIRMATN_METRICS = {
+  unitsPerEm: 2048,
+  ascender: 2100,
+  descender: -1100,
+  capHeight: 1638,
+  xHeight: 1082,
+} as const;
+
+/**
+ * Distance from the top of a Label's line box to the optical centre of its
+ * capital letters. Persian needs tall line boxes, so Latin capitals sit well
+ * above the box's middle (4.7 pt at 30 pt); aligning an icon to the box centre
+ * therefore puts it visibly low. Use this to align icons to the letters.
+ */
+export function capCenterFromTop(fontSize: number): number {
+  const m = VAZIRMATN_METRICS;
+  const box = Math.ceil(fontSize * PERSIAN_LINE_HEIGHT);
+  const natural = (fontSize * (m.ascender - m.descender)) / m.unitsPerEm;
+  const baseline = (box - natural) / 2 + (fontSize * m.ascender) / m.unitsPerEm;
+  return baseline - (fontSize * m.capHeight) / m.unitsPerEm / 2;
+}
+
 export function fontFamilyFor(weight: TextStyle["fontWeight"]): string {
   const w =
     weight === "bold" ? 700 : weight === "normal" || weight == null ? 400 : Number(weight);

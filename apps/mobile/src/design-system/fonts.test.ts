@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { appFont, fontFamilyFor, hasPersianLetters, persianText, PERSIAN_LINE_HEIGHT, setFontsAvailable } from "./fonts";
+import { appFont, capCenterFromTop, fontFamilyFor, hasPersianLetters, persianText, PERSIAN_LINE_HEIGHT, setFontsAvailable } from "./fonts";
 
 describe("Persian text resolution", () => {
   it("never lets a line be shorter than Vazirmatn's measured height", () => {
@@ -45,5 +45,12 @@ describe("Persian text resolution", () => {
       setFontsAvailable(true);
     }
     expect(appFont("Vazirmatn_400Regular")).toBe("Vazirmatn_400Regular");
+  });
+
+  it("locates the optical centre of Latin capitals inside a Persian line box", () => {
+    // 30 pt: box 47, baseline 30.82, cap height 23.99 → centre 18.83,
+    // i.e. 4.67 pt above the box centre (23.5).
+    expect(capCenterFromTop(30)).toBeCloseTo(18.83, 2);
+    expect(Math.ceil(30 * PERSIAN_LINE_HEIGHT) / 2 - capCenterFromTop(30)).toBeCloseTo(4.67, 2);
   });
 });
