@@ -92,7 +92,7 @@ export default function More() {
             />
           </View>
 
-          <SettingsRow title="حالت ظاهری" subtitle="هماهنگ با آیفون یا دستی" accessory="none" />
+          <SettingsRow title="حالت ظاهری" subtitle="هماهنگ با دستگاه یا دستی" accessory="none" />
           <View style={{ paddingHorizontal: spacing.sm, paddingBottom: spacing.xs }}>
             <SegmentedControl
               values={["dark", "light", "system"] as const}

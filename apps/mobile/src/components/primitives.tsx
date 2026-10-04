@@ -135,6 +135,8 @@ export function Label({
   align,
   numberOfLines,
   allowFontScaling = true,
+  adjustsFontSizeToFit,
+  minimumFontScale,
   style,
 }: {
   children: React.ReactNode;
@@ -152,6 +154,8 @@ export function Label({
   align?: "left" | "right" | "center";
   numberOfLines?: number;
   allowFontScaling?: boolean;
+  adjustsFontSizeToFit?: boolean;
+  minimumFontScale?: number;
   style?: StyleProp<TextStyle>;
 }) {
   const t = useTheme();
@@ -192,6 +196,8 @@ export function Label({
     <Text
       numberOfLines={numberOfLines}
       allowFontScaling={allowFontScaling}
+      adjustsFontSizeToFit={adjustsFontSizeToFit}
+      minimumFontScale={minimumFontScale}
       style={resolved}
     >
       {children}

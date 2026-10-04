@@ -8,8 +8,9 @@
  * screen. The conversion itself is unchanged: `convert` over the market quotes.
  */
 import { useRef, useState } from "react";
-import { Alert, Animated, Modal, Pressable, ScrollView, TextInput, View } from "react-native";
+import { Alert, Animated, Modal, Pressable, ScrollView, TextInput, View, useWindowDimensions } from "react-native";
 import { useLocalSearchParams } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import * as Clipboard from "expo-clipboard";
 import {
   convert,
@@ -37,6 +38,7 @@ import {
   spacing,
   useFeedback,
   usePrice,
+  useReduceMotion,
   useTheme,
 } from "../../src/ui";
 
@@ -73,7 +75,7 @@ function CurrencyPill({
         flexDirection: "row-reverse",
         alignItems: "center",
         gap: 6,
-        height: 42,
+        minHeight: 48,
         paddingStart: 6,
         paddingEnd: 12,
         borderRadius: 21,
@@ -132,6 +134,7 @@ function CurrencySheet({
   const t = useTheme();
   const app = useApp();
   const fmt = usePrice();
+  const reducedMotion = useReduceMotion();
   const rateOf = (code: ConversionCurrency) =>
     code === "IRT"
       ? 1
@@ -142,11 +145,11 @@ function CurrencySheet({
   return (
     <Modal
       visible={visible}
-      animationType="slide"
+      animationType={reducedMotion ? "none" : "slide"}
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View style={{ flex: 1, backgroundColor: t.background }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: t.background }}>
         <View
           style={{
             flexDirection: "row-reverse",
@@ -205,15 +208,17 @@ function CurrencySheet({
             })}
           </Surface>
         </ScrollView>
-      </View>
+      </SafeAreaView>
     </Modal>
   );
 }
 
 export default function Converter() {
+  const { width } = useWindowDimensions();
   const app = useApp();
   const t = useTheme();
   const feedback = useFeedback();
+  const reducedMotion = useReduceMotion();
   const params = useLocalSearchParams<{ from?: string }>();
   const persian = app.user.settings.persian;
 
@@ -246,7 +251,7 @@ export default function Converter() {
   const rotation = useRef(new Animated.Value(0)).current;
   const swap = () => {
     feedback.press();
-    Animated.spring(rotation, {
+    if (!reducedMotion) Animated.spring(rotation, {
       toValue: 1,
       useNativeDriver: true,
       damping: 16,
@@ -326,9 +331,9 @@ export default function Converter() {
               accessibilityLabel="جابه‌جایی مبدأ و مقصد"
               onPress={swap}
               style={({ pressed }) => ({
-                width: 44,
-                height: 44,
-                borderRadius: 22,
+                width: 48,
+                height: 48,
+                borderRadius: 24,
                 alignItems: "center",
                 justifyContent: "center",
                 backgroundColor: t.accentSolid,
@@ -344,10 +349,12 @@ export default function Converter() {
 
         <ExchangeCard label="معادل" code={to} onPickCurrency={() => setPicking("to")}>
           <Label
-            size={32}
+            size={width < 360 ? 24 : 32}
             weight="700"
             numberOfLines={1}
             allowFontScaling={false}
+            adjustsFontSizeToFit
+            minimumFontScale={0.5}
             style={{ writingDirection: "ltr", textAlign: "right" }}
           >
             {result === null ? "—" : formatAmount(result, persian)}
@@ -371,8 +378,8 @@ export default function Converter() {
               }}
               style={({ pressed }) => ({
                 flex: 1,
-                height: 38,
-                borderRadius: 19,
+                minHeight: 48,
+                borderRadius: 24,
                 borderCurve: curve.continuous,
                 alignItems: "center",
                 justifyContent: "center",

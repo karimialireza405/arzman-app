@@ -260,7 +260,9 @@ export function QuoteHero({
               weight="700"
               numberOfLines={1}
               allowFontScaling={false}
-              style={{ color: ON_BRAND, writingDirection: "ltr", letterSpacing: -1 }}
+              adjustsFontSizeToFit
+              minimumFontScale={0.65}
+              style={{ color: ON_BRAND, writingDirection: "ltr", letterSpacing: -1, flexShrink: 1 }}
             >
               {fmt(quote?.priceToman)}
             </Label>
