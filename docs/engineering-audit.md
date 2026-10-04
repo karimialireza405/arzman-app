@@ -1,5 +1,10 @@
 # ArzMan — Engineering Audit & iPhone Readiness
 
+> Historical September audit. For the current 2026-10-04 app, taste-skill
+> review and standalone Android APK evidence, read
+> [taste-skill-audit.md](taste-skill-audit.md). Portfolio/Face ID have since been
+> removed, and the existing deployed backend was healthy in the current checks.
+
 **Audited:** 2026-09-22 (Asia/Tehran), continuing the audit started by the previous agent
 **Scope:** correctness of market data, portfolio accounting, unit presentation, backend parity, runtime readiness for a physical iPhone
 **Not in scope:** UI redesign, Widgets, Live Activities, Dynamic Island, Siri/App Intents, any deployment

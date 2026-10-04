@@ -1,5 +1,21 @@
 # ArzMan Handoff & Architecture Status
 
+## Latest: taste-skill review and Android APK (2026-10-04)
+
+Read `docs/taste-skill-audit.md` first for current source/runtime/build evidence.
+Android distribution now uses the existing EAS project's internal preview APK
+profile, package `com.arzman.personal`, and the verified deployed HTTPS API.
+The old iPhone-only status and backend outage notes below are historical.
+Current checks: typecheck/lint, 46 tests, Doctor 21/21, all-platform export,
+14/14 deployed API smoke checks and 4/4 real TGJU verification.
+Scoped fixes: converter tap targets/safe-area/reduced motion/narrow amount
+display; platform-neutral settings copy; native appearance support and compatible
+Expo patches. Portfolio remains removed. No Android device is connected, so
+physical native QA must follow installation. Build completion/signature and
+distribution file are recorded in the audit. EAS job
+`47f81330-8859-4b34-ac22-fc4eff1a748b` finished successfully on 2026-10-04;
+the direct APK link and Persian installation guide are in the current audit.
+
 **Project:** «ارز من» (ArzMan) — Personal Iranian Currency-Market iPhone Application  
 **Platform:** iOS (Expo SDK 57, React Native 0.86, TypeScript, Expo Router)  
 **Development Host:** Windows 11 Pro, Node.js 24 LTS, Git Bash  

@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - 2026-10-04 — Android direct distribution and taste-skill audit
+
+- Add the existing app's Android package, adaptive icon, unused permission
+  exclusions and standalone EAS preview APK profile; preserve iOS configuration.
+- Add expo-system-ui and align the six SDK 57 patches requested by Expo Doctor.
+- Improve converter controls to 48pt, safe-area handling, reduced-motion behavior
+  and complete financial result display on narrow screens; preserve calculations.
+- Make shared appearance settings wording suitable for Android as well as iOS.
+- Exclude local assistant configuration and binary distribution artifacts from
+  cloud uploads; signing and private env files remain excluded.
+- Document current taste-skill findings, actual backend/source checks and native
+  QA limits in `docs/taste-skill-audit.md`.
+- EAS preview Release APK built successfully; downloaded and verified signature,
+  package/version/minimum SDK, permissions, embedded HTTPS API and Persian fonts.
+  Android 7+, universal APK, 108.89 MiB. Physical Android launch remains untested.
+
 ## [0.5.1] - 2026-09-27 — second design pass
 
 ### Changed

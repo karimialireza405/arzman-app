@@ -1,8 +1,37 @@
 # ارز من · ArzMan
 
-A Persian-first personal iPhone currency dashboard built on **Expo SDK 57, React Native 0.86, TypeScript and Expo Router**, developed on Windows. It reads Iranian open-market USD/EUR/AED/IQD quotes through a Cloudflare service. No paid market-data API key is required.
+A Persian-first Android and iPhone currency dashboard built on **Expo SDK 57, React Native 0.86, TypeScript and Expo Router**, developed on Windows. It reads Iranian open-market USD/EUR/AED/IQD quotes through a Cloudflare service. No paid market-data API key is required.
 
-**Status:** source code, automated domain/parser/cache tests and JavaScript exports are available. Physical-iPhone QA, a signed EAS build and Cloudflare deployment have not been performed. The current TGJU pages do not provide a complete trade timestamp; quotes are deliberately marked stale/unverified. This is not a claim of production readiness.
+**Current verification (2026-10-04):** typecheck/lint and 46 automated tests pass; Expo Doctor passes 21/21; Android/iOS/Web exports succeed. The existing HTTPS Worker passes 14 API checks and all four public TGJU profiles were verified live. Source trade timestamps remain incomplete; retrieval freshness does not prove trade freshness. Physical Android QA remains outstanding. See [the current taste-skill and Android review](docs/taste-skill-audit.md) for release evidence; older handoff sections are historical.
+
+## Android APK for friends
+
+**Signed APK build completed on 2026-10-04:**
+[Download ArzMan 0.1.0 APK](https://expo.dev/artifacts/eas/jRj0STzf4B9n8nu2YfwLCrR-t5G6h3fVP9Gj8VOoho0.apk).
+The local distribution copy is `artifacts/ArzMan-0.1.0-android.apk`.
+
+The EAS `preview` profile builds a signed **standalone APK** for direct installation.
+It bundles JavaScript and fonts; Expo Go, Metro and this Windows PC are not required
+after installation. The preview environment was verified to contain:
+`EXPO_PUBLIC_API_URL=https://arzman-market.alirezkarimi0021.workers.dev`.
+Internet is required for new prices; last-known-good quotes are cached locally.
+
+To reproduce the build from the existing Expo account in PowerShell:
+
+```powershell
+cd D:\MY_APP\Arz_Man\apps\mobile
+npx eas-cli@latest build --platform android --profile preview
+```
+
+Do not distribute a development-client build to friends: it expects Metro.
+The production profile's store bundle is also different from this direct-install
+APK. Keep using the existing signing key for future updates. Build archives omit
+private environment files, signing files, `.claude/`, native generated folders
+and release artifacts. The APK download and signature details are recorded in
+`docs/taste-skill-audit.md` after the build completes.
+
+Persian step-by-step installation and the first-device checklist:
+[Android installation guide](docs/android-install.md).
 
 ## What is included
 
@@ -11,8 +40,8 @@ A Persian-first personal iPhone currency dashboard built on **Expo SDK 57, React
   (tab bar, glass buttons) with **opaque** content surfaces, native `borderCurve: "continuous"`
   squircles, semantic button hierarchy, segmented controls, iOS search field, inset-grouped
   lists, SF Symbols on iOS, spring press states, haptics and system Reduce Motion support.
-- **Currency badge family** (`CurrencyBadge`): one consistent squircle icon system for
-  USD/EUR/AED/IQD (+USDT/IRT) with semantic tints — no flags, no emoji.
+- **Currency badges** (`CurrencyBadge`): consistent round flag badges for
+  USD/EUR/AED/IQD and the existing personal-rate/unit marks.
 - Native navigation sheets, safe-area layout (Dynamic Island, home indicator, floating tab bar).
 - Rial/toman preferences, Persian/English number formatting and explicit source quote sizes.
 - Personal rates (e.g. your exchange's or USDT) compared with the open market. *(The portfolio / transaction ledger was removed on 2026-09-27 at the owner's request; it is recoverable from git history.)*

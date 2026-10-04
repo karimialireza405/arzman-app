@@ -1,5 +1,26 @@
 # TODO — ArzMan (ارز من)
 
+## Current Android distribution follow-up (2026-10-04)
+
+- [x] Apply the installed taste-skill as an audit of the existing native app.
+- [x] Prepare standalone preview APK, public HTTPS API and Android identifiers.
+- [x] Fix measured narrow converter result clipping, tap sizes, picker safe area,
+      Reduce Motion and shared appearance wording; align Expo compatible patches.
+- [x] Verify 46 tests, typecheck/lint, Doctor 21/21, all-platform export,
+      14 deployed API checks and 4 real TGJU profiles.
+- [x] EAS standalone APK build finished successfully (final job recorded in audit).
+- [x] Verify downloaded APK manifest/bundle/signature and all six Persian fonts;
+      APK 0.1.0, code 1, Android 7+, 108.89 MiB (full evidence in audit).
+- [ ] Real Android installation: tabs/back/keyboard, RTL, both themes, large fonts,
+      haptics, history, local persistence, offline restart and recovery.
+- [ ] Clarify source trade-time uncertainty beside retrieval freshness.
+- [ ] Foreground refresh for mounted sparklines with five-minute cache.
+- [ ] Measure long-range history rows read and review compatible dependency security fixes.
+
+Earlier milestone and outage notes below are retained as history; current deployed
+backend returned healthy responses on 2026-10-04. Do not infer a deployment need
+from an older unchecked item.
+
 ## Completed Milestones
 
 ### Milestone 0.4.0 — portfolio removed (2026-09-27)
