@@ -139,9 +139,15 @@ function useAppStore() {
       setBusy(true);
       const timeout = setTimeout(() => controller.abort(), 55_000);
       try {
-        const response = await fetch(`${apiUrl}/api/market`, {
+        // v2 carries all 24 currencies. A service that predates it answers 404,
+        // and then the four core currencies from v1 still keep the app working.
+        let response = await fetch(`${apiUrl}/api/v2/market`, {
           signal: controller.signal,
         });
+        if (response.status === 404)
+          response = await fetch(`${apiUrl}/api/market`, {
+            signal: controller.signal,
+          });
         if (!response.ok) throw new Error("Service unavailable");
         const data = MarketSnapshotSchema.parse(await response.json());
         if (controller.signal.aborted) return;

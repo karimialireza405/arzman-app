@@ -2,8 +2,9 @@
  * Screen scaffold, form field and empty state.
  *
  * Safe-area contract (HIG · Layout): the scroll view accounts for the top inset
- * (Dynamic Island) via SafeAreaView. The bottom belongs to the native tab bar,
- * which insets the first ScrollView of each tab automatically on iOS.
+ * (Dynamic Island) via SafeAreaView. The bottom belongs to the tab bar: the
+ * native one insets the first ScrollView of each tab automatically on iOS; the
+ * floating bar on Android and the web provides its clearance by context.
  */
 import React, { useState } from "react";
 import {
@@ -23,6 +24,7 @@ import { useApp } from "../store";
 import { AppIcon, Label } from "./primitives";
 import { Button } from "./controls";
 import { useTheme } from "./theme";
+import { useTabBarClearance } from "./tab-bar";
 import type { StyleProp, ViewStyle } from "react-native";
 
 export function Screen({
@@ -47,6 +49,7 @@ export function Screen({
 }) {
   const t = useTheme();
   const app = useApp();
+  const clearance = useTabBarClearance();
 
   return (
     <SafeAreaView
@@ -64,9 +67,9 @@ export function Screen({
           {
             paddingHorizontal: spacing.sm,
             paddingTop: spacing.xxs,
-            // The native tab bar insets this ScrollView automatically (iOS)
-            // or wraps the screen in a bottom safe area (Android).
-            paddingBottom: spacing.xl,
+            // The native iOS tab bar insets this ScrollView automatically; the
+            // floating bar on Android and the web reports its clearance.
+            paddingBottom: spacing.xl + clearance,
             gap: spacing.lg,
             maxWidth: 720,
             width: "100%",
@@ -80,6 +83,10 @@ export function Screen({
               refreshing={app.busy}
               onRefresh={() => void app.refresh(true)}
               tintColor={t.textSecondary}
+              // Android draws its own spinner disc; theme it so it is not a
+              // white puck in dark mode.
+              colors={[t.accent]}
+              progressBackgroundColor={t.surface}
             />
           ) : undefined
         }

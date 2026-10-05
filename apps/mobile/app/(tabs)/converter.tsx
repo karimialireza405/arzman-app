@@ -19,6 +19,7 @@ import {
   formatAmount,
   names,
   fiatCodes,
+  shortNames,
   type ConversionCurrency,
 } from "@arzman/shared";
 import { useApp } from "../../src/store";
@@ -31,6 +32,7 @@ import {
   Label,
   MarketStatus,
   Screen,
+  SearchField,
   Surface,
   appFont,
   curve,
@@ -44,15 +46,6 @@ import {
 
 const codes = [...fiatCodes, "IRT", "IRR"] as const;
 
-/** Pill labels: the card is one row, so the pill carries the short name. */
-const shortNames: Record<ConversionCurrency, string> = {
-  USD: "دلار",
-  EUR: "یورو",
-  AED: "درهم",
-  IQD: "دینار",
-  IRT: "تومان",
-  IRR: "ریال",
-};
 
 const QUICK_AMOUNTS = [1, 10, 100, 1000];
 
@@ -135,6 +128,16 @@ function CurrencySheet({
   const app = useApp();
   const fmt = usePrice();
   const reducedMotion = useReduceMotion();
+  const [search, setSearch] = useState("");
+  const query = search.trim().toLowerCase();
+  // Toman and Rial first: almost every conversion has one of them on a side.
+  const listed = (["IRT", "IRR", ...fiatCodes] as ConversionCurrency[]).filter(
+    (code) =>
+      !query ||
+      code.toLowerCase().includes(query) ||
+      names[code].includes(query) ||
+      shortNames[code].includes(query),
+  );
   const rateOf = (code: ConversionCurrency) =>
     code === "IRT"
       ? 1
@@ -148,6 +151,7 @@ function CurrencySheet({
       animationType={reducedMotion ? "none" : "slide"}
       presentationStyle="pageSheet"
       onRequestClose={onClose}
+      onDismiss={() => setSearch("")}
     >
       <SafeAreaView style={{ flex: 1, backgroundColor: t.background }}>
         <View
@@ -165,9 +169,25 @@ function CurrencySheet({
           </Label>
           <IconButton icon="close-outline" size={34} accessibilityLabel="بستن" onPress={onClose} />
         </View>
-        <ScrollView contentContainerStyle={{ padding: spacing.sm, paddingTop: 0 }}>
+        <View style={{ paddingHorizontal: spacing.sm, paddingBottom: spacing.xs }}>
+          <SearchField
+            value={search}
+            onChangeText={setSearch}
+            placeholder="جستجوی ارز (پوند، لیر، GBP…)"
+            onClear={() => setSearch("")}
+          />
+        </View>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ padding: spacing.sm, paddingTop: 0 }}
+        >
+          {listed.length === 0 ? (
+            <Label secondary size={14} align="center" style={{ paddingVertical: spacing.lg }}>
+              ارزی با «{search}» پیدا نشد.
+            </Label>
+          ) : null}
           <Surface padded={false}>
-            {codes.map((code, index) => {
+            {listed.map((code, index) => {
               const rate = rateOf(code);
               const active = code === selected;
               return (
@@ -176,7 +196,10 @@ function CurrencySheet({
                     accessibilityRole="button"
                     accessibilityState={{ selected: active }}
                     accessibilityLabel={names[code]}
-                    onPress={() => onSelect(code)}
+                    onPress={() => {
+                      setSearch("");
+                      onSelect(code);
+                    }}
                     style={({ pressed }) => ({
                       flexDirection: "row-reverse",
                       alignItems: "center",
@@ -202,7 +225,7 @@ function CurrencySheet({
                       {active ? <AppIcon name="check" size={18} color={t.accent} /> : null}
                     </View>
                   </Pressable>
-                  {index < codes.length - 1 ? <Divider inset={68} /> : null}
+                  {index < listed.length - 1 ? <Divider inset={68} /> : null}
                 </View>
               );
             })}

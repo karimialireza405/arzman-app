@@ -13,6 +13,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
+  FlatList,
   Pressable,
   TextInput,
   View,
@@ -543,3 +544,72 @@ export function SearchField({
 
 /** Legacy alias. */
 export const GlassSearchBar = SearchField;
+
+/**
+ * A horizontally scrolling row of choice chips, for sets too large for a
+ * segmented control (24 currencies, market regions). `inverted` makes the row
+ * start at the right edge, where a Persian reader begins.
+ */
+export function ChipRow<T extends string>({
+  values,
+  value,
+  onChange,
+  label,
+  leading,
+  accessibilityLabel,
+}: {
+  values: readonly T[];
+  value: T;
+  onChange: (value: T) => void;
+  label: (value: T) => string;
+  /** Optional artwork before the label, e.g. a currency flag. */
+  leading?: (value: T) => React.ReactNode;
+  accessibilityLabel?: string;
+}) {
+  const t = useTheme();
+  const feedback = useFeedback();
+  return (
+    <FlatList
+      horizontal
+      inverted
+      data={values as T[]}
+      keyExtractor={(v) => v}
+      accessibilityLabel={accessibilityLabel}
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{ gap: spacing.xxs, paddingVertical: 2 }}
+      renderItem={({ item }) => {
+        const active = item === value;
+        return (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ selected: active }}
+            accessibilityLabel={label(item)}
+            onPress={() => {
+              if (active) return;
+              feedback.tap();
+              onChange(item);
+            }}
+            style={({ pressed }) => ({
+              flexDirection: "row-reverse",
+              alignItems: "center",
+              gap: 6,
+              minHeight: 40,
+              paddingStart: leading ? 5 : 14,
+              paddingEnd: 14,
+              borderRadius: 20,
+              borderCurve: curve.continuous,
+              borderWidth: 1,
+              borderColor: active ? t.accent : t.separator,
+              backgroundColor: active ? t.accentFill : pressed ? t.fillSecondary : t.fillTertiary,
+            })}
+          >
+            {leading?.(item)}
+            <Label size={14} weight={active ? "700" : "500"} accent={active}>
+              {label(item)}
+            </Label>
+          </Pressable>
+        );
+      }}
+    />
+  );
+}

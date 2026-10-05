@@ -25,7 +25,7 @@ import {
   useTheme,
 } from "../../src/ui";
 
-const majorCurrencies = ["EUR", "AED", "IQD"] as const;
+const majorCurrencies = ["EUR", "AED", "GBP", "TRY", "IQD"] as const;
 
 export default function Home() {
   const app = useApp();

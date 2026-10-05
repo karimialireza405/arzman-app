@@ -8,7 +8,8 @@
  */
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { I18nManager, Platform } from "react-native";
+import { useEffect } from "react";
+import { Appearance, I18nManager, Platform } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 // Per-weight subpaths: the package's main entry references all nine weights,
 // which put three unused .ttf files (~380 KB) into the bundle.
@@ -19,7 +20,7 @@ import { Vazirmatn_500Medium } from "@expo-google-fonts/vazirmatn/500Medium";
 import { Vazirmatn_600SemiBold } from "@expo-google-fonts/vazirmatn/600SemiBold";
 import { Vazirmatn_700Bold } from "@expo-google-fonts/vazirmatn/700Bold";
 import { Vazirmatn_800ExtraBold } from "@expo-google-fonts/vazirmatn/800ExtraBold";
-import { AppProvider } from "../src/store";
+import { AppProvider, useApp } from "../src/store";
 import { radii, useTheme } from "../src/ui";
 import { setFontsAvailable } from "../src/design-system";
 
@@ -33,6 +34,15 @@ I18nManager.forceRTL(false);
 
 function Navigation() {
   const t = useTheme();
+  const appearance = useApp().user.settings.appearance;
+  // Native views (Android's system bars and dialogs, iOS's native tab bar,
+  // alerts and keyboards) follow the *system* scheme unless told otherwise, so
+  // choosing «روشن» on a phone in dark mode left them dark. Hand the app's
+  // choice to the platform; «خودکار» gives control back to the system.
+  useEffect(() => {
+    if (Platform.OS === "web") return;
+    Appearance.setColorScheme(appearance === "system" ? "unspecified" : appearance);
+  }, [appearance]);
 
   return (
     <>

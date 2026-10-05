@@ -1,14 +1,15 @@
 /**
  * Markets — «بازار»
  *
- * iOS Stocks pattern: search first, then a scope control (همه / دنبال‌شده‌ها),
- * then one inset grouped list. Rows are pressable and navigate to detail.
+ * iOS Stocks pattern: search first, then scope chips (همه / دنبال‌شده‌ها /
+ * regions — 24 currencies need browsing aids), then one inset grouped list. Rows are pressable and navigate to detail.
  */
 import { useState } from "react";
 import { View } from "react-native";
-import { fiatCodes, names, type Currency } from "@arzman/shared";
+import { fiatCodes, names, shortNames, type Currency } from "@arzman/shared";
 import { useApp } from "../../src/store";
 import {
+  ChipRow,
   CurrencyList,
   CurrencyRow,
   EmptyState,
@@ -16,16 +17,27 @@ import {
   MarketStatus,
   Screen,
   SearchField,
-  SegmentedControl,
   spacing,
 } from "../../src/ui";
 
-const filters = ["all", "favorites"] as const;
+const filters = ["all", "favorites", "gulf", "west", "asia", "neighbors"] as const;
 type Filter = (typeof filters)[number];
 
 const filterLabels: Record<Filter, string> = {
   all: "همه",
   favorites: "دنبال‌شده‌ها",
+  gulf: "عربی و خلیج فارس",
+  west: "اروپا و آمریکا",
+  asia: "آسیا و اقیانوسیه",
+  neighbors: "همسایگان",
+};
+
+/** Regions are browsing aids; a currency may sit in more than one. */
+const regions: Record<Exclude<Filter, "all" | "favorites">, readonly Currency[]> = {
+  gulf: ["AED", "SAR", "QAR", "OMR", "KWD", "BHD", "IQD"],
+  west: ["USD", "EUR", "GBP", "CHF", "CAD"],
+  asia: ["CNY", "JPY", "INR", "MYR", "THB", "AUD"],
+  neighbors: ["TRY", "IQD", "AFN", "AZN", "AMD", "RUB", "GEL"],
 };
 
 export default function Market() {
@@ -37,10 +49,12 @@ export default function Market() {
 
   const filtered = fiatCodes.filter((code) => {
     if (filter === "favorites" && !app.user.watchlist.includes(code)) return false;
+    if (filter !== "all" && filter !== "favorites" && !regions[filter].includes(code)) return false;
     if (!query) return true;
     return (
       code.toLowerCase().includes(query) ||
-      names[code].toLowerCase().includes(query)
+      names[code].toLowerCase().includes(query) ||
+      shortNames[code].includes(query)
     );
   });
 
@@ -57,14 +71,15 @@ export default function Market() {
         <SearchField
           value={search}
           onChangeText={setSearch}
-          placeholder="جستجوی ارز (دلار، یورو، AED…)"
+          placeholder="جستجوی ارز (دلار، پوند، لیر، AED…)"
           onClear={() => setSearch("")}
         />
-        <SegmentedControl
+        <ChipRow
           values={filters}
           value={filter}
           onChange={setFilter}
           label={(v) => filterLabels[v]}
+          accessibilityLabel="دسته‌بندی ارزها"
         />
       </View>
 

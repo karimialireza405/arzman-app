@@ -24,7 +24,7 @@ import { SvgXml } from "react-native-svg";
 import { flagSvg, type FlagCode } from "./flags";
 import { colors } from "./tokens";
 
-/** The currencies ArzMan can display, plus the two Iranian denominations. */
+/** Currencies with a glyph fallback; every other code is drawn by its flag. */
 export type BadgeCurrency =
   | "USD"
   | "EUR"
@@ -106,11 +106,31 @@ export const badgeSizes = {
 export type BadgeSize = keyof typeof badgeSizes;
 
 /** Which flag stands for which currency. Both Iranian units share Iran's. */
-export const currencyFlags: Partial<Record<BadgeCurrency, FlagCode>> = {
+export const currencyFlags: Partial<Record<string, FlagCode>> = {
   USD: "US",
   EUR: "EU",
   AED: "AE",
   IQD: "IQ",
+  GBP: "GB",
+  TRY: "TR",
+  CNY: "CN",
+  CAD: "CA",
+  AUD: "AU",
+  CHF: "CH",
+  JPY: "JP",
+  SAR: "SA",
+  QAR: "QA",
+  OMR: "OM",
+  KWD: "KW",
+  BHD: "BH",
+  RUB: "RU",
+  INR: "IN",
+  AFN: "AF",
+  AZN: "AZ",
+  AMD: "AM",
+  GEL: "GE",
+  MYR: "MY",
+  THB: "TH",
   IRT: "IR",
   IRR: "IR",
 };
@@ -150,7 +170,7 @@ export function CurrencyBadge({
   const isDark = dark ?? scheme !== "light";
 
   const edge = typeof size === "number" ? size : badgeSizes[size];
-  const flag = currencyFlags[code as BadgeCurrency];
+  const flag = currencyFlags[code];
   const ring = isDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.10)";
   const xml = useMemo(() => (flag ? flagSvg[flag] : null), [flag]);
 

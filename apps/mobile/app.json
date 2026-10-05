@@ -3,7 +3,7 @@
     "name": "ارز من",
     "slug": "arzman",
     "scheme": "arzman",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "icon": "./assets/icon.png",

@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0 app] - 2026-10-06 — 24 currencies, Android glass tab bar
+
+### Added
+- **20 more currencies** (GBP, TRY, CNY, CAD, AUD, CHF, JPY, SAR, QAR, OMR,
+  KWD, BHD, RUB, INR, AFN, AZN, AMD, GEL, MYR, THB), with round flags. They are
+  read from TGJU's currency overview in one request every 4 minutes, anchored
+  to the verified core USD quote (unit), the stated JPY 100-yen lot (size) and
+  a factor-of-three USD cross-rate guard (magnitude). A row that fails its own
+  checks is dropped; the core four still come from their profile pages.
+- `/api/v2/market` serves all 24. `/api/market` still serves exactly the four
+  core quotes, so app installs from before this release keep working.
+- Market: region chips (Gulf, Europe & America, Asia, neighbours) and search by
+  short names. Converter sheet: search. Alerts: flag chips for 24 currencies.
+
+### Fixed
+- **Android light mode**: the bottom navigation stayed black and flat because
+  Material's native tabs follow the device theme. Android (and the web) now use
+  ArzMan's floating glass tab bar, themed from the app's own setting, hidden
+  while the keyboard is up.
+- The app's appearance choice is handed to the platform
+  (`Appearance.setColorScheme`), so native dialogs, keyboards and system bars
+  follow «روشن»/«تیره» instead of the phone's setting.
+- Android pull-to-refresh spinner is themed instead of a white disc.
+
 ## [Unreleased] - 2026-10-04 — Android direct distribution and taste-skill audit
 
 - Add the existing app's Android package, adaptive icon, unused permission

@@ -11,6 +11,7 @@ import {
   CurrencySchema,
   fiatCodes,
   names,
+  shortNames,
   PriceAlertSchema,
   parseAmount,
   formatNumber,
@@ -22,6 +23,7 @@ import {
   AmountInput,
   AppIcon,
   Button,
+  ChipRow,
   CurrencyBadge,
   EmptyState,
   GroupedList,
@@ -114,12 +116,13 @@ export default function Alerts() {
         <Surface style={{ gap: spacing.sm }}>
           <View style={{ gap: spacing.xxs }}>
             <Label secondary size={13} weight="600">انتخاب ارز</Label>
-            <SegmentedControl
+            <ChipRow
               values={fiatCodes}
               value={currency}
               onChange={setCurrency}
-              label={(c) => names[c]}
-              size="compact"
+              label={(c) => shortNames[c]}
+              leading={(c) => <CurrencyBadge code={c} size={28} dark={t.dark} />}
+              accessibilityLabel="انتخاب ارز"
             />
           </View>
 
