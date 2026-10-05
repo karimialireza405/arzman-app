@@ -2,22 +2,22 @@ import { load } from "cheerio";
 import {
   CurrencyQuoteSchema,
   MarketSnapshotSchema,
-  fiatCodes,
+  coreCodes,
   names,
   normalize,
   parseAmount,
   latinDigits,
-  type Currency,
+  type CoreCurrency,
   type MarketDataProvider,
 } from "@arzman/shared";
 
-export const profiles: Record<Currency, string> = {
+export const profiles: Record<CoreCurrency, string> = {
   USD: "price_dollar_rl",
   EUR: "price_eur",
   AED: "price_aed",
   IQD: "price_iqd",
 };
-const sourceNames: Record<Currency, string> = {
+const sourceNames: Record<CoreCurrency, string> = {
   USD: "دلار",
   EUR: "یورو",
   AED: "درهم امارات",
@@ -42,7 +42,7 @@ export function parseSourceTimestamp(
     throw new Error("Invalid source timestamp");
   return new Date(ts).toISOString();
 }
-export function parseTgju(html: string, currency: Currency, now = Date.now()) {
+export function parseTgju(html: string, currency: CoreCurrency, now = Date.now()) {
   if (html.length > 2_000_000) throw new Error("Oversize page");
   const $ = load(html);
   const title = clean($("h1.title").first().text());
@@ -158,7 +158,7 @@ export class TGJUProvider implements MarketDataProvider {
   async fetchSnapshot() {
     const quotes = [];
     // Sequential, bounded public requests; no challenge handling or private endpoints.
-    for (const currency of fiatCodes) {
+    for (const currency of coreCodes) {
       const response = await this.fetcher(
         `https://www.tgju.org/profile/${profiles[currency]}`,
         {

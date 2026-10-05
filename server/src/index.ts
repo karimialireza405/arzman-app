@@ -1,10 +1,12 @@
 import { DurableObject } from "cloudflare:workers";
 import {
   CurrencySchema,
+  type CurrencyQuote,
   type MarketSnapshot,
   type HistoricalPoint,
 } from "@arzman/shared";
 import { TGJUProvider } from "./providers/tgju";
+import { fetchOverviewHtml, parseOverview } from "./providers/tgju/overview";
 import { refreshSnapshot, staleSnapshot } from "./cache";
 import {
   HISTORY_QUERY,
@@ -15,6 +17,7 @@ import {
 } from "./sql";
 import {
   ACTIVE_INTERVAL_MS,
+  EXTRAS_INTERVAL_MS,
   alarmToWrite,
   cooldownMs,
   nextRefreshDelayMs,
@@ -41,6 +44,8 @@ export class MarketStore extends DurableObject<Env> {
    * until the next request, which refreshes immediately anyway.
    */
   private lastClientAt: number | null = null;
+  /** In memory for the same reason; after an eviction the extras simply refresh. */
+  private lastExtrasAttempt = 0;
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
     ctx.storage.sql.exec(OBSERVATIONS_SCHEMA);
@@ -79,14 +84,8 @@ export class MarketStore extends DurableObject<Env> {
         await this.ctx.storage.delete("lastError");
         await this.ctx.storage.put("consecutiveFailures", 0);
       }
-      for (const q of snapshot.quotes)
-        this.ctx.storage.sql.exec(
-          INSERT_OBSERVATION,
-          q.currency,
-          q.fetchedAt,
-          q.priceToman,
-          q.stale ? 1 : 0,
-        );
+      this.record(snapshot.quotes);
+      await this.refreshExtras(snapshot);
       this.ctx.storage.sql.exec(
         RETENTION_DELETE,
         ...retentionParams(new Date(Date.now() - ranges["1Y"]).toISOString()),
@@ -100,6 +99,40 @@ export class MarketStore extends DurableObject<Env> {
       await this.ctx.storage.put("consecutiveFailures", nextFailures);
       await this.ctx.storage.put("lastError", true);
       await this.ctx.storage.setAlarm(Date.now() + cooldownMs(nextFailures));
+    }
+  }
+  private record(quotes: CurrencyQuote[]) {
+    for (const q of quotes)
+      this.ctx.storage.sql.exec(
+        INSERT_OBSERVATION,
+        q.currency,
+        q.fetchedAt,
+        q.priceToman,
+        q.stale ? 1 : 0,
+      );
+  }
+  /**
+   * The 20 extra currencies come from one overview page, on a slower cadence
+   * than the core four (one ~250 KB read every few minutes). Their failure
+   * never fails the core snapshot: the last good extras are kept and age out.
+   */
+  private async refreshExtras(core: MarketSnapshot) {
+    if (Date.now() - this.lastExtrasAttempt < EXTRAS_INTERVAL_MS) return;
+    this.lastExtrasAttempt = Date.now();
+    const usd = core.quotes.find((q) => q.currency === "USD");
+    if (!usd) return;
+    try {
+      const html = await fetchOverviewHtml((input, init) => fetch(input, init));
+      const quotes = parseOverview(html, usd.priceToman, Date.now(), (currency, message) =>
+        console.error("extra_quote_rejected", { currency, message }),
+      );
+      if (!quotes.length) throw new Error("No extra currency passed validation");
+      await this.ctx.storage.put("extras", quotes);
+      this.record(quotes);
+    } catch (error) {
+      console.error("extras_refresh_failed", {
+        message: error instanceof Error ? error.message : "Unknown provider error",
+      });
     }
   }
   async alarm() {
@@ -139,12 +172,17 @@ export class MarketStore extends DurableObject<Env> {
         kind: "observations",
       });
     }
+    // v1 (/api/market) is what app installs before the 24-currency release
+    // read: exactly the four core quotes, which their schema requires.
+    // v2 adds the extras.
+    const all = url.pathname === "/api/v2/market";
     const code =
-      url.pathname === "/api/market"
+      url.pathname === "/api/market" || all
         ? null
         : CurrencySchema.safeParse(url.pathname.split("/").pop());
     if (
       url.pathname !== "/api/market" &&
+      !all &&
       (!url.pathname.startsWith("/api/market/") || !code?.success)
     )
       return Response.json({ error: "Not found" }, { status: 404 });
@@ -159,15 +197,24 @@ export class MarketStore extends DurableObject<Env> {
         { status: 503, headers: { "Retry-After": "45" } },
       );
     const failed = await this.ctx.storage.get<boolean>("lastError");
+    const extras =
+      all || code?.success
+        ? ((await this.ctx.storage.get<CurrencyQuote[]>("extras")) ?? []).map((q) =>
+            Date.now() - Date.parse(q.fetchedAt) > EXTRAS_INTERVAL_MS * 2 ? { ...q, stale: true } : q,
+          )
+        : [];
+    const merged = { ...saved, quotes: [...saved.quotes, ...extras] };
     const snapshot =
       failed || Date.now() - Date.parse(saved.fetchedAt) > ACTIVE_INTERVAL_MS * 2
-        ? staleSnapshot(saved)
-        : saved;
-    return Response.json(
-      code?.success
-        ? snapshot.quotes.find((q) => q.currency === code.data)
-        : snapshot,
-    );
+        ? staleSnapshot(merged)
+        : merged;
+    if (code?.success) {
+      const quote = snapshot.quotes.find((q) => q.currency === code.data);
+      return quote
+        ? Response.json(quote)
+        : Response.json({ error: "Quote unavailable" }, { status: 404 });
+    }
+    return Response.json(snapshot);
   }
 }
 export default {

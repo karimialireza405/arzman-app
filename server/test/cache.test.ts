@@ -1,7 +1,7 @@
 import { it, expect, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import {
-  fiatCodes,
+  coreCodes,
   type MarketSnapshot,
   type MarketDataProvider,
 } from "@arzman/shared";
@@ -9,7 +9,7 @@ import { parseTgju } from "../src/providers/tgju";
 import { refreshSnapshot, type SnapshotCache } from "../src/cache";
 const valid: MarketSnapshot = {
   schemaVersion: 1,
-  quotes: fiatCodes.map((c) =>
+  quotes: coreCodes.map((c) =>
     parseTgju(
       readFileSync(`server/test/fixtures/${c.toLowerCase()}.html`, "utf8"),
       c,

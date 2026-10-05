@@ -1,8 +1,65 @@
 import { z } from "zod";
 
-export const fiatCodes = ["USD", "EUR", "AED", "IQD"] as const;
+/**
+ * The four currencies read from their own TGJU profile pages, each verified
+ * by its unit row and per-unit FAQ. A snapshot is never published without
+ * them, and the v1 API (old app installs) serves exactly these four.
+ */
+export const coreCodes = ["USD", "EUR", "AED", "IQD"] as const;
+/** Read from TGJU's currency overview table, anchored to the core USD quote. */
+export const extraCodes = [
+  "GBP",
+  "TRY",
+  "CNY",
+  "CAD",
+  "AUD",
+  "CHF",
+  "JPY",
+  "SAR",
+  "QAR",
+  "OMR",
+  "KWD",
+  "BHD",
+  "RUB",
+  "INR",
+  "AFN",
+  "AZN",
+  "AMD",
+  "GEL",
+  "MYR",
+  "THB",
+] as const;
+/** Display order: the currencies Iranians trade most come first. */
+export const fiatCodes = [
+  "USD",
+  "EUR",
+  "AED",
+  "GBP",
+  "TRY",
+  "IQD",
+  "CNY",
+  "CAD",
+  "AUD",
+  "CHF",
+  "JPY",
+  "SAR",
+  "QAR",
+  "OMR",
+  "KWD",
+  "BHD",
+  "RUB",
+  "INR",
+  "AFN",
+  "AZN",
+  "AMD",
+  "GEL",
+  "MYR",
+  "THB",
+] as const;
 export const CurrencySchema = z.enum(fiatCodes);
 export type Currency = z.infer<typeof CurrencySchema>;
+export type CoreCurrency = (typeof coreCodes)[number];
+export type ExtraCurrency = (typeof extraCodes)[number];
 export const AssetSchema = z.enum([...fiatCodes, "USDT", "IRT"]);
 export type Asset = z.infer<typeof AssetSchema>;
 export type ConversionCurrency = Currency | "IRT" | "IRR";
@@ -11,7 +68,56 @@ export const names: Record<Asset | "IRR", string> = {
   EUR: "یورو",
   AED: "درهم امارات",
   IQD: "دینار عراق",
+  GBP: "پوند انگلیس",
+  TRY: "لیر ترکیه",
+  CNY: "یوان چین",
+  CAD: "دلار کانادا",
+  AUD: "دلار استرالیا",
+  CHF: "فرانک سوئیس",
+  JPY: "ین ژاپن",
+  SAR: "ریال عربستان",
+  QAR: "ریال قطر",
+  OMR: "ریال عمان",
+  KWD: "دینار کویت",
+  BHD: "دینار بحرین",
+  RUB: "روبل روسیه",
+  INR: "روپیه هند",
+  AFN: "افغانی",
+  AZN: "منات آذربایجان",
+  AMD: "درام ارمنستان",
+  GEL: "لاری گرجستان",
+  MYR: "رینگیت مالزی",
+  THB: "بات تایلند",
   USDT: "تتر",
+  IRT: "تومان",
+  IRR: "ریال",
+};
+/** One-word names for tight places (the converter pill). */
+export const shortNames: Record<ConversionCurrency, string> = {
+  USD: "دلار",
+  EUR: "یورو",
+  AED: "درهم",
+  IQD: "دینار",
+  GBP: "پوند",
+  TRY: "لیر",
+  CNY: "یوان",
+  CAD: "دلار کانادا",
+  AUD: "دلار استرالیا",
+  CHF: "فرانک",
+  JPY: "ین",
+  SAR: "ریال سعودی",
+  QAR: "ریال قطر",
+  OMR: "ریال عمان",
+  KWD: "دینار کویت",
+  BHD: "دینار بحرین",
+  RUB: "روبل",
+  INR: "روپیه",
+  AFN: "افغانی",
+  AZN: "منات",
+  AMD: "درام",
+  GEL: "لاری",
+  MYR: "رینگیت",
+  THB: "بات",
   IRT: "تومان",
   IRR: "ریال",
 };
@@ -65,14 +171,18 @@ export type ProviderStatus = z.infer<typeof ProviderStatusSchema>;
 export const MarketSnapshotSchema = z
   .object({
     schemaVersion: z.literal(1),
-    quotes: z.array(CurrencyQuoteSchema).length(4),
+    quotes: z.array(CurrencyQuoteSchema).min(coreCodes.length),
     fetchedAt: date,
     status: ProviderStatusSchema,
     message: z.string().optional(),
   })
   .refine(
-    (s) => new Set(s.quotes.map((q) => q.currency)).size === 4,
+    (s) => new Set(s.quotes.map((q) => q.currency)).size === s.quotes.length,
     "Duplicate currencies",
+  )
+  .refine(
+    (s) => coreCodes.every((c) => s.quotes.some((q) => q.currency === c)),
+    "Missing core currency",
   );
 export type MarketSnapshot = z.infer<typeof MarketSnapshotSchema>;
 export const HistoricalPointSchema = z.object({

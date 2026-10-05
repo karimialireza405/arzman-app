@@ -1,11 +1,11 @@
 import { readFileSync } from "node:fs";
 import { describe, it, expect } from "vitest";
 import { parseTgju, parseSourceTimestamp } from "../src/providers/tgju";
-import { CurrencyQuoteSchema, fiatCodes } from "@arzman/shared";
+import { CurrencyQuoteSchema, coreCodes } from "@arzman/shared";
 const fixture = (code: string) =>
   readFileSync(`server/test/fixtures/${code.toLowerCase()}.html`, "utf8");
 describe("TGJU captured fixtures", () => {
-  for (const code of fiatCodes)
+  for (const code of coreCodes)
     it(`parses ${code} with metadata and semantic fallback`, () => {
       const html = fixture(code);
       const q = parseTgju(html, code);

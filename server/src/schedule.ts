@@ -11,6 +11,11 @@
  */
 export const ACTIVE_INTERVAL_MS = 45_000;
 export const IDLE_INTERVAL_MS = 10 * 60_000;
+/**
+ * The 20 extra currencies refresh at most this often. Kept under the clients'
+ * five-minute retrieval-freshness window, so their alerts can still fire.
+ */
+export const EXTRAS_INTERVAL_MS = 4 * 60_000;
 /** A client request within this window counts as "someone is using the app". */
 export const ACTIVE_WINDOW_MS = 10 * 60_000;
 export const BASE_BACKOFF_MS = 15_000;
