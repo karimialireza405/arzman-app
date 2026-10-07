@@ -14,6 +14,7 @@
 ![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)
 ![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-f38020?logo=cloudflare&logoColor=white)
 ![Platforms](https://img.shields.io/badge/iOS%20%C2%B7%20Android%20%C2%B7%20Web-6d4aff)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 </div>
 
@@ -156,7 +157,7 @@ npm run start                                         # Expo — press w for the
 
 ## مجوز
 
-حق نشر © ۲۰۲۶ علیرضا کریمی. **همه حقوق محفوظ است** — کد برای مطالعه و بررسی عمومی است، اما بدون اجازه کتبی، حق استفاده، کپی، تغییر یا بازنشر آن داده نشده است. جزئیات در [LICENSE](LICENSE).
+تحت مجوز [MIT](LICENSE) © ۲۰۲۶ علیرضا کریمی — استفاده، تغییر و بازنشر آزاد است. پرچم‌ها با مجوز MIT از [country-flag-icons](https://github.com/catamphetamine/country-flag-icons) آمده‌اند و پرچم شیر و خورشید در مالکیت عمومی است.
 
 <div align="center">
 

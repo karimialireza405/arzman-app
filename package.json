@@ -4,7 +4,7 @@
   "private": true,
   "description": "ArzMan (ارز من) — Persian-first live currency dashboard for the Iranian open market",
   "author": "Alireza Karimi <alirezkarimi0021@gmail.com>",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/karimialireza405/arzman-app.git"
