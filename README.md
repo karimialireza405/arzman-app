@@ -14,7 +14,7 @@
 ![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)
 ![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-f38020?logo=cloudflare&logoColor=white)
 ![Platforms](https://img.shields.io/badge/iOS%20%C2%B7%20Android%20%C2%B7%20Web-6d4aff)
-![License](https://img.shields.io/badge/license-All%20rights%20reserved-lightgrey)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ### The pulse of the open market, in your hand.
 
@@ -159,9 +159,7 @@ open a public issue for them.
 
 ## License
 
-Copyright © 2026 Alireza Karimi. **All rights reserved** — the source is public so it
-can be read and reviewed, but no permission is granted to use, copy, modify or
-redistribute it without written permission. See [LICENSE](LICENSE).
+[MIT](LICENSE) © 2026 Alireza Karimi — free to use, modify and distribute.
 
 Third-party notices: flag artwork is MIT-licensed
 ([country-flag-icons](https://github.com/catamphetamine/country-flag-icons)); the Lion
