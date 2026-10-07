@@ -21,6 +21,10 @@
 Persian-first, real-time currency dashboard for the Iranian open market.<br>
 24 currencies · converter · price alerts · personal rates — on iPhone, Android and the web.
 
+**ArzMan (ارز من)** is an open-source Iran currency exchange rate app: live open-market prices for the
+US dollar, euro, UAE dirham and 21 more currencies in Toman and Rial, with a currency converter,
+price alerts and real price history. Built with Expo, React Native and Cloudflare Workers.
+
 [Features](#features) · [How it works](#how-it-works) · [Getting started](#getting-started) · [API](#api) · [Documentation](#documentation)
 
 </div>
