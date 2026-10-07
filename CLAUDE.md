@@ -15,7 +15,8 @@ React Native 0.86 / TypeScript monorepo + a Cloudflare Worker. Read
 - **Ask before anything outward-facing or hard to reverse**: deploying the Worker,
   deploying the web site, starting an EAS build, deleting deployed resources, making
   the repository public. Never log in to Cloudflare, Expo or Apple on their behalf.
-- The repository is **private for now**; the owner will say when to make it public.
+- The repository is **public** under the MIT license (see LICENSE). `README.md` is the
+  English front page and `README.fa.md` the Persian one; keep them in sync.
 
 ## Commands
 
