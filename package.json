@@ -50,8 +50,8 @@
     "@types/node": "^24.0.0",
     "eslint": "^9.39.0",
     "prettier": "^3.9.8",
-    "react-native-reanimated": "4.5.1",
-    "react-native-worklets": "0.10.1",
+    "react-native-reanimated": "4.7.1",
+    "react-native-worklets": "0.13.0",
     "tsx": "^4.19.3",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.57.0",
@@ -59,7 +59,7 @@
   },
   "overrides": {
     "react-native-gesture-handler": "2.32.0",
-    "react-native-reanimated": "4.5.1",
-    "react-native-worklets": "0.10.1"
+    "react-native-reanimated": "4.7.1",
+    "react-native-worklets": "0.13.0"
   }
 }
