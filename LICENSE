@@ -1,0 +1,8 @@
+Copyright (c) 2026 Alireza Karimi. All rights reserved.
+
+This source code is proprietary. No permission is granted to use, copy, modify,
+merge, publish, distribute, sublicense or sell it without the written permission
+of the copyright holder.
+
+Third-party components keep their own licenses: see the notices in
+apps/mobile/src/design-system/flags.ts and the package licenses in node_modules.

@@ -2,6 +2,16 @@
   "name": "arzman",
   "version": "0.1.0",
   "private": true,
+  "description": "ArzMan (ارز من) — Persian-first live currency dashboard for the Iranian open market",
+  "author": "Alireza Karimi <alirezkarimi0021@gmail.com>",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/karimialireza405/arzman-app.git"
+  },
+  "engines": {
+    "node": ">=24"
+  },
   "workspaces": [
     "apps/*",
     "packages/*",
@@ -14,7 +24,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "verify": "npx tsx scripts/verify-market.ts",
-    "check": "npm run typecheck && npm run lint && npm test"
+    "check": "npm run typecheck && npm run lint && npm test",
+    "build:web": "npm run build:web -w @arzman/mobile"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

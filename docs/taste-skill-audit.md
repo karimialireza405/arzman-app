@@ -83,7 +83,7 @@ possible native defects or security issues are ruled out.
   AED 742,390 / 10 / 1 = 74,239; IQD 1,800 / 10 / 1 = 180.
   All four sourceTimestamp null, stale true. These are observations at audit
   time, not promised prices when the APK is opened later.
-- `npx tsx scripts/audit-api.ts https://arzman-market.alirezkarimi0021.workers.dev`:
+- `npx tsx scripts/audit-api.ts https://arzman-market.<your-account>.workers.dev`:
   14/14 endpoint/status/schema/CORS checks passed; 1D history had 120 real points.
 - EAS existing authentication and preview public API variable verified read-only.
 - Local SDK preparation failed downloading CMake with an invalid archive;

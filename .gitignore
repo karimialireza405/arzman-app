@@ -19,3 +19,4 @@ apps/mobile/android/
 .DS_Store
 Thumbs.db
 artifacts/
+.claude/
