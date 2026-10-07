@@ -5,6 +5,25 @@
   "description": "ArzMan (ارز من) — Persian-first live currency dashboard for the Iranian open market",
   "author": "Alireza Karimi <alirezkarimi0021@gmail.com>",
   "license": "MIT",
+  "homepage": "https://github.com/karimialireza405/arzman-app#readme",
+  "bugs": {
+    "url": "https://github.com/karimialireza405/arzman-app/issues"
+  },
+  "keywords": [
+    "iran",
+    "currency",
+    "exchange-rate",
+    "toman",
+    "rial",
+    "persian",
+    "farsi",
+    "rtl",
+    "expo",
+    "react-native",
+    "cloudflare-workers",
+    "durable-objects",
+    "tgju"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/karimialireza405/arzman-app.git"
