@@ -16,7 +16,6 @@ import {
   CustomRateSchema,
   CurrencySchema,
   alertMatches,
-  isStale,
   observationOf,
   type MarketSnapshot,
   type HistoricalPoint,

@@ -51,6 +51,7 @@ beforeAll(async () => {
     ["lastAttempt", now],
   ]);
   const ctx = {
+    blockConcurrencyWhile: async (fn: () => Promise<void>) => fn(),
     storage: {
       get: async (key: string) => data.get(key),
       put: async (key: string, value: unknown) => void data.set(key, value),
