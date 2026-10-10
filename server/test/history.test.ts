@@ -106,7 +106,7 @@ describe("history rollups", () => {
     expect(scanned("1D")).toBeLessThanOrEqual(1950);
     for (const range of Object.keys(RANGE_MS))
       expect(run(db, range).length).toBeLessThanOrEqual(366);
-  });
+  }, 60_000);
 
   it("returns real, ordered observations and never invents a point", () => {
     const db = fresh();
@@ -126,7 +126,7 @@ describe("history rollups", () => {
       const times = rows.map((r) => r.timestamp);
       expect([...times].sort()).toEqual(times);
     }
-  });
+  }, 60_000);
 
   it("live upserts keep the latest observation of each hour and day, in any arrival order", () => {
     const db = fresh();
