@@ -9,12 +9,8 @@ import Svg, {
   LinearGradient,
   Stop,
 } from "react-native-svg";
-import {
-  HistorySchema,
-  type Currency,
-  type HistoricalPoint,
-  formatNumber,
-} from "@arzman/shared";
+import { type Currency, type HistoricalPoint, formatNumber } from "@arzman/shared";
+import { useHistoryResult } from "./history";
 import { apiUrl, useApp } from "./store";
 import {
   Card,
@@ -37,64 +33,31 @@ const rangeLabels: Record<Range, string> = {
   "1Y": "سال",
 };
 
+const noPoints: HistoricalPoint[] = [];
+
 export function ChartCard({ currency }: { currency: Currency }) {
   const t = useTheme();
   const app = useApp();
   const [range, setRange] = useState<Range>("1D");
-  const [points, setPoints] = useState<HistoricalPoint[]>([]);
   const [selected, setSelected] = useState<number>(0);
   const [width, setWidth] = useState(320);
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState("");
+  const history = useHistoryResult(currency, range, !!apiUrl);
+  const points = history.points ?? noPoints;
+  const loading = history.loading;
+  const status = !apiUrl
+    ? "سرویس تاریخچه متصل نیست"
+    : loading
+      ? "در حال دریافت تاریخچه…"
+      : history.failed
+        ? "تاریخچه در دسترس نیست"
+        : points.length < 2
+          ? "مشاهدات ثبت‌شده در این بازه هنوز به ۲ نقطه نرسیده است."
+          : "";
 
+  // A new series starts with its latest point selected.
   useEffect(() => {
-    const controller = new AbortController();
-    let current = true;
-    setPoints([]);
-    setLoading(true);
-    setStatus("در حال دریافت تاریخچه…");
-    const timer = setTimeout(() => controller.abort(), 15000);
-
-    if (!apiUrl) {
-      setStatus("سرویس تاریخچه متصل نیست");
-      setLoading(false);
-      clearTimeout(timer);
-      return;
-    }
-
-    (async () => {
-      try {
-        const response = await fetch(
-          `${apiUrl}/api/history/${currency}?range=${range}`,
-          { signal: controller.signal },
-        );
-        if (!response.ok) throw new Error("Fetch error");
-        const result = HistorySchema.parse(await response.json());
-        if (!controller.signal.aborted) {
-          setPoints(result.points);
-          setSelected(Math.max(0, result.points.length - 1));
-          setStatus(
-            result.points.length < 2
-              ? "مشاهدات ثبت‌شده در این بازه هنوز به ۲ نقطه نرسیده است."
-              : "",
-          );
-        }
-      } catch {
-        if (!current) return;
-        if (!controller.signal.aborted) setStatus("تاریخچه در دسترس نیست");
-        else setStatus("دریافت تاریخچه کامل نشد");
-      } finally {
-        clearTimeout(timer);
-        if (current) setLoading(false);
-      }
-    })();
-
-    return () => {
-      current = false;
-      controller.abort();
-      clearTimeout(timer);
-    };
-  }, [currency, range]);
+    setSelected(Math.max(0, points.length - 1));
+  }, [points]);
 
   const values = points.map((p) => p.priceToman);
   const min = points.length ? Math.min(...values) : 0;
