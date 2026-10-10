@@ -67,6 +67,13 @@ npx eas-cli build --platform android --profile preview
 The free EAS queue can take from minutes to hours. Do not hand out a development-client
 build: it expects Metro. Install steps for friends: [android-install.md](android-install.md).
 
+### Android APK from GitHub
+
+Expo account → Access tokens → create one, then add it as the repository secret
+`EXPO_TOKEN`. Actions → **Android release** → Run workflow with a tag such as `v0.2.0`.
+It builds the `preview` APK on EAS and attaches it to a GitHub Release (the free EAS
+queue can take hours).
+
 ## Web version (Add to Home Screen)
 
 Served as static files by a second Worker named `arzman` (`apps/mobile/wrangler.jsonc`,

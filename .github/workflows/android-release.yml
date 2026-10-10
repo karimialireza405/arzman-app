@@ -1,0 +1,50 @@
+name: Android release
+
+# Manual only: Actions tab → Android release → Run workflow.
+# Needs the repository secret EXPO_TOKEN (Expo account → Access tokens).
+# Builds the signed `preview` APK on EAS (same signing key as earlier builds)
+# and attaches it to a GitHub Release.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag, e.g. v0.2.0"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-release
+  cancel-in-progress: false
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Build APK on EAS
+        working-directory: apps/mobile
+        run: |
+          npx eas-cli build --platform android --profile preview \
+            --non-interactive --wait --json > build.json
+          url=$(jq -r '.[0].artifacts.buildUrl' build.json)
+          test -n "$url" && test "$url" != "null"
+          curl -fsSL "$url" -o "ArzMan-${{ github.event.inputs.tag }}-android.apk"
+
+      - name: Publish release
+        run: |
+          gh release create "${{ github.event.inputs.tag }}" \
+            "apps/mobile/ArzMan-${{ github.event.inputs.tag }}-android.apk" \
+            --title "ArzMan ${{ github.event.inputs.tag }}" \
+            --notes "Android APK (signed). Install steps: docs/android-install.md"
