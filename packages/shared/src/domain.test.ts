@@ -7,6 +7,7 @@ import {
   alertMatches,
   isStale,
   isFetchFresh,
+  observationOf,
   formatNumber,
   formatAmount,
   type CurrencyQuote,
@@ -108,4 +109,25 @@ it("fires once on a freshly retrieved quote and never on a served cache", () => 
   };
   expect(isFetchFresh(served)).toBe(false);
   expect(alertMatches(alert, served)).toBe(false);
+});
+it("fires a rapid-move alert on a live TGJU quote", () => {
+  const alert = {
+    id: "r",
+    currency: "USD" as const,
+    kind: "rapid" as const,
+    threshold: 1,
+    enabled: true,
+    triggeredAt: null,
+  };
+  const now = Date.now();
+  // The previous poll was a fresh retrieval even though `isStale` is always true.
+  const previous = observationOf({ ...quote, fetchedAt: new Date(now - 60_000).toISOString() }, now);
+  expect(previous.stale).toBe(false);
+  const moved = { ...quote, priceToman: previous.priceToman * 1.02 };
+  expect(alertMatches(alert, moved, previous, now)).toBe(true);
+  // A small move, or a previous point older than five minutes, stays quiet.
+  expect(alertMatches(alert, { ...quote, priceToman: previous.priceToman * 1.001 }, previous, now)).toBe(false);
+  const old = observationOf({ ...quote, fetchedAt: new Date(now - 10 * 60_000).toISOString() }, now);
+  expect(old.stale).toBe(true);
+  expect(alertMatches(alert, moved, old, now)).toBe(false);
 });

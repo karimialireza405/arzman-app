@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Changed
+- **History reads rollups, not raw rows.** 1W/1M/3M read `observations_hourly`
+  and 1Y reads `observations_daily` (last observation per hour/day, PK
+  `(currency, bucket)`), so a 1Y request reads ~365 rows instead of ~700k. Existing
+  observations are backfilled once on first start. Raw rows are now kept 8 days.
+- The Durable Object caches computed history responses in memory (30 s for 1H up
+  to 1 h for 1Y). The chart screen now uses the shared `useHistory` cache.
+
 ## [0.2.0 app] - 2026-10-06 — 24 currencies, Android glass tab bar
 
 ### Added

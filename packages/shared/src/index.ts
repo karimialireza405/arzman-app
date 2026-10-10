@@ -303,6 +303,19 @@ export function isStale(q: CurrencyQuote, now = Date.now()) {
 export function isFetchFresh(q: CurrencyQuote, now = Date.now()) {
   return now - Date.parse(q.fetchedAt) <= 5 * 60_000;
 }
+/**
+ * The previous-observation point a "rapid move" alert compares against.
+ * `stale` here means "not freshly retrieved", never `isStale`: that is always
+ * true for TGJU, which would make rapid alerts unreachable.
+ */
+export function observationOf(q: CurrencyQuote, now = Date.now()): HistoricalPoint {
+  return {
+    timestamp: q.fetchedAt,
+    priceToman: q.priceToman,
+    source: "TGJU",
+    stale: !isFetchFresh(q, now),
+  };
+}
 export function alertMatches(
   alert: PriceAlert,
   q: CurrencyQuote,

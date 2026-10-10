@@ -1,6 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import {
   CurrencySchema,
+  fiatCodes,
   type CurrencyQuote,
   type MarketSnapshot,
   type HistoricalPoint,
@@ -18,12 +19,30 @@ import {
   staleAfterMs,
 } from "./health";
 import {
-  HISTORY_QUERY,
+  BACKFILL_DAILY,
+  BACKFILL_HOURLY,
+  DAILY_RETENTION_DELETE,
+  DAILY_SCHEMA,
+  DAY_LENGTH,
+  HOURLY_RETENTION_DELETE,
+  HOURLY_SCHEMA,
+  HOUR_LENGTH,
   INSERT_OBSERVATION,
   OBSERVATIONS_SCHEMA,
   RETENTION_DELETE,
+  UPSERT_DAILY,
+  UPSERT_HOURLY,
   retentionParams,
 } from "./sql";
+import {
+  DAILY_RETENTION_MS,
+  HISTORY_TTL_MS,
+  HOURLY_RETENTION_MS,
+  RANGE_MS,
+  RAW_RETENTION_MS,
+  TtlCache,
+  planHistory,
+} from "./history";
 import {
   ACTIVE_INTERVAL_MS,
   EXTRAS_INTERVAL_MS,
@@ -42,14 +61,6 @@ interface Env {
   /** Minutes without fresh data before alerting (default 30, minimum 5). */
   STALE_ALERT_MINUTES?: string;
 }
-const ranges: Record<string, number> = {
-  "1H": 3600_000,
-  "1D": 86400_000,
-  "1W": 7 * 86400_000,
-  "1M": 30 * 86400_000,
-  "3M": 90 * 86400_000,
-  "1Y": 365 * 86400_000,
-};
 export class MarketStore extends DurableObject<Env> {
   private pending: Promise<void> | null = null;
   /**
@@ -61,9 +72,27 @@ export class MarketStore extends DurableObject<Env> {
   private lastClientAt: number | null = null;
   /** In memory for the same reason; after an eviction the extras simply refresh. */
   private lastExtrasAttempt = 0;
+  /**
+   * Computed history responses. In memory: losing them on eviction only costs
+   * one recomputation, while persisting them would cost rows written.
+   */
+  private historyCache = new TtlCache<HistoricalPoint[]>();
+  private lastRetentionAt = 0;
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
     ctx.storage.sql.exec(OBSERVATIONS_SCHEMA);
+    ctx.storage.sql.exec(HOURLY_SCHEMA);
+    ctx.storage.sql.exec(DAILY_SCHEMA);
+    // Observations stored before the rollups existed are folded in once, a
+    // currency at a time through the primary key, before anything expires.
+    void ctx.blockConcurrencyWhile(async () => {
+      if (await ctx.storage.get<boolean>("rollupsBackfilled")) return;
+      for (const currency of fiatCodes) {
+        ctx.storage.sql.exec(BACKFILL_HOURLY, currency);
+        ctx.storage.sql.exec(BACKFILL_DAILY, currency);
+      }
+      await ctx.storage.put("rollupsBackfilled", true);
+    });
   }
   async refresh() {
     if (this.pending) return this.pending;
@@ -101,10 +130,7 @@ export class MarketStore extends DurableObject<Env> {
       }
       this.record(snapshot.quotes);
       await this.refreshExtras(snapshot);
-      this.ctx.storage.sql.exec(
-        RETENTION_DELETE,
-        ...retentionParams(new Date(Date.now() - ranges["1Y"]).toISOString()),
-      );
+      this.expire();
       const now = Date.now();
       await this.ctx.storage.setAlarm(
         now + nextRefreshDelayMs(now, this.lastClientAt, 0),
@@ -161,14 +187,25 @@ export class MarketStore extends DurableObject<Env> {
     };
   }
   private record(quotes: CurrencyQuote[]) {
-    for (const q of quotes)
-      this.ctx.storage.sql.exec(
-        INSERT_OBSERVATION,
-        q.currency,
-        q.fetchedAt,
-        q.priceToman,
-        q.stale ? 1 : 0,
-      );
+    const sql = this.ctx.storage.sql;
+    for (const q of quotes) {
+      const stale = q.stale ? 1 : 0;
+      sql.exec(INSERT_OBSERVATION, q.currency, q.fetchedAt, q.priceToman, stale);
+      const iso = new Date(q.fetchedAt).toISOString();
+      sql.exec(UPSERT_HOURLY, q.currency, iso.slice(0, HOUR_LENGTH), q.fetchedAt, q.priceToman, stale);
+      sql.exec(UPSERT_DAILY, q.currency, iso.slice(0, DAY_LENGTH), q.fetchedAt, q.priceToman, stale);
+    }
+  }
+  /** Drops expired rows, at most once an hour: nothing expires faster than that. */
+  private expire() {
+    const now = Date.now();
+    if (now - this.lastRetentionAt < 3600_000) return;
+    this.lastRetentionAt = now;
+    const sql = this.ctx.storage.sql;
+    const cutoff = (ms: number) => new Date(now - ms).toISOString();
+    sql.exec(RETENTION_DELETE, ...retentionParams(cutoff(RAW_RETENTION_MS)));
+    sql.exec(HOURLY_RETENTION_DELETE, ...retentionParams(cutoff(HOURLY_RETENTION_MS).slice(0, HOUR_LENGTH)));
+    sql.exec(DAILY_RETENTION_DELETE, ...retentionParams(cutoff(DAILY_RETENTION_MS).slice(0, DAY_LENGTH)));
   }
   /**
    * The 20 extra currencies come from one overview page, on a slower cadence
@@ -221,27 +258,32 @@ export class MarketStore extends DurableObject<Env> {
     if (url.pathname.startsWith("/api/history/")) {
       const code = CurrencySchema.safeParse(url.pathname.split("/").pop());
       const range = url.searchParams.get("range") ?? "1D";
-      if (!code.success || !Object.hasOwn(ranges, range))
+      if (!code.success || !Object.hasOwn(RANGE_MS, range))
         return Response.json(
           { error: "Invalid currency or range" },
           { status: 400 },
         );
-      // Select one real observation per bucket; never interpolate missing data.
-      const bucket = Math.max(300_000, Math.ceil(ranges[range] / 240));
-      const rows = this.ctx.storage.sql
-        .exec<{ timestamp: string; price: number; stale: number }>(
-          HISTORY_QUERY,
-          code.data,
-          new Date(Date.now() - ranges[range]).toISOString(),
-          bucket,
-        )
-        .toArray();
-      const points: HistoricalPoint[] = rows.map((r) => ({
-        timestamp: r.timestamp,
-        priceToman: r.price,
-        source: "TGJU",
-        stale: !!r.stale,
-      }));
+      const key = `${code.data}:${range}`;
+      let points = this.historyCache.get(key);
+      if (!points) {
+        // Select one real observation per bucket; never interpolate missing data.
+        const plan = planHistory(range, Date.now())!;
+        const rows = this.ctx.storage.sql
+          .exec<{ timestamp: string; price: number; stale: number }>(
+            plan.sql,
+            code.data,
+            plan.cutoff,
+            plan.bucketMs,
+          )
+          .toArray();
+        points = rows.map((r) => ({
+          timestamp: r.timestamp,
+          priceToman: r.price,
+          source: "TGJU",
+          stale: !!r.stale,
+        })) as HistoricalPoint[];
+        this.historyCache.set(key, points, HISTORY_TTL_MS[range]);
+      }
       return Response.json({
         currency: code.data,
         range,
