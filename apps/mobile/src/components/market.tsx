@@ -278,6 +278,7 @@ export function MarketStatus() {
   // What the app can truthfully say is *when it received* the rates. TGJU
   // publishes no trade timestamp, so that caveat lives on the currency card
   // ("زمان منبع"), not in an amber warning on every screen.
+  const source = app.snapshot?.quotes[0]?.source ?? "TGJU";
   const fetchedAt = app.snapshot ? Date.parse(app.snapshot.fetchedAt) : null;
   const ageMs = fetchedAt === null ? null : app.clock - fetchedAt;
   const fresh = ageMs !== null && ageMs <= 3 * 60_000;
@@ -314,14 +315,14 @@ export function MarketStatus() {
       >
         <View
           accessible
-          accessibilityLabel={`${statusLabel}، منبع TGJU`}
+          accessibilityLabel={`${statusLabel}، منبع ${source}`}
           style={{ flex: 1, flexDirection: "row-reverse", alignItems: "center", gap: spacing.xxs }}
         >
           <View
             style={{ width: 7, height: 7, borderRadius: 3.5, backgroundColor: statusColor }}
           />
           <Label secondary size={13} numberOfLines={1} style={{ flex: 1 }}>
-            {statusLabel} · TGJU
+            {statusLabel} · {source}
           </Label>
         </View>
         {app.busy ? (

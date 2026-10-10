@@ -8,6 +8,7 @@
     "bindings": [{ "name": "MARKET", "class_name": "MarketStore" }],
   },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["MarketStore"] }],
+  "triggers": { "crons": ["*/15 * * * *"] },
   "vars": { "ALLOWED_ORIGIN": "*" },
   "observability": { "enabled": true },
 }
