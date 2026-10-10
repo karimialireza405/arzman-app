@@ -24,6 +24,25 @@ All checks should pass, and `GET /api/v2/market` should return 24 quotes while
 `ALLOWED_ORIGIN` is `*` by default (public quote data, not authentication); restrict it
 if you host a web client on a known origin.
 
+### Optional: fallback source and stale-data alert
+
+Both are off until you set a secret; the Worker works exactly as before without them.
+
+```bash
+cd server
+npx wrangler secret put BRSAPI_KEY          # free key from brsapi.ir; enables the fallback
+npx wrangler secret put ALERT_WEBHOOK_URL   # e.g. https://ntfy.sh/<long-random-topic>
+npm run deploy
+```
+
+- While TGJU fails, `/api/v2/market` serves the four core currencies from BRSAPI (each quote says
+  `source: "BRSAPI"`). `/api/market` (v1) never does — old installs require `TGJU`.
+  BRSAPI prices must agree with the last TGJU snapshot within 2x, otherwise they are ignored.
+- A cron (every 15 min) alerts the topic once when no source has delivered fresh data for
+  `STALE_ALERT_MINUTES` (default 30), repeats every 6 h, and says when data recovers. Install the
+  free ntfy app on the phone and subscribe to the same topic.
+- `GET /api/health` returns 200/503 and the data age, for an external monitor such as UptimeRobot.
+
 ## Android APK (EAS)
 
 The `preview` profile builds a signed standalone APK; keep using the same signing key

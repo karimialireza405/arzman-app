@@ -8,7 +8,16 @@ import {
 } from "@arzman/shared";
 import { TGJUProvider } from "./providers/tgju";
 import { fetchOverviewHtml, parseOverview } from "./providers/tgju/overview";
+import { BrsApiProvider } from "./providers/brsapi";
 import { refreshSnapshot, staleSnapshot } from "./cache";
+import {
+  FALLBACK_MAX_AGE_MS,
+  alertText,
+  decideAlert,
+  lastGoodAt,
+  sendAlert,
+  staleAfterMs,
+} from "./health";
 import {
   BACKFILL_DAILY,
   BACKFILL_HOURLY,
@@ -45,6 +54,12 @@ import {
 interface Env {
   MARKET: DurableObjectNamespace<MarketStore>;
   ALLOWED_ORIGIN: string;
+  /** Secret. Enables the BRSAPI fallback; without it TGJU is the only source. */
+  BRSAPI_KEY?: string;
+  /** Secret. https URL of a private ntfy topic (or compatible) for stale-data alerts. */
+  ALERT_WEBHOOK_URL?: string;
+  /** Minutes without fresh data before alerting (default 30, minimum 5). */
+  STALE_ALERT_MINUTES?: string;
 }
 export class MarketStore extends DurableObject<Env> {
   private pending: Promise<void> | null = null;
@@ -121,11 +136,55 @@ export class MarketStore extends DurableObject<Env> {
         now + nextRefreshDelayMs(now, this.lastClientAt, 0),
       );
     } else {
+      await this.refreshFallback();
       const nextFailures = failures + 1;
       await this.ctx.storage.put("consecutiveFailures", nextFailures);
       await this.ctx.storage.put("lastError", true);
       await this.ctx.storage.setAlarm(Date.now() + cooldownMs(nextFailures));
     }
+  }
+  /** TGJU just failed: try the second source, if the owner configured one. */
+  private async refreshFallback() {
+    const key = this.env.BRSAPI_KEY;
+    if (!key) return;
+    const provider = new BrsApiProvider(key, () =>
+      this.ctx.storage.get<MarketSnapshot>("snapshot"),
+    );
+    await refreshSnapshot(provider, {
+      read: () => this.ctx.storage.get<MarketSnapshot>("fallback"),
+      write: (snapshot) => this.ctx.storage.put("fallback", snapshot),
+    });
+  }
+  /** Called by the cron trigger: keep the refresh loop alive and alert once if data is stale. */
+  async checkHealth() {
+    await this.refresh();
+    const now = Date.now();
+    const good = await this.freshness(now);
+    const alertedAt = (await this.ctx.storage.get<number>("alertedAt")) ?? null;
+    const action = decideAlert({
+      now,
+      lastGoodAt: good.at,
+      alertedAt,
+      staleAfterMs: staleAfterMs(this.env.STALE_ALERT_MINUTES),
+    });
+    if (action === "none") return;
+    const sent = await sendAlert(
+      this.env.ALERT_WEBHOOK_URL,
+      alertText(action, now, good.at),
+    );
+    // An unsent alert stays open so the next check retries it.
+    if (!sent) return;
+    if (action === "recover") await this.ctx.storage.delete("alertedAt");
+    else await this.ctx.storage.put("alertedAt", now);
+  }
+  private async freshness(now: number) {
+    const primary = await this.ctx.storage.get<MarketSnapshot>("snapshot");
+    const fallback = await this.ctx.storage.get<MarketSnapshot>("fallback");
+    return {
+      at: lastGoodAt(primary?.fetchedAt, fallback?.fetchedAt),
+      primaryAgeS: primary ? Math.round((now - Date.parse(primary.fetchedAt)) / 1000) : null,
+      fallbackAgeS: fallback ? Math.round((now - Date.parse(fallback.fetchedAt)) / 1000) : null,
+    };
   }
   private record(quotes: CurrencyQuote[]) {
     const sql = this.ctx.storage.sql;
@@ -176,8 +235,26 @@ export class MarketStore extends DurableObject<Env> {
     await this.refresh();
   }
   async fetch(request: Request) {
-    this.lastClientAt = Date.now();
     const url = new URL(request.url);
+    // A monitor pinging this must not count as "someone is using the app".
+    if (url.pathname === "/api/health") {
+      const now = Date.now();
+      const f = await this.freshness(now);
+      const limit = staleAfterMs(this.env.STALE_ALERT_MINUTES);
+      const ok = f.at !== null && now - f.at <= limit;
+      return Response.json(
+        {
+          ok,
+          lastGoodAt: f.at === null ? null : new Date(f.at).toISOString(),
+          primaryAgeSeconds: f.primaryAgeS,
+          fallbackConfigured: !!this.env.BRSAPI_KEY,
+          fallbackAgeSeconds: f.fallbackAgeS,
+          alertConfigured: !!this.env.ALERT_WEBHOOK_URL,
+        },
+        { status: ok ? 200 : 503 },
+      );
+    }
+    this.lastClientAt = Date.now();
     if (url.pathname.startsWith("/api/history/")) {
       const code = CurrencySchema.safeParse(url.pathname.split("/").pop());
       const range = url.searchParams.get("range") ?? "1D";
@@ -229,7 +306,20 @@ export class MarketStore extends DurableObject<Env> {
     )
       return Response.json({ error: "Not found" }, { status: 404 });
     await this.refresh();
-    const saved = await this.ctx.storage.get<MarketSnapshot>("snapshot");
+    const primary = await this.ctx.storage.get<MarketSnapshot>("snapshot");
+    const failed = await this.ctx.storage.get<boolean>("lastError");
+    const primaryFresh =
+      !!primary &&
+      !failed &&
+      Date.now() - Date.parse(primary.fetchedAt) <= ACTIVE_INTERVAL_MS * 2;
+    // v1 must stay TGJU-only: old installs parse `source` as the literal "TGJU".
+    const fallback =
+      !primaryFresh && (all || code?.success)
+        ? await this.ctx.storage.get<MarketSnapshot>("fallback")
+        : undefined;
+    const useFallback =
+      !!fallback && Date.now() - Date.parse(fallback.fetchedAt) <= FALLBACK_MAX_AGE_MS;
+    const saved = useFallback ? fallback : primary;
     if (!saved)
       return Response.json(
         {
@@ -238,16 +328,24 @@ export class MarketStore extends DurableObject<Env> {
         },
         { status: 503, headers: { "Retry-After": "45" } },
       );
-    const failed = await this.ctx.storage.get<boolean>("lastError");
     const extras =
       all || code?.success
         ? ((await this.ctx.storage.get<CurrencyQuote[]>("extras")) ?? []).map((q) =>
-            Date.now() - Date.parse(q.fetchedAt) > EXTRAS_INTERVAL_MS * 2 ? { ...q, stale: true } : q,
+            useFallback || Date.now() - Date.parse(q.fetchedAt) > EXTRAS_INTERVAL_MS * 2
+              ? { ...q, stale: true }
+              : q,
           )
         : [];
-    const merged = { ...saved, quotes: [...saved.quotes, ...extras] };
+    const merged = {
+      ...saved,
+      ...(useFallback && {
+        message: "TGJU در دسترس نیست؛ نرخ‌های اصلی موقتاً از منبع جایگزین (BRSAPI) است",
+      }),
+      quotes: [...saved.quotes, ...extras],
+    };
     const snapshot =
-      failed || Date.now() - Date.parse(saved.fetchedAt) > ACTIVE_INTERVAL_MS * 2
+      !useFallback &&
+      (failed || Date.now() - Date.parse(saved.fetchedAt) > ACTIVE_INTERVAL_MS * 2)
         ? staleSnapshot(merged)
         : merged;
     if (code?.success) {
@@ -294,5 +392,9 @@ export default {
         { status: 503, headers },
       );
     }
+  },
+  /** Cron trigger (wrangler.jsonc): data-freshness watchdog. */
+  async scheduled(_event: ScheduledController, env: Env): Promise<void> {
+    await env.MARKET.get(env.MARKET.idFromName("global")).checkHealth();
   },
 };

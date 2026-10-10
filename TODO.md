@@ -30,6 +30,10 @@ from an older unchecked item.
 
 ## Open — backend
 
+- [ ] **Owner**: set `BRSAPI_KEY` + `ALERT_WEBHOOK_URL`, deploy, and check the BRSAPI response shape live
+      once (parser in `server/src/providers/brsapi` was written from the docs, not verified against the service).
+- [ ] **Owner**: custom domain on Cloudflare; test from MCI/Irancell without VPN.
+
 - [x] Find why the deployed Worker 503s: full-table-scan retention delete
       exhausted the Free plan's 5M rows-read/day (measured, fixed in `4745059`).
 - [ ] **Owner deploys**: `npm run deploy -w @arzman/server` (this PC is already

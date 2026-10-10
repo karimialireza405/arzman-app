@@ -121,6 +121,12 @@ export const shortNames: Record<ConversionCurrency, string> = {
   IRT: "تومان",
   IRR: "ریال",
 };
+/**
+ * Where a quote came from. TGJU is the primary source; BRSAPI is the fallback
+ * the server uses only while TGJU is failing. Historical points are always TGJU.
+ */
+export const QuoteSourceSchema = z.enum(["TGJU", "BRSAPI"]);
+export type QuoteSource = z.infer<typeof QuoteSourceSchema>;
 const positive = z.number().finite().positive().max(1e15);
 const date = z.iso.datetime();
 export const CurrencyQuoteSchema = z
@@ -137,7 +143,7 @@ export const CurrencyQuoteSchema = z
     changePercent: z.number().finite().nullable(),
     highToman: positive.nullable(),
     lowToman: positive.nullable(),
-    source: z.literal("TGJU"),
+    source: QuoteSourceSchema,
     sourceUrl: z.url(),
     sourceTimestamp: date.nullable(),
     sourceTimeLabel: z.string(),
