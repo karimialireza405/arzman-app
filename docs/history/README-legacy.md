@@ -44,7 +44,7 @@ Persian step-by-step installation and the first-device checklist:
   USD/EUR/AED/IQD and the existing personal-rate/unit marks.
 - Native navigation sheets, safe-area layout (Dynamic Island, home indicator, floating tab bar).
 - Rial/toman preferences, Persian/English number formatting and explicit source quote sizes.
-- Personal rates (e.g. your exchange's or USDT) compared with the open market. *(The portfolio / transaction ledger was removed on 2026-09-27 at the owner's request; it is recoverable from git history.)*
+- Personal rates (e.g. your exchange's or USDT) compared with the open market. _(The portfolio / transaction ledger was removed on 2026-09-27 at the owner's request; it is recoverable from git history.)_
 - Foreground-only threshold, percentage and rapid-movement alerts, disabled for stale prices.
 - Real backend observation history across 1H/1D/1W/1M/3M/1Y, with touch selection and no generated price history.
 - Shared schemas, parser fixtures, protected last-known-good cache and restart-persistent server history.
@@ -110,7 +110,7 @@ npm run start -w @arzman/mobile
 
 Press `w` for a browser preview, or open [the local preview](http://localhost:8081). Environment changes require restarting Metro.
 
-**Which runtime can run this app** — see the matrix below, and read [`docs/engineering-audit.md`](docs/engineering-audit.md) §5 before choosing. Short version: every native module this project uses *is* included in Expo Go, and Expo Go is a **free App Store install** whose current build runs React Native 0.86 — this project's exact version. So the free route works. Move to a development build when you need the app's own identity, `ios.enableSceneSupport`, or a native extension; that route requires a paid Apple Developer account for signing.
+**Which runtime can run this app** — see the matrix below, and read [`docs/engineering-audit.md`](docs/engineering-audit.md) §5 before choosing. Short version: every native module this project uses _is_ included in Expo Go, and Expo Go is a **free App Store install** whose current build runs React Native 0.86 — this project's exact version. So the free route works. Move to a development build when you need the app's own identity, `ios.enableSceneSupport`, or a native extension; that route requires a paid Apple Developer account for signing.
 
 ## Backend Endpoints and Deployment
 
@@ -163,24 +163,24 @@ Verified on 2026-09-22 against each library's own page on `docs.expo.dev/version
 ("Included in Expo Go" is the badge shown there), and empirically: `npx expo start --go`
 serves an `exposdk:57.0.0` manifest and a working iOS Hermes bundle for this project.
 
-| Feature | Expo Web | Expo Go (iOS) | Development build | Notes |
-|---------|----------|---------------|-------------------|-------|
-| Market data, converter, alert logic | ✅ | ✅ | ✅ | Plain JS over an HTTPS API |
-| Charts (`react-native-svg`) | ✅ | ✅ | ✅ | Bundled in Expo Go |
-| `expo-sqlite` | ❌ falls back | ✅ | ✅ | Included in Expo Go |
-| Liquid Glass (`expo-glass-effect`) | ❌ falls back | ✅ iOS 26+ | ✅ iOS 26+ | Included in Expo Go; plain view below iOS 26 |
-| `expo-blur` | approximation | ✅ | ✅ | Included in Expo Go |
-| SF Symbols (`expo-symbols`) | ❌ Ionicons | ✅ | ✅ | Included in Expo Go |
-| Haptics (`expo-haptics`) | ❌ no-op | ✅ | ✅ | Every call site is guarded and `.catch()`-ed |
-| `ios.enableSceneSupport` build property | n/a | ❌ not applied | ✅ | A config plugin cannot change Expo Go's prebuilt binary |
-| App identity (name «ارز من», icon, bundle id) | n/a | ❌ Expo Go shell | ✅ | |
-| Push notifications | ❌ | ❌ | ❌ | **Not implemented.** In-app alerts only, while the app is open |
-| Widgets · Live Activities · Dynamic Island · Siri/App Intents | ❌ | ❌ | ❌ | **Not implemented** (`nativeCapabilities` are all `false`). Each needs a native extension target, therefore a development build |
+| Feature                                                       | Expo Web      | Expo Go (iOS)    | Development build | Notes                                                                                                                           |
+| ------------------------------------------------------------- | ------------- | ---------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Market data, converter, alert logic                           | ✅            | ✅               | ✅                | Plain JS over an HTTPS API                                                                                                      |
+| Charts (`react-native-svg`)                                   | ✅            | ✅               | ✅                | Bundled in Expo Go                                                                                                              |
+| `expo-sqlite`                                                 | ❌ falls back | ✅               | ✅                | Included in Expo Go                                                                                                             |
+| Liquid Glass (`expo-glass-effect`)                            | ❌ falls back | ✅ iOS 26+       | ✅ iOS 26+        | Included in Expo Go; plain view below iOS 26                                                                                    |
+| `expo-blur`                                                   | approximation | ✅               | ✅                | Included in Expo Go                                                                                                             |
+| SF Symbols (`expo-symbols`)                                   | ❌ Ionicons   | ✅               | ✅                | Included in Expo Go                                                                                                             |
+| Haptics (`expo-haptics`)                                      | ❌ no-op      | ✅               | ✅                | Every call site is guarded and `.catch()`-ed                                                                                    |
+| `ios.enableSceneSupport` build property                       | n/a           | ❌ not applied   | ✅                | A config plugin cannot change Expo Go's prebuilt binary                                                                         |
+| App identity (name «ارز من», icon, bundle id)                 | n/a           | ❌ Expo Go shell | ✅                |                                                                                                                                 |
+| Push notifications                                            | ❌            | ❌               | ❌                | **Not implemented.** In-app alerts only, while the app is open                                                                  |
+| Widgets · Live Activities · Dynamic Island · Siri/App Intents | ❌            | ❌               | ❌                | **Not implemented** (`nativeCapabilities` are all `false`). Each needs a native extension target, therefore a development build |
 
 ## Data Privacy and Limitations
 
 - ArzMan stores no financial data. Settings, watchlist, alerts, personal rates and the market cache live in SQLite on the device (localStorage in the browser preview). Cache clearing removes only the market cache.
-- TGJU publishes no trade timestamp (only a clock or day/month label), so the status pill honestly reads «تازگی منبع تأیید نشده» and `sourceTimestamp` stays `null`. Alerts are evaluated against *retrieval* freshness instead, which ArzMan does know, so they fire while the app is open. There is no closed-app push delivery.
+- TGJU publishes no trade timestamp (only a clock or day/month label), so the status pill honestly reads «تازگی منبع تأیید نشده» and `sourceTimestamp` stays `null`. Alerts are evaluated against _retrieval_ freshness instead, which ArzMan does know, so they fire while the app is open. There is no closed-app push delivery.
 - The history starts with this backend's actual collection period. Lines connect observed samples, not fabricated exchange ticks. One-year retention is implemented; one year's data does not appear immediately.
 - Watchlist order persists; removing/re-adding moves a currency to the end. Drag reordering is not implemented.
 - Chart smoothing/animation and final on-device spacing/accessibility polish remain. Native widgets/ActivityKit/App Intents are not compiled extensions yet.
@@ -211,6 +211,7 @@ npm run verify
 ```
 
 This script fetches USD, EUR, AED, IQD from their official TGJU profiles, parses them with the same logic used in production, and prints a detailed comparison report showing:
+
 - Raw TGJU value and unit (IRR/IRT)
 - Quote lot size
 - Normalized Toman price
@@ -220,6 +221,7 @@ This script fetches USD, EUR, AED, IQD from their official TGJU profiles, parses
 - OK/FAIL verdict per currency
 
 Example output:
+
 ```
 Currency:          USD — دلار آمریکا
 TGJU raw value:    2,306,000 IRR
@@ -272,9 +274,9 @@ Use this when you want the real app: its own identity, scene
 support, or any future native extension (widgets, Live Activities, App Intents).
 
 **Prerequisite:** an active [Apple Developer Program](https://developer.apple.com/programs/)
-membership (US$99/year). The Expo docs state it for macOS, Windows and Linux alike — *all
+membership (US$99/year). The Expo docs state it for macOS, Windows and Linux alike — _all
 builds that run on an iPhone device require a paid Apple Developer account for build
-signing*. Also enable **Developer Mode** on the iPhone (Settings → Privacy & Security),
+signing_. Also enable **Developer Mode** on the iPhone (Settings → Privacy & Security),
 which iOS 16+ requires before it will run a development-signed app.
 
 ```powershell
@@ -294,13 +296,13 @@ phone.
 
 **Troubleshooting (both routes)**
 
-- *The phone cannot reach Metro*: same private Wi-Fi, no VPN, Node.js allowed through
+- _The phone cannot reach Metro_: same private Wi-Fi, no VPN, Node.js allowed through
   Windows Defender Firewall for **Private networks**. Fallback: add `--tunnel`.
-- *«ارتباط با سرویس برقرار نشد»*: that is the market API, not Metro. Check
+- _«ارتباط با سرویس برقرار نشد»_: that is the market API, not Metro. Check
   `EXPO_PUBLIC_API_URL` in `apps/mobile/.env.local` and restart Metro after any change.
-- *Blank screen*: read the Metro terminal for red errors, then run `npm run check` at the
+- _Blank screen_: read the Metro terminal for red errors, then run `npm run check` at the
   repository root.
-- *Build fails on signing (Route B)*: confirm the bundle id `com.arzman.personal` is free on
+- _Build fails on signing (Route B)_: confirm the bundle id `com.arzman.personal` is free on
   your account, or change `ios.bundleIdentifier` in `apps/mobile/app.json`.
 
 **Windows-only preview.** `npm run start -w @arzman/mobile` then `w` runs the app in a
@@ -314,11 +316,11 @@ Symbols, no Liquid Glass, no haptics.
 Live verification against TGJU public pages (as of audit):
 
 | Currency | TGJU Raw (IRR) | Quote Size | Normalized Toman | Normalization Formula |
-|----------|----------------|------------|------------------|----------------------|
-| **USD**  | 2,306,000      | 1 unit     | 230,600          | 2,306,000 ÷ 10 ÷ 1   |
-| **EUR**  | 2,651,000      | 1 unit     | 265,100          | 2,651,000 ÷ 10 ÷ 1   |
-| **AED**  | 627,880        | 1 unit     | 62,788           | 627,880 ÷ 10 ÷ 1     |
-| **IQD**  | 1,479          | 1 unit     | 147.9            | 1,479 ÷ 10 ÷ 1       |
+| -------- | -------------- | ---------- | ---------------- | --------------------- |
+| **USD**  | 2,306,000      | 1 unit     | 230,600          | 2,306,000 ÷ 10 ÷ 1    |
+| **EUR**  | 2,651,000      | 1 unit     | 265,100          | 2,651,000 ÷ 10 ÷ 1    |
+| **AED**  | 627,880        | 1 unit     | 62,788           | 627,880 ÷ 10 ÷ 1      |
+| **IQD**  | 1,479          | 1 unit     | 147.9            | 1,479 ÷ 10 ÷ 1        |
 
 **IQD convention verified:** TGJU profile `price_iqd` explicitly quotes **price per 1 Iraqi Dinar** (not 100 or 1000). FAQ text confirms: «قیمت هر دینار عراق... ۱,۴۷۹ ریال». Quote size is strictly **1 unit**. Lot sizes are never inferred from magnitude.
 

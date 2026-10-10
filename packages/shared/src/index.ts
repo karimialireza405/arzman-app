@@ -247,7 +247,12 @@ export function parseAmount(value: string): number {
   return result;
 }
 /** `minDigits` pads decimals (a column of percentages lines up); it never exceeds `digits`. */
-export function formatNumber(value: number, persian = true, digits = 2, minDigits = 0) {
+export function formatNumber(
+  value: number,
+  persian = true,
+  digits = 2,
+  minDigits = 0,
+) {
   return new Intl.NumberFormat(persian ? "fa-IR" : "en-US", {
     maximumFractionDigits: digits,
     minimumFractionDigits: Math.min(minDigits, digits),
@@ -261,7 +266,10 @@ export function formatNumber(value: number, persian = true, digits = 2, minDigit
 export function formatAmount(value: number, persian = true, significant = 4) {
   const magnitude = Math.abs(value);
   if (magnitude === 0 || magnitude >= 1) return formatNumber(value, persian, 4);
-  const decimals = Math.min(12, Math.ceil(-Math.log10(magnitude)) + significant - 1);
+  const decimals = Math.min(
+    12,
+    Math.ceil(-Math.log10(magnitude)) + significant - 1,
+  );
   return formatNumber(value, persian, decimals);
 }
 export function convert(
@@ -308,7 +316,10 @@ export function isFetchFresh(q: CurrencyQuote, now = Date.now()) {
  * `stale` here means "not freshly retrieved", never `isStale`: that is always
  * true for TGJU, which would make rapid alerts unreachable.
  */
-export function observationOf(q: CurrencyQuote, now = Date.now()): HistoricalPoint {
+export function observationOf(
+  q: CurrencyQuote,
+  now = Date.now(),
+): HistoricalPoint {
   return {
     timestamp: q.fetchedAt,
     priceToman: q.priceToman,

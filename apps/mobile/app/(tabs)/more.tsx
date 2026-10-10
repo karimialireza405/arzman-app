@@ -25,7 +25,15 @@ import {
 } from "../../src/ui";
 
 /** A tappable developer contact in the footer; Latin text stays left-to-right. */
-function ContactLink({ icon, text, url }: { icon: string; text: string; url: string }) {
+function ContactLink({
+  icon,
+  text,
+  url,
+}: {
+  icon: string;
+  text: string;
+  url: string;
+}) {
   const t = useTheme();
   return (
     <Pressable
@@ -41,7 +49,13 @@ function ContactLink({ icon, text, url }: { icon: string; text: string; url: str
       })}
     >
       <AppIcon name={icon} size={13} color={t.accent} />
-      <Label accent size={12} weight="500" align="left" style={{ writingDirection: "ltr" }}>
+      <Label
+        accent
+        size={12}
+        weight="500"
+        align="left"
+        style={{ writingDirection: "ltr" }}
+      >
         {text}
       </Label>
     </Pressable>
@@ -55,7 +69,6 @@ export default function More() {
 
   const update = (next: Partial<typeof settings>) =>
     app.updateUser((u) => ({ ...u, settings: { ...u.settings, ...next } }));
-
 
   return (
     <Screen title="بیشتر" eyebrow="تنظیمات و منابع">
@@ -82,8 +95,14 @@ export default function More() {
       {/* Display & formatting */}
       <Section title="نمایش و قالب‌بندی">
         <GroupedList>
-          <SettingsRow title="واحد پیش‌فرض" subtitle="نمایش مبالغ در سراسر برنامه" accessory="none" />
-          <View style={{ paddingHorizontal: spacing.sm, paddingBottom: spacing.xs }}>
+          <SettingsRow
+            title="واحد پیش‌فرض"
+            subtitle="نمایش مبالغ در سراسر برنامه"
+            accessory="none"
+          />
+          <View
+            style={{ paddingHorizontal: spacing.sm, paddingBottom: spacing.xs }}
+          >
             <SegmentedControl
               values={["IRT", "IRR"] as const}
               value={settings.unit}
@@ -92,13 +111,21 @@ export default function More() {
             />
           </View>
 
-          <SettingsRow title="حالت ظاهری" subtitle="هماهنگ با دستگاه یا دستی" accessory="none" />
-          <View style={{ paddingHorizontal: spacing.sm, paddingBottom: spacing.xs }}>
+          <SettingsRow
+            title="حالت ظاهری"
+            subtitle="هماهنگ با دستگاه یا دستی"
+            accessory="none"
+          />
+          <View
+            style={{ paddingHorizontal: spacing.sm, paddingBottom: spacing.xs }}
+          >
             <SegmentedControl
               values={["dark", "light", "system"] as const}
               value={settings.appearance}
               onChange={(appearance) => update({ appearance })}
-              label={(v) => ({ dark: "تیره", light: "روشن", system: "خودکار" })[v]}
+              label={(v) =>
+                ({ dark: "تیره", light: "روشن", system: "خودکار" })[v]
+              }
             />
           </View>
 
@@ -126,8 +153,14 @@ export default function More() {
       {/* Data & cache */}
       <Section title="داده و منبع">
         <GroupedList>
-          <SettingsRow title="به‌روزرسانی خودکار" subtitle="فاصلهٔ استعلام از سرویس بازار" accessory="none" />
-          <View style={{ paddingHorizontal: spacing.sm, paddingBottom: spacing.xs }}>
+          <SettingsRow
+            title="به‌روزرسانی خودکار"
+            subtitle="فاصلهٔ استعلام از سرویس بازار"
+            accessory="none"
+          />
+          <View
+            style={{ paddingHorizontal: spacing.sm, paddingBottom: spacing.xs }}
+          >
             <SegmentedControl
               values={[30, 60, 120, 300] as const}
               value={settings.refresh}
@@ -148,7 +181,9 @@ export default function More() {
             onPress={() =>
               void app
                 .clearCache()
-                .then(() => Alert.alert("کش پاک شد", "داده‌های کش‌شده بازار تخلیه شدند."))
+                .then(() =>
+                  Alert.alert("کش پاک شد", "داده‌های کش‌شده بازار تخلیه شدند."),
+                )
                 .catch(() => Alert.alert("خطا", "پاک کردن کش ناموفق بود."))
             }
           />
@@ -158,19 +193,29 @@ export default function More() {
       {/* About */}
       <Section title="درباره">
         <Surface style={{ gap: spacing.xs }}>
-          <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: spacing.xs }}>
+          <View
+            style={{
+              flexDirection: "row-reverse",
+              alignItems: "center",
+              gap: spacing.xs,
+            }}
+          >
             <View style={{ flex: 1, gap: 2 }}>
-              <Label size={15} weight="600">شبکه اطلاع‌رسانی طلا و ارز (TGJU)</Label>
+              <Label size={15} weight="600">
+                شبکه اطلاع‌رسانی طلا و ارز (TGJU)
+              </Label>
               <Label secondary size={12}>
                 منبع اصلی داده‌های بازار آزاد ایران
               </Label>
             </View>
           </View>
           <Label secondary size={12} style={{ lineHeight: 18 }}>
-            سرویس ابری سبک ارز من داده‌های عمومی TGJU را در چرخه‌های منظم اعتبارسنجی،
-            نرمال‌سازی و با حفظ امنیت روی دستگاه شما کش می‌کند.
+            سرویس ابری سبک ارز من داده‌های عمومی TGJU را در چرخه‌های منظم
+            اعتبارسنجی، نرمال‌سازی و با حفظ امنیت روی دستگاه شما کش می‌کند.
           </Label>
-          <View style={{ flexDirection: "row-reverse", justifyContent: "flex-end" }}>
+          <View
+            style={{ flexDirection: "row-reverse", justifyContent: "flex-end" }}
+          >
             <Button
               title="مشاهدهٔ تارنمای منبع"
               variant="plain"
@@ -180,15 +225,25 @@ export default function More() {
           </View>
         </Surface>
 
-        <View style={{ alignItems: "center", gap: 4, paddingVertical: spacing.xs }}>
+        <View
+          style={{ alignItems: "center", gap: 4, paddingVertical: spacing.xs }}
+        >
           <Label secondary size={12} weight="600" align="center">
             «ارز من» · نسخهٔ {Constants.expoConfig?.version ?? "0.1.0"}
           </Label>
           <Label tertiary size={12} align="center">
             توسعه‌دهنده: علیرضا کریمی
           </Label>
-          <ContactLink icon="logo-github" text="github.com/karimialireza405" url="https://github.com/karimialireza405" />
-          <ContactLink icon="mail" text="alirezkarimi0021@gmail.com" url="mailto:alirezkarimi0021@gmail.com" />
+          <ContactLink
+            icon="logo-github"
+            text="github.com/karimialireza405"
+            url="https://github.com/karimialireza405"
+          />
+          <ContactLink
+            icon="mail"
+            text="alirezkarimi0021@gmail.com"
+            url="mailto:alirezkarimi0021@gmail.com"
+          />
         </View>
       </Section>
     </Screen>

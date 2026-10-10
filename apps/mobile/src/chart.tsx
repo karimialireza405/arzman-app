@@ -9,7 +9,11 @@ import Svg, {
   LinearGradient,
   Stop,
 } from "react-native-svg";
-import { type Currency, type HistoricalPoint, formatNumber } from "@arzman/shared";
+import {
+  type Currency,
+  type HistoricalPoint,
+  formatNumber,
+} from "@arzman/shared";
 import { useHistoryResult } from "./history";
 import { apiUrl, useApp } from "./store";
 import {
@@ -93,7 +97,11 @@ export function ChartCard({ currency }: { currency: Currency }) {
   const first = values[0];
   const last = values[values.length - 1];
   const strokeColor =
-    points.length < 2 || last === first ? t.accent : last > first ? t.green : t.red;
+    points.length < 2 || last === first
+      ? t.accent
+      : last > first
+        ? t.green
+        : t.red;
   const fillColor = strokeColor;
   const periodPercent =
     points.length >= 2 && first > 0 ? ((last - first) / first) * 100 : null;
@@ -143,10 +151,22 @@ export function ChartCard({ currency }: { currency: Currency }) {
             alignItems: "baseline",
           }}
         >
-          <View style={{ flexDirection: "row-reverse", alignItems: "baseline", gap: 5 }}>
-            <Label size={20} weight="700" tabular style={{ writingDirection: "ltr" }}>
+          <View
+            style={{
+              flexDirection: "row-reverse",
+              alignItems: "baseline",
+              gap: 5,
+            }}
+          >
+            <Label
+              size={20}
+              weight="700"
+              tabular
+              style={{ writingDirection: "ltr" }}
+            >
               {formatNumber(
-                activePoint.priceToman * (app.user.settings.unit === "IRR" ? 10 : 1),
+                activePoint.priceToman *
+                  (app.user.settings.unit === "IRR" ? 10 : 1),
                 app.user.settings.persian,
                 2,
               )}
@@ -185,7 +205,9 @@ export function ChartCard({ currency }: { currency: Currency }) {
             let closestIdx = 0;
             let minDiff = Infinity;
             for (let i = 0; i < points.length; i++) {
-              const diff = Math.abs(Date.parse(points[i].timestamp) - targetTime);
+              const diff = Math.abs(
+                Date.parse(points[i].timestamp) - targetTime,
+              );
               if (diff < minDiff) {
                 minDiff = diff;
                 closestIdx = i;
@@ -203,7 +225,9 @@ export function ChartCard({ currency }: { currency: Currency }) {
             let closestIdx = 0;
             let minDiff = Infinity;
             for (let i = 0; i < points.length; i++) {
-              const diff = Math.abs(Date.parse(points[i].timestamp) - targetTime);
+              const diff = Math.abs(
+                Date.parse(points[i].timestamp) - targetTime,
+              );
               if (diff < minDiff) {
                 minDiff = diff;
                 closestIdx = i;
@@ -218,7 +242,13 @@ export function ChartCard({ currency }: { currency: Currency }) {
         >
           <Svg width={width} height={chartHeight}>
             <Defs>
-              <LinearGradient id="chartAreaGradient" x1="0" y1="0" x2="0" y2="1">
+              <LinearGradient
+                id="chartAreaGradient"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
                 <Stop offset="0%" stopColor={fillColor} stopOpacity={0.28} />
                 <Stop offset="85%" stopColor={fillColor} stopOpacity={0.02} />
                 <Stop offset="100%" stopColor={fillColor} stopOpacity={0} />
@@ -306,7 +336,8 @@ export function ChartCard({ currency }: { currency: Currency }) {
             {status || "مشاهدات واقعی کافی برای ترسیم نمودار ثبت نشده است."}
           </Label>
           <Label tertiary size={11} style={{ textAlign: "center" }}>
-            نمودار ارز من بر اساس داده‌های دریافت و تأییدشده است و قیمت ساختگی تولید نمی‌کند.
+            نمودار ارز من بر اساس داده‌های دریافت و تأییدشده است و قیمت ساختگی
+            تولید نمی‌کند.
           </Label>
         </View>
       )}

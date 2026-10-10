@@ -20,9 +20,24 @@ import {
 export const unstable_settings = { initialRouteName: "index" };
 
 const tabs: TabSpec[] = [
-  { name: "more", title: "بیشتر", icon: "ellipsis-horizontal-circle-outline", activeIcon: "more" },
-  { name: "converter", title: "مبدل", icon: "swap-horizontal", activeIcon: "swap-horizontal" },
-  { name: "market", title: "بازار", icon: "stats-chart-outline", activeIcon: "stats-chart" },
+  {
+    name: "more",
+    title: "بیشتر",
+    icon: "ellipsis-horizontal-circle-outline",
+    activeIcon: "more",
+  },
+  {
+    name: "converter",
+    title: "مبدل",
+    icon: "swap-horizontal",
+    activeIcon: "swap-horizontal",
+  },
+  {
+    name: "market",
+    title: "بازار",
+    icon: "stats-chart-outline",
+    activeIcon: "stats-chart",
+  },
   { name: "index", title: "خانه", icon: "home-outline", activeIcon: "home" },
 ];
 
@@ -42,7 +57,11 @@ export default function TabLayout() {
         }}
       >
         {tabs.map((tab) => (
-          <Tabs.Screen key={tab.name} name={tab.name} options={{ title: tab.title }} />
+          <Tabs.Screen
+            key={tab.name}
+            name={tab.name}
+            options={{ title: tab.title }}
+          />
         ))}
       </Tabs>
     </TabBarClearanceContext.Provider>

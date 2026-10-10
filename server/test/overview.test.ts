@@ -10,7 +10,9 @@ const USD = 268_700;
 describe("TGJU currency overview", () => {
   it("parses all 20 extra currencies, in Toman per one unit", () => {
     const failures: string[] = [];
-    const quotes = parseOverview(html, USD, Date.now(), (c, m) => failures.push(`${c}: ${m}`));
+    const quotes = parseOverview(html, USD, Date.now(), (c, m) =>
+      failures.push(`${c}: ${m}`),
+    );
     expect(failures).toEqual([]);
     expect(quotes.map((q) => q.currency)).toEqual([...extraCodes]);
     const gbp = quotes.find((q) => q.currency === "GBP")!;
@@ -42,31 +44,37 @@ describe("TGJU currency overview", () => {
   });
 
   it("rejects a page that is not the currency overview", () => {
-    expect(() => parseOverview(html.replace(/<title>[^<]*</, "<title>طلا<"), USD)).toThrow(
-      "Wrong overview page",
-    );
+    expect(() =>
+      parseOverview(html.replace(/<title>[^<]*</, "<title>طلا<"), USD),
+    ).toThrow("Wrong overview page");
   });
 
   it("drops a currency whose lot changed instead of guessing a divisor", () => {
     const changed = html.replace("ین ژاپن (100 ین)", "ین ژاپن (1000 ین)");
     const failures: string[] = [];
-    const quotes = parseOverview(changed, USD, Date.now(), (c, m) => failures.push(c + m));
+    const quotes = parseOverview(changed, USD, Date.now(), (c, m) =>
+      failures.push(c + m),
+    );
     expect(quotes.some((q) => q.currency === "JPY")).toBe(false);
     expect(quotes).toHaveLength(extraCodes.length - 1);
     expect(failures[0]).toMatch(/^JPY/);
   });
 
   it("drops a currency whose price moved by a lot factor", () => {
-    const changed = html.replace(/data-price="54,700"/, 'data-price="5,470,000"').replace(
-      '<td class="nf">54,700</td>',
-      '<td class="nf">5,470,000</td>',
-    );
+    const changed = html
+      .replace(/data-price="54,700"/, 'data-price="5,470,000"')
+      .replace('<td class="nf">54,700</td>', '<td class="nf">5,470,000</td>');
     const quotes = parseOverview(changed, USD);
     expect(quotes.some((q) => q.currency === "TRY")).toBe(false);
   });
 
   it("drops a row whose two price copies disagree", () => {
-    const changed = html.replace('<td class="nf">3,551,800</td>', '<td class="nf">3,551,900</td>');
-    expect(parseOverview(changed, USD).some((q) => q.currency === "GBP")).toBe(false);
+    const changed = html.replace(
+      '<td class="nf">3,551,800</td>',
+      '<td class="nf">3,551,900</td>',
+    );
+    expect(parseOverview(changed, USD).some((q) => q.currency === "GBP")).toBe(
+      false,
+    );
   });
 });

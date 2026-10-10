@@ -27,10 +27,7 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "CFBundleAllowMixedLocalizations": true,
-        "CFBundleLocalizations": [
-          "fa",
-          "en"
-        ]
+        "CFBundleLocalizations": ["fa", "en"]
       }
     },
     "plugins": [

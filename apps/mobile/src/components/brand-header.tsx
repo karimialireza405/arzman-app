@@ -36,7 +36,12 @@ export function BrandHeader({
       {/* Balances the search button so the lockup sits on the true centre. */}
       <View style={{ width: SIDE }}>
         {onSearch ? (
-          <IconButton icon="search" size={SIDE} accessibilityLabel="جستجو در بازار" onPress={onSearch} />
+          <IconButton
+            icon="search"
+            size={SIDE}
+            accessibilityLabel="جستجو در بازار"
+            onPress={onSearch}
+          />
         ) : null}
       </View>
 
@@ -49,19 +54,34 @@ export function BrandHeader({
         {/* The mark is centred on the capitals of "ArzMan", not on the text's
             line box: Persian line boxes are tall, so the box centre sits
             4.7 pt below the letters and a centred icon looked low. */}
-        <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 9 }}>
-          <View style={{ marginTop: capCenterFromTop(WORDMARK_SIZE) - MARK_SIZE / 2 }}>
+        <View
+          style={{ flexDirection: "row", alignItems: "flex-start", gap: 9 }}
+        >
+          <View
+            style={{
+              marginTop: capCenterFromTop(WORDMARK_SIZE) - MARK_SIZE / 2,
+            }}
+          >
             <BrandMark size={MARK_SIZE} />
           </View>
           <View style={{ flexDirection: "row" }}>
-            <Label size={WORDMARK_SIZE} weight="800" align="center" style={{ writingDirection: "ltr", letterSpacing: -0.6 }}>
+            <Label
+              size={WORDMARK_SIZE}
+              weight="800"
+              align="center"
+              style={{ writingDirection: "ltr", letterSpacing: -0.6 }}
+            >
               Arz
             </Label>
             <Label
               size={WORDMARK_SIZE}
               weight="800"
               align="center"
-              style={{ writingDirection: "ltr", letterSpacing: -0.6, color: t.accent }}
+              style={{
+                writingDirection: "ltr",
+                letterSpacing: -0.6,
+                color: t.accent,
+              }}
             >
               Man
             </Label>

@@ -1,6 +1,6 @@
 {
   "name": "arzman",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "ArzMan (ارز من) — Persian-first live currency dashboard for the Iranian open market",
   "author": "Alireza Karimi <alirezkarimi0021@gmail.com>",
@@ -43,12 +43,15 @@
     "lint": "eslint .",
     "test": "vitest run",
     "verify": "npx tsx scripts/verify-market.ts",
-    "check": "npm run typecheck && npm run lint && npm test",
-    "build:web": "npm run build:web -w @arzman/mobile"
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm test",
+    "build:web": "npm run build:web -w @arzman/mobile",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
     "eslint": "^9.39.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "prettier": "^3.9.8",
     "react-native-reanimated": "4.5.1",
     "react-native-worklets": "0.10.1",

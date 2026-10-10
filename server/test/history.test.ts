@@ -10,11 +10,20 @@ import {
   UPSERT_DAILY,
   UPSERT_HOURLY,
 } from "../src/sql";
-import { RANGE_MS, TtlCache, dayBucket, hourBucket, planHistory } from "../src/history";
+import {
+  RANGE_MS,
+  TtlCache,
+  dayBucket,
+  hourBucket,
+  planHistory,
+} from "../src/history";
 
 const NOW = Date.parse("2026-10-10T12:00:00.000Z");
 const STEP = 45_000;
-const ROLLUP_TABLES = { hourly: "observations_hourly", daily: "observations_daily" };
+const ROLLUP_TABLES = {
+  hourly: "observations_hourly",
+  daily: "observations_daily",
+};
 
 const fresh = () => {
   const db = new DatabaseSync(":memory:");
@@ -29,7 +38,12 @@ const seedYear = (db: DatabaseSync, currency = "USD") => {
   db.exec("BEGIN");
   const insert = db.prepare(INSERT_OBSERVATION);
   for (let t = first; t <= NOW; t += STEP) {
-    insert.run(currency, new Date(t).toISOString(), 1000 + ((t / STEP) % 500), 0);
+    insert.run(
+      currency,
+      new Date(t).toISOString(),
+      1000 + ((t / STEP) % 500),
+      0,
+    );
   }
   db.exec("COMMIT");
 };
@@ -77,7 +91,10 @@ describe("history rollups", () => {
       const { sql, cutoff } = (() => {
         const plan = planHistory(range, NOW)!;
         const table = plan.sql.match(/FROM (\w+)/)![1];
-        return { sql: `SELECT COUNT(*) AS n FROM ${table} WHERE currency = ? AND ${table === "observations" ? "timestamp" : "bucket"} >= ?`, cutoff: plan.cutoff };
+        return {
+          sql: `SELECT COUNT(*) AS n FROM ${table} WHERE currency = ? AND ${table === "observations" ? "timestamp" : "bucket"} >= ?`,
+          cutoff: plan.cutoff,
+        };
       })();
       return (db.prepare(sql).get("USD", cutoff) as { n: number }).n;
     };
@@ -96,7 +113,11 @@ describe("history rollups", () => {
     seedYear(db);
     backfill(db);
     const real = new Set(
-      (db.prepare("SELECT timestamp FROM observations").all() as { timestamp: string }[]).map((r) => r.timestamp),
+      (
+        db.prepare("SELECT timestamp FROM observations").all() as {
+          timestamp: string;
+        }[]
+      ).map((r) => r.timestamp),
     );
     for (const range of ["1W", "3M", "1Y"]) {
       const rows = run(db, range);
@@ -117,14 +138,16 @@ describe("history rollups", () => {
     upsert("2026-10-10T01:50:00.000Z", 3);
     upsert("2026-10-10T01:30:00.000Z", 2); // late and older: must not win
     upsert("2026-10-10T02:05:00.000Z", 4);
-    const hourly = db.prepare("SELECT bucket, price FROM observations_hourly ORDER BY bucket").all();
+    const hourly = db
+      .prepare("SELECT bucket, price FROM observations_hourly ORDER BY bucket")
+      .all();
     expect(hourly).toEqual([
       { bucket: "2026-10-10T01", price: 3 },
       { bucket: "2026-10-10T02", price: 4 },
     ]);
-    expect(db.prepare("SELECT bucket, price FROM observations_daily").all()).toEqual([
-      { bucket: "2026-10-10", price: 4 },
-    ]);
+    expect(
+      db.prepare("SELECT bucket, price FROM observations_daily").all(),
+    ).toEqual([{ bucket: "2026-10-10", price: 4 }]);
   });
 
   it("the backfill agrees with what live upserts would have stored", () => {
@@ -133,16 +156,17 @@ describe("history rollups", () => {
     const first = NOW - 5 * 86400_000;
     for (let t = first; t <= NOW; t += 10 * 60_000) {
       const iso = new Date(t).toISOString();
-      const price = 1000 + (t / 60_000) % 97;
-      for (const db of [live, filled]) db.prepare(INSERT_OBSERVATION).run("USD", iso, price, 0);
+      const price = 1000 + ((t / 60_000) % 97);
+      for (const db of [live, filled])
+        db.prepare(INSERT_OBSERVATION).run("USD", iso, price, 0);
       live.prepare(UPSERT_HOURLY).run("USD", hourBucket(iso), iso, price, 0);
       live.prepare(UPSERT_DAILY).run("USD", dayBucket(iso), iso, price, 0);
     }
     backfill(filled);
     for (const table of Object.values(ROLLUP_TABLES))
-      expect(filled.prepare(`SELECT * FROM ${table} ORDER BY bucket`).all()).toEqual(
-        live.prepare(`SELECT * FROM ${table} ORDER BY bucket`).all(),
-      );
+      expect(
+        filled.prepare(`SELECT * FROM ${table} ORDER BY bucket`).all(),
+      ).toEqual(live.prepare(`SELECT * FROM ${table} ORDER BY bucket`).all());
   });
 });
 

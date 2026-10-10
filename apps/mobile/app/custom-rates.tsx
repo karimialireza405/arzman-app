@@ -37,7 +37,8 @@ export default function CustomRates() {
   const t = useTheme();
   const feedback = useFeedback();
 
-  const [currency, setCurrency] = useState<(typeof customCurrencyOptions)[number]>("USDT");
+  const [currency, setCurrency] =
+    useState<(typeof customCurrencyOptions)[number]>("USDT");
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
 
@@ -64,7 +65,11 @@ export default function CustomRates() {
   };
 
   return (
-    <Screen title="نرخ من" eyebrow="تعیین نرخ صرافی یا توافقی شما" largeTitle={false}>
+    <Screen
+      title="نرخ من"
+      eyebrow="تعیین نرخ صرافی یا توافقی شما"
+      largeTitle={false}
+    >
       <Surface
         style={{
           flexDirection: "row-reverse",
@@ -73,7 +78,12 @@ export default function CustomRates() {
           backgroundColor: t.accentFill,
         }}
       >
-        <AppIcon name="info" size={18} color={t.accent} style={{ marginTop: 2 }} />
+        <AppIcon
+          name="info"
+          size={18}
+          color={t.accent}
+          style={{ marginTop: 2 }}
+        />
         <View style={{ flex: 1, gap: 2 }}>
           <Label size={13} weight="600" accent>
             نرخ اختصاصی شما
@@ -89,7 +99,9 @@ export default function CustomRates() {
       <Section title="ثبت یا ویرایش نرخ دستی">
         <Surface style={{ gap: spacing.sm }}>
           <View style={{ gap: spacing.xxs }}>
-            <Label secondary size={13} weight="600">انتخاب ارز</Label>
+            <Label secondary size={13} weight="600">
+              انتخاب ارز
+            </Label>
             <SegmentedControl
               values={customCurrencyOptions}
               value={currency}
@@ -106,7 +118,11 @@ export default function CustomRates() {
             unit="تومان"
           />
 
-          {!!error && <Label red size={13}>{error}</Label>}
+          {!!error && (
+            <Label red size={13}>
+              {error}
+            </Label>
+          )}
 
           <Button
             title="ذخیره نرخ دستی"
@@ -138,7 +154,9 @@ export default function CustomRates() {
               const market = app.snapshot?.quotes.find(
                 (q) => q.currency === rate.currency,
               );
-              const spreadDiff = market ? rate.priceToman - market.priceToman : null;
+              const spreadDiff = market
+                ? rate.priceToman - market.priceToman
+                : null;
               const spreadPct = market
                 ? (rate.priceToman / market.priceToman - 1) * 100
                 : null;
@@ -158,7 +176,11 @@ export default function CustomRates() {
                       gap: spacing.xs,
                     }}
                   >
-                    <CurrencyBadge code={rate.currency} size="md" dark={t.dark} />
+                    <CurrencyBadge
+                      code={rate.currency}
+                      size="md"
+                      dark={t.dark}
+                    />
                     <View style={{ flex: 1, gap: 1 }}>
                       <Label size={16} weight="600">
                         {names[rate.currency]}
@@ -177,7 +199,11 @@ export default function CustomRates() {
                         writingDirection: "ltr",
                       }}
                     >
-                      {formatNumber(rate.priceToman, app.user.settings.persian, 0)}
+                      {formatNumber(
+                        rate.priceToman,
+                        app.user.settings.persian,
+                        0,
+                      )}
                     </Label>
                   </View>
 
@@ -191,26 +217,45 @@ export default function CustomRates() {
                       }}
                     >
                       <Label tertiary size={11} allowFontScaling={false}>
-                        اختلاف با بازار ({formatNumber(market.priceToman, app.user.settings.persian, 0)})
+                        اختلاف با بازار (
+                        {formatNumber(
+                          market.priceToman,
+                          app.user.settings.persian,
+                          0,
+                        )}
+                        )
                       </Label>
                       <View
-                        style={{ flexDirection: "row-reverse", alignItems: "center", gap: spacing.xxs }}
+                        style={{
+                          flexDirection: "row-reverse",
+                          alignItems: "center",
+                          gap: spacing.xxs,
+                        }}
                       >
                         <Label
                           size={12}
                           weight="600"
                           allowFontScaling={false}
-                          style={{ fontVariant: ["tabular-nums"], writingDirection: "ltr" }}
+                          style={{
+                            fontVariant: ["tabular-nums"],
+                            writingDirection: "ltr",
+                          }}
                         >
                           {spreadDiff > 0 ? "+" : ""}
-                          {formatNumber(spreadDiff, app.user.settings.persian, 0)}
+                          {formatNumber(
+                            spreadDiff,
+                            app.user.settings.persian,
+                            0,
+                          )}
                         </Label>
                         <ChangePill value={spreadPct} size="small" />
                       </View>
                     </View>
                   ) : null}
 
-                  <View style={{ flexDirection: "row-reverse", paddingStart: 50 }}>
+                  <View
+                    style={{ flexDirection: "row-reverse", paddingStart: 50 }}
+                  >
                     <Button
                       title="حذف نرخ دستی"
                       variant="plain"

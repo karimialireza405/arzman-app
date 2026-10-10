@@ -63,7 +63,7 @@ from an older unchecked item.
       quote; correct the custom-rate screen's description.
 - [x] **P2** Erase a deleted transaction's Keychain item (after the index commit).
 - [x] **P3** Persian digits for the quote size on the currency detail screen.
-- [x] Portfolio edge cases A–H as permanent tests *and* walked by hand in the running app.
+- [x] Portfolio edge cases A–H as permanent tests _and_ walked by hand in the running app.
 - [x] Measure local vs deployed backend parity; document the deployment gap without deploying.
 - [x] Establish the real Expo Go / development-build situation from the current official docs.
 - [x] Verification: `npm run check` (typecheck + lint + **35 tests**), `npx expo-doctor`
@@ -101,9 +101,9 @@ from an older unchecked item.
   - [x] Currency detail (Stocks-calm hero, chart, grouped stats, stacked actions).
   - [x] Alerts / Custom rates / Transaction sheets (form-first, honest notices).
 - [x] Verification: `npm run check` (typecheck + lint + 22 tests), `npx expo-doctor` 21/21,
-  `npx expo export --platform all` (Web/iOS/Android).
+      `npx expo export --platform all` (Web/iOS/Android).
 - [x] Documentation: HANDOFF §0, TODO, CHANGELOG, README, apple-reference-index,
-  apple-ui-findings §14, ui-audit "Post-Redesign Status".
+      apple-ui-findings §14, ui-audit "Post-Redesign Status".
 
 ### Milestone 0.2 — verified baseline & first design system (2026-09-21, Claude session)
 

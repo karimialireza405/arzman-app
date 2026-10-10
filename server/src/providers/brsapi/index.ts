@@ -80,8 +80,13 @@ export function parseBrsApi(
       throw new Error(`BRSAPI: ${code} timestamp in the future`);
     const sourceTimestamp = ts === null ? null : new Date(ts).toISOString();
     const change = num(row.change_value);
-    const previous = change === null ? null : normalize(rawValue, rawUnit, 1) - change;
-    const hasPrev = previous !== null && previous > 0 && priceToman / previous <= 2 && priceToman / previous >= 0.5;
+    const previous =
+      change === null ? null : normalize(rawValue, rawUnit, 1) - change;
+    const hasPrev =
+      previous !== null &&
+      previous > 0 &&
+      priceToman / previous <= 2 &&
+      priceToman / previous >= 0.5;
     return CurrencyQuoteSchema.parse({
       currency: code,
       nameFa: names[code],
@@ -119,7 +124,8 @@ export class BrsApiProvider implements MarketDataProvider {
   constructor(
     private readonly apiKey: string,
     private readonly reference: () => Promise<MarketSnapshot | undefined>,
-    private readonly fetcher: typeof fetch = (input, init) => fetch(input, init),
+    private readonly fetcher: typeof fetch = (input, init) =>
+      fetch(input, init),
   ) {}
   async fetchSnapshot() {
     const reference = await this.reference();

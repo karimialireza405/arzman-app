@@ -8,7 +8,10 @@ const now = Date.parse("2026-10-10T12:00:00Z");
 const reference: MarketSnapshot = {
   schemaVersion: 1,
   quotes: coreCodes.map((c) =>
-    parseTgju(readFileSync(`server/test/fixtures/${c.toLowerCase()}.html`, "utf8"), c),
+    parseTgju(
+      readFileSync(`server/test/fixtures/${c.toLowerCase()}.html`, "utf8"),
+      c,
+    ),
   ),
   fetchedAt: new Date(now).toISOString(),
   status: "stale",
@@ -35,21 +38,45 @@ describe("BRSAPI fallback parser", () => {
   });
   it("converts rials to toman", () => {
     const usd = reference.quotes.find((q) => q.currency === "USD")!;
-    const s = parseBrsApi(body({ USD: { unit: "ریال", price: usd.priceToman * 10 } }), reference, now);
+    const s = parseBrsApi(
+      body({ USD: { unit: "ریال", price: usd.priceToman * 10 } }),
+      reference,
+      now,
+    );
     expect(s.quotes[0].priceToman).toBeCloseTo(usd.priceToman);
   });
   it("rejects a lot-size / unit mistake that disagrees with TGJU", () => {
     const iqd = reference.quotes.find((q) => q.currency === "IQD")!;
-    expect(() => parseBrsApi(body({ IQD: { price: iqd.priceToman * 1000 } }), reference, now)).toThrow(/magnitude/);
+    expect(() =>
+      parseBrsApi(
+        body({ IQD: { price: iqd.priceToman * 1000 } }),
+        reference,
+        now,
+      ),
+    ).toThrow(/magnitude/);
   });
   it("fails closed on unknown units, missing or duplicate currencies, bad shape", () => {
-    expect(() => parseBrsApi(body({ EUR: { unit: "دلار" } }), reference, now)).toThrow(/unit/);
-    expect(() => parseBrsApi({ currency: body().currency.slice(1) }, reference, now)).toThrow(/USD/);
-    expect(() => parseBrsApi({ currency: [...body().currency, ...body().currency] }, reference, now)).toThrow();
+    expect(() =>
+      parseBrsApi(body({ EUR: { unit: "دلار" } }), reference, now),
+    ).toThrow(/unit/);
+    expect(() =>
+      parseBrsApi({ currency: body().currency.slice(1) }, reference, now),
+    ).toThrow(/USD/);
+    expect(() =>
+      parseBrsApi(
+        { currency: [...body().currency, ...body().currency] },
+        reference,
+        now,
+      ),
+    ).toThrow();
     expect(() => parseBrsApi({}, reference, now)).toThrow();
   });
   it("marks quotes without a trade time as stale instead of live", () => {
-    const s = parseBrsApi(body({ USD: { time_unix: undefined } }), reference, now);
+    const s = parseBrsApi(
+      body({ USD: { time_unix: undefined } }),
+      reference,
+      now,
+    );
     expect(s.quotes[0].stale).toBe(true);
     expect(s.quotes[0].sourceTimestamp).toBeNull();
   });

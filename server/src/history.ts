@@ -38,10 +38,19 @@ export function planHistory(range: string, now: number): HistoryPlan | null {
   // One real observation per bucket, about 240 points per chart.
   const bucketMs = Math.max(300_000, Math.ceil(length / 240));
   const iso = new Date(now - length).toISOString();
-  if (length <= RANGE_MS["1D"]) return { sql: HISTORY_QUERY, cutoff: iso, bucketMs };
+  if (length <= RANGE_MS["1D"])
+    return { sql: HISTORY_QUERY, cutoff: iso, bucketMs };
   if (length <= RANGE_MS["3M"])
-    return { sql: HOURLY_HISTORY_QUERY, cutoff: iso.slice(0, HOUR_LENGTH), bucketMs };
-  return { sql: DAILY_HISTORY_QUERY, cutoff: iso.slice(0, DAY_LENGTH), bucketMs };
+    return {
+      sql: HOURLY_HISTORY_QUERY,
+      cutoff: iso.slice(0, HOUR_LENGTH),
+      bucketMs,
+    };
+  return {
+    sql: DAILY_HISTORY_QUERY,
+    cutoff: iso.slice(0, DAY_LENGTH),
+    bucketMs,
+  };
 }
 
 /** ISO bucket keys for an observation time. */

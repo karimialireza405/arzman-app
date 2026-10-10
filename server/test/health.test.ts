@@ -12,24 +12,42 @@ const base = { now: 10_000 * MIN, staleAfterMs: 30 * MIN };
 
 describe("stale-data alert decisions", () => {
   it("stays quiet while data is fresh", () => {
-    expect(decideAlert({ ...base, lastGoodAt: base.now - 5 * MIN, alertedAt: null })).toBe("none");
+    expect(
+      decideAlert({ ...base, lastGoodAt: base.now - 5 * MIN, alertedAt: null }),
+    ).toBe("none");
   });
   it("alerts once when data passes the threshold", () => {
     const lastGood = base.now - 31 * MIN;
-    expect(decideAlert({ ...base, lastGoodAt: lastGood, alertedAt: null })).toBe("alert");
-    expect(decideAlert({ ...base, lastGoodAt: lastGood, alertedAt: base.now - MIN })).toBe("none");
+    expect(
+      decideAlert({ ...base, lastGoodAt: lastGood, alertedAt: null }),
+    ).toBe("alert");
+    expect(
+      decideAlert({ ...base, lastGoodAt: lastGood, alertedAt: base.now - MIN }),
+    ).toBe("none");
   });
   it("repeats only after the repeat interval", () => {
     const lastGood = base.now - 600 * MIN;
     expect(
-      decideAlert({ ...base, lastGoodAt: lastGood, alertedAt: base.now - ALERT_REPEAT_MS }),
+      decideAlert({
+        ...base,
+        lastGoodAt: lastGood,
+        alertedAt: base.now - ALERT_REPEAT_MS,
+      }),
     ).toBe("repeat");
   });
   it("announces recovery only if an alert was open", () => {
-    expect(decideAlert({ ...base, lastGoodAt: base.now - MIN, alertedAt: base.now - 90 * MIN })).toBe("recover");
+    expect(
+      decideAlert({
+        ...base,
+        lastGoodAt: base.now - MIN,
+        alertedAt: base.now - 90 * MIN,
+      }),
+    ).toBe("recover");
   });
   it("treats never having had data as stale", () => {
-    expect(decideAlert({ ...base, lastGoodAt: null, alertedAt: null })).toBe("alert");
+    expect(decideAlert({ ...base, lastGoodAt: null, alertedAt: null })).toBe(
+      "alert",
+    );
   });
 });
 

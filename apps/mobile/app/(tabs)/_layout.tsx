@@ -40,14 +40,20 @@ export default function TabLayout() {
 
       <NativeTabs.Trigger name="market">
         <NativeTabs.Trigger.Icon
-          sf={{ default: "chart.xyaxis.line", selected: "chart.line.uptrend.xyaxis" }}
+          sf={{
+            default: "chart.xyaxis.line",
+            selected: "chart.line.uptrend.xyaxis",
+          }}
           md="show_chart"
         />
         <NativeTabs.Trigger.Label>بازار</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Icon sf={{ default: "house", selected: "house.fill" }} md="home" />
+        <NativeTabs.Trigger.Icon
+          sf={{ default: "house", selected: "house.fill" }}
+          md="home"
+        />
         <NativeTabs.Trigger.Label>خانه</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
     </NativeTabs>

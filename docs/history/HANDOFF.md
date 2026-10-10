@@ -24,7 +24,7 @@ the direct APK link and Persian installation guide are in the current audit.
 **Project Version:** 0.3.1  
 **Project Path:** `D:\MY_APP\Arz_Man`  
 **Git HEAD at the redesign handoff:** `8900c9d`  
-**Git HEAD after the audit session:** see §00.4  
+**Git HEAD after the audit session:** see §00.4
 
 > Read **§00000, §0000, §000 and §00 first** — it is the most recent session and supersedes anything older it
 > contradicts, in particular the Expo Go instructions in §0 and in `README.md`.
@@ -115,7 +115,7 @@ and nothing was documented or committed.
 ### 00.2 What this session completed
 
 1. **P0 — TGJU FAQ gate removed properly.** The parser no longer requires the FAQ number to
-   equal the live quote; it requires the FAQ to *exist* (per-unit evidence), to publish the
+   equal the live quote; it requires the FAQ to _exist_ (per-unit evidence), to publish the
    same unit, and to agree in magnitude (×0.5–×2). Added the previous close as a second
    magnitude anchor. `docs/engineering-audit.md` §2 has the full validation model.
 2. **P1 — price alerts were unreachable** and now work: `alertMatches` gates on the new
@@ -149,10 +149,10 @@ and nothing was documented or committed.
   working `exposdk:57.0.0` iOS bundle. Expo Go **is** a free App Store install
   (`id982107779`) and its current build runs React Native 0.86, this project's exact
   version. An earlier revision of this handoff claimed otherwise; that came from the
-  `set-up-your-environment` docs page, which describes building a *private* Expo Go with
+  `set-up-your-environment` docs page, which describes building a _private_ Expo Go with
   `npx eas-cli@latest go` — a different thing from the App Store build. `docs/engineering-audit.md`
   §5 records both sources.
-- **Development build:** the docs state that *all* builds running on an iPhone device require
+- **Development build:** the docs state that _all_ builds running on an iPhone device require
   a paid Apple Developer account for signing, on macOS, Windows and Linux alike. This is the
   upgrade path, not the entry point — take it when the app's own identity, the Persian Face
   ID string, `ios.enableSceneSupport` or a native extension is needed.
@@ -191,7 +191,7 @@ Claude's session produced (all committed through `d56dae8`):
   `apps/mobile/src/ui.tsx` component library with native `expo-glass-effect` integration.
 - Screen upgrades: floating tab bar, formSheet modals, home hero, market search,
   converter, currency detail + chart, portfolio, alerts, custom rates, settings.
-- Three *uncommitted* files found at handoff:
+- Three _uncommitted_ files found at handoff:
   - `docs/apple-references/apple-reference-index.md` (new)
   - `docs/apple-references/apple-ui-findings.md` (new)
   - `docs/ui-audit.md` (new)
@@ -320,12 +320,14 @@ padding, money values intentionally do not scale with Dynamic Type.
 ## 3. Files Changed & Created
 
 ### Created
+
 - `apps/mobile/src/design-system/tokens.ts` — Apple iOS 27 Liquid Glass tokens and concentric geometry.
 - `apps/mobile/src/design-system/index.ts` — Design system export barrel.
 - `TODO.md` — Active development milestone tracking.
 - `CHANGELOG.md` — Version history of changes.
 
 ### Modified
+
 - `apps/mobile/package.json` — Added `"expo-symbols": "~57.0.3"`.
 - `apps/mobile/src/ui.tsx` — Comprehensive iOS 27 Liquid Glass component library.
 - `apps/mobile/src/chart.tsx` — Stocks-style interactive bezier chart with touch scrubber HUD and gradient fill.
@@ -346,15 +348,16 @@ padding, money values intentionally do not scale with Dynamic Type.
 
 ## 4. Tests Run & Verification Results
 
-| Verification Step | Command | Result |
-|---|---|---|
-| Monorepo Typecheck | `npm run typecheck` (`tsc` on shared, server, mobile) | **PASSED** (0 errors) |
-| Monorepo Lint | `npm run lint` (`eslint .`) | **PASSED** (0 errors, 0 warnings) |
-| Vitest Unit Tests | `npm test` (`vitest run`) | **PASSED** (18/18 tests across 3 suites) |
-| Full Workspace Check | `npm run check` | **PASSED** (579ms) |
-| Expo Multiplatform Export | `npx expo export --platform all` | **PASSED** (Web bundle 2.4MB, iOS Hermes bytecode 3.9MB, Android Hermes bytecode 4.2MB) |
+| Verification Step         | Command                                               | Result                                                                                  |
+| ------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Monorepo Typecheck        | `npm run typecheck` (`tsc` on shared, server, mobile) | **PASSED** (0 errors)                                                                   |
+| Monorepo Lint             | `npm run lint` (`eslint .`)                           | **PASSED** (0 errors, 0 warnings)                                                       |
+| Vitest Unit Tests         | `npm test` (`vitest run`)                             | **PASSED** (18/18 tests across 3 suites)                                                |
+| Full Workspace Check      | `npm run check`                                       | **PASSED** (579ms)                                                                      |
+| Expo Multiplatform Export | `npx expo export --platform all`                      | **PASSED** (Web bundle 2.4MB, iOS Hermes bytecode 3.9MB, Android Hermes bytecode 4.2MB) |
 
 ### Test Suites Details
+
 - `packages/shared/src/domain.test.ts`: 7 tests passing (normalization, conversion math, portfolio weighted average cost, realized/unrealized P&L, alerts matching, decimal parsing).
 - `server/test/cache.test.ts`: 3 tests passing (Durable Object caching, last-known-good protection on failure, stale flag attachment).
 - `server/test/parser.test.ts`: 8 tests passing (TGJU HTML parsing for USD, EUR, AED, IQD, quote size validation, FAQ cross-check, sanity bounds).
@@ -406,7 +409,7 @@ TGJU Public Profile Pages (tgju.org)
 **Live TGJU verification audit (2026-09-21, via `npm run verify`):**
 
 | Currency | TGJU Raw (IRR) | Quote Size | Normalized Toman | Status |
-|----------|----------------|------------|------------------|--------|
+| -------- | -------------- | ---------- | ---------------- | ------ |
 | USD      | 2,306,000      | 1 unit     | 230,600          | ✅ OK  |
 | EUR      | 2,651,000      | 1 unit     | 265,100          | ✅ OK  |
 | AED      | 627,880        | 1 unit     | 62,788           | ✅ OK  |
@@ -479,6 +482,7 @@ npm run verify
 ```
 
 This command independently audits the ArzMan TGJU parser against the actual live public TGJU profile pages for USD, EUR, AED, IQD. It prints:
+
 - Raw TGJU value and unit (IRR or IRT)
 - Quote lot size (explicitly, never guessed)
 - Normalized Toman price with full math shown

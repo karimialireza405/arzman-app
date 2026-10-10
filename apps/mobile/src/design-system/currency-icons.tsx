@@ -19,20 +19,20 @@
  *   except `neutral`, which dims them for metadata contexts.
  */
 import { useMemo } from "react";
-import { Text, View, useColorScheme, type StyleProp, type ViewStyle } from "react-native";
+import {
+  Text,
+  View,
+  useColorScheme,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 import { SvgXml } from "react-native-svg";
 import { flagSvg, type FlagCode } from "./flags";
 import { colors } from "./tokens";
 
 /** Currencies with a glyph fallback; every other code is drawn by its flag. */
 export type BadgeCurrency =
-  | "USD"
-  | "EUR"
-  | "AED"
-  | "IQD"
-  | "USDT"
-  | "IRT"
-  | "IRR";
+  "USD" | "EUR" | "AED" | "IQD" | "USDT" | "IRT" | "IRR";
 
 interface CurrencyGlyph {
   /** The symbol drawn inside the badge. */
@@ -138,10 +138,7 @@ export const currencyFlags: Partial<Record<string, FlagCode>> = {
 /** Tether's own green, so USDT is recognisable without a flag. */
 const TETHER_GREEN = "#26A17B";
 
-export function currencyTint(
-  code: string,
-  dark: boolean,
-): string | undefined {
+export function currencyTint(code: string, dark: boolean): string | undefined {
   const entry = currencyGlyphs[code as BadgeCurrency];
   return entry ? entry.tint[dark ? "dark" : "light"] : undefined;
 }

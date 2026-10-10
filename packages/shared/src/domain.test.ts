@@ -121,13 +121,26 @@ it("fires a rapid-move alert on a live TGJU quote", () => {
   };
   const now = Date.now();
   // The previous poll was a fresh retrieval even though `isStale` is always true.
-  const previous = observationOf({ ...quote, fetchedAt: new Date(now - 60_000).toISOString() }, now);
+  const previous = observationOf(
+    { ...quote, fetchedAt: new Date(now - 60_000).toISOString() },
+    now,
+  );
   expect(previous.stale).toBe(false);
   const moved = { ...quote, priceToman: previous.priceToman * 1.02 };
   expect(alertMatches(alert, moved, previous, now)).toBe(true);
   // A small move, or a previous point older than five minutes, stays quiet.
-  expect(alertMatches(alert, { ...quote, priceToman: previous.priceToman * 1.001 }, previous, now)).toBe(false);
-  const old = observationOf({ ...quote, fetchedAt: new Date(now - 10 * 60_000).toISOString() }, now);
+  expect(
+    alertMatches(
+      alert,
+      { ...quote, priceToman: previous.priceToman * 1.001 },
+      previous,
+      now,
+    ),
+  ).toBe(false);
+  const old = observationOf(
+    { ...quote, fetchedAt: new Date(now - 10 * 60_000).toISOString() },
+    now,
+  );
   expect(old.stale).toBe(true);
   expect(alertMatches(alert, moved, old, now)).toBe(false);
 });

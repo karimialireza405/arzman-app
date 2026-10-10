@@ -2,12 +2,12 @@
 
 Direct HTTPS fetches of the four public pages returned HTTP 200 without authentication, CAPTCHA handling or browser impersonation. Relevant DOM excerpts are preserved in `server/test/fixtures/`; complete downloads remain ignored local research files.
 
-| Currency | Observed public profile | Unit | Quoted quantity |
-|---|---|---|---|
-| USD | https://www.tgju.org/profile/price_dollar_rl | ریال | each dollar |
-| EUR | https://www.tgju.org/profile/price_eur | ریال | each euro |
-| AED | https://www.tgju.org/profile/price_aed | ریال | each dirham |
-| IQD | https://www.tgju.org/profile/price_iqd | ریال | each dinar |
+| Currency | Observed public profile                      | Unit | Quoted quantity |
+| -------- | -------------------------------------------- | ---- | --------------- |
+| USD      | https://www.tgju.org/profile/price_dollar_rl | ریال | each dollar     |
+| EUR      | https://www.tgju.org/profile/price_eur       | ریال | each euro       |
+| AED      | https://www.tgju.org/profile/price_aed       | ریال | each dirham     |
+| IQD      | https://www.tgju.org/profile/price_iqd       | ریال | each dinar      |
 
 `/profile/price_dollar` redirects to `/profile/price_dollar_rl`. Each inspected profile has a `واحد پولی` row and a FAQ answer saying `در حال حاضر قیمت هر ...`. For IQD this explicitly says each dinar, not 100 dinars. The parser requires both pieces of evidence on every response. Quote size is an explicit provider contract of one; a future lot-size source requires a separate mapping and evidence, not a guessed divisor.
 

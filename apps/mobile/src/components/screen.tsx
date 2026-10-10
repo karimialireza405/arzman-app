@@ -19,7 +19,14 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Defs, RadialGradient, Rect, Stop } from "react-native-svg";
 import Reanimated, { FadeInDown } from "react-native-reanimated";
-import { appFont, curve, fontFamilies, iconSizes, radii, spacing } from "../design-system";
+import {
+  appFont,
+  curve,
+  fontFamilies,
+  iconSizes,
+  radii,
+  spacing,
+} from "../design-system";
 import { useApp } from "../store";
 import { AppIcon, Label } from "./primitives";
 import { Button } from "./controls";
@@ -154,9 +161,25 @@ function AmbientGlow() {
     >
       <Svg width="100%" height="100%" preserveAspectRatio="none">
         <Defs>
-          <RadialGradient id="ambient" cx="0.9" cy="0" rx="0.9" ry="0.8" fx="0.9" fy="0">
-            <Stop offset="0" stopColor={t.dark ? "#6247E0" : "#8B5CF6"} stopOpacity={t.dark ? 0.32 : 0.14} />
-            <Stop offset="1" stopColor={t.dark ? "#6247E0" : "#8B5CF6"} stopOpacity={0} />
+          <RadialGradient
+            id="ambient"
+            cx="0.9"
+            cy="0"
+            rx="0.9"
+            ry="0.8"
+            fx="0.9"
+            fy="0"
+          >
+            <Stop
+              offset="0"
+              stopColor={t.dark ? "#6247E0" : "#8B5CF6"}
+              stopOpacity={t.dark ? 0.32 : 0.14}
+            />
+            <Stop
+              offset="1"
+              stopColor={t.dark ? "#6247E0" : "#8B5CF6"}
+              stopOpacity={0}
+            />
           </RadialGradient>
         </Defs>
         <Rect x="0" y="0" width="100%" height="100%" fill="url(#ambient)" />
@@ -242,7 +265,12 @@ export function EmptyState({
       <Label size={17} weight="600" align="center">
         {title}
       </Label>
-      <Label secondary size={13} align="center" style={{ maxWidth: 300, lineHeight: 20 }}>
+      <Label
+        secondary
+        size={13}
+        align="center"
+        style={{ maxWidth: 300, lineHeight: 20 }}
+      >
         {description}
       </Label>
       {action ? (

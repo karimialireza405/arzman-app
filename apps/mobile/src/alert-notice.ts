@@ -33,7 +33,11 @@ export function makeNotice(
   id: number,
   persian = true,
 ): AlertNotice {
-  return { id, title: ALERT_TITLE, lines: alerts.map((a) => alertLine(a, persian)) };
+  return {
+    id,
+    title: ALERT_TITLE,
+    lines: alerts.map((a) => alertLine(a, persian)),
+  };
 }
 
 type BrowserNotification = {
@@ -43,8 +47,11 @@ type BrowserNotification = {
 };
 
 function browserApi(): BrowserNotification | null {
-  const api = (globalThis as { Notification?: BrowserNotification }).Notification;
-  return typeof api === "function" || typeof api === "object" ? (api ?? null) : null;
+  const api = (globalThis as { Notification?: BrowserNotification })
+    .Notification;
+  return typeof api === "function" || typeof api === "object"
+    ? (api ?? null)
+    : null;
 }
 
 /** "unsupported" outside browsers and on iOS Safari tabs not added to the home screen. */
@@ -68,7 +75,11 @@ export function notifyBrowser(notice: AlertNotice): void {
   const api = browserApi();
   if (!api || api.permission !== "granted") return;
   try {
-    new api(notice.title, { body: notice.lines.join("\n"), lang: "fa", dir: "rtl" });
+    new api(notice.title, {
+      body: notice.lines.join("\n"),
+      lang: "fa",
+      dir: "rtl",
+    });
   } catch {
     // Some mobile browsers only allow notifications through a service worker.
   }

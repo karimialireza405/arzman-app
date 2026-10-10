@@ -42,7 +42,11 @@ export function parseSourceTimestamp(
     throw new Error("Invalid source timestamp");
   return new Date(ts).toISOString();
 }
-export function parseTgju(html: string, currency: CoreCurrency, now = Date.now()) {
+export function parseTgju(
+  html: string,
+  currency: CoreCurrency,
+  now = Date.now(),
+) {
   if (html.length > 2_000_000) throw new Error("Oversize page");
   const $ = load(html);
   const title = clean($("h1.title").first().text());

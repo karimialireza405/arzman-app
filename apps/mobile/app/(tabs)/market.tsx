@@ -20,7 +20,14 @@ import {
   spacing,
 } from "../../src/ui";
 
-const filters = ["all", "favorites", "gulf", "west", "asia", "neighbors"] as const;
+const filters = [
+  "all",
+  "favorites",
+  "gulf",
+  "west",
+  "asia",
+  "neighbors",
+] as const;
 type Filter = (typeof filters)[number];
 
 const filterLabels: Record<Filter, string> = {
@@ -33,7 +40,10 @@ const filterLabels: Record<Filter, string> = {
 };
 
 /** Regions are browsing aids; a currency may sit in more than one. */
-const regions: Record<Exclude<Filter, "all" | "favorites">, readonly Currency[]> = {
+const regions: Record<
+  Exclude<Filter, "all" | "favorites">,
+  readonly Currency[]
+> = {
   gulf: ["AED", "SAR", "QAR", "OMR", "KWD", "BHD", "IQD"],
   west: ["USD", "EUR", "GBP", "CHF", "CAD"],
   asia: ["CNY", "JPY", "INR", "MYR", "THB", "AUD"],
@@ -48,8 +58,14 @@ export default function Market() {
   const query = search.trim().toLowerCase();
 
   const filtered = fiatCodes.filter((code) => {
-    if (filter === "favorites" && !app.user.watchlist.includes(code)) return false;
-    if (filter !== "all" && filter !== "favorites" && !regions[filter].includes(code)) return false;
+    if (filter === "favorites" && !app.user.watchlist.includes(code))
+      return false;
+    if (
+      filter !== "all" &&
+      filter !== "favorites" &&
+      !regions[filter].includes(code)
+    )
+      return false;
     if (!query) return true;
     return (
       code.toLowerCase().includes(query) ||
@@ -59,11 +75,7 @@ export default function Market() {
   });
 
   return (
-    <Screen
-      title="بازار ارز"
-      eyebrow="نرخ لحظه‌ای بازار آزاد ایران"
-      refresh
-    >
+    <Screen title="بازار ارز" eyebrow="نرخ لحظه‌ای بازار آزاد ایران" refresh>
       <MarketStatus />
 
       {/* Search + scope (iOS search pattern) */}
@@ -94,7 +106,10 @@ export default function Market() {
           icon={filter === "favorites" ? "star-outline" : "search"}
           action={
             filter === "favorites"
-              ? { title: "بازگشت به همه ارزها", onPress: () => setFilter("all") }
+              ? {
+                  title: "بازگشت به همه ارزها",
+                  onPress: () => setFilter("all"),
+                }
               : undefined
           }
         />

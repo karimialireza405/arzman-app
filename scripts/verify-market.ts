@@ -33,9 +33,15 @@ interface AuditResult {
 }
 
 async function verifyMarket() {
-  console.log("======================================================================");
-  console.log("             ارز من · ArzMan Live Market Verification                ");
-  console.log("======================================================================");
+  console.log(
+    "======================================================================",
+  );
+  console.log(
+    "             ارز من · ArzMan Live Market Verification                ",
+  );
+  console.log(
+    "======================================================================",
+  );
   console.log(`Execution Timestamp: ${new Date().toISOString()}`);
   console.log(`Target Provider:     TGJU (شبکه اطلاع‌رسانی طلا و ارز)\n`);
 
@@ -127,21 +133,37 @@ async function verifyMarket() {
 
   // Print individual currency diagnostic reports
   for (const r of results) {
-    console.log(`----------------------------------------------------------------------`);
+    console.log(
+      `----------------------------------------------------------------------`,
+    );
     console.log(`Currency:          ${r.currency} — ${r.nameFa}`);
     console.log(`Source URL:        ${r.sourceUrl}`);
     console.log(`Response Time:     ${r.responseTimeMs}ms`);
 
     if (r.status === "OK") {
-      console.log(`TGJU raw value:    ${r.rawValue.toLocaleString()} ${r.rawUnit}`);
+      console.log(
+        `TGJU raw value:    ${r.rawValue.toLocaleString()} ${r.rawUnit}`,
+      );
       console.log(`Quote size:        ${r.quoteSize} unit`);
-      console.log(`ArzMan Toman:      ${r.normalizedToman.toLocaleString()} Toman`);
-      console.log(`Normalization:     ${r.rawValue.toLocaleString()} ${r.rawUnit} / ${r.rawUnit === "IRR" ? 10 : 1} / ${r.quoteSize} = ${r.normalizedToman.toLocaleString()} Toman`);
-      console.log(`Previous close:    ${r.previousCloseToman?.toLocaleString() ?? "—"} Toman`);
-      console.log(`Daily change:      ${r.changeToman != null ? (r.changeToman >= 0 ? "+" : "") + r.changeToman.toLocaleString() + " Toman" : "—"} (${r.changePercent != null ? (r.changePercent >= 0 ? "+" : "") + r.changePercent.toFixed(2) + "%" : "—"})`);
-      console.log(`Today's bounds:    Low ${r.lowToman?.toLocaleString() ?? "—"} ... High ${r.highToman?.toLocaleString() ?? "—"} Toman`);
+      console.log(
+        `ArzMan Toman:      ${r.normalizedToman.toLocaleString()} Toman`,
+      );
+      console.log(
+        `Normalization:     ${r.rawValue.toLocaleString()} ${r.rawUnit} / ${r.rawUnit === "IRR" ? 10 : 1} / ${r.quoteSize} = ${r.normalizedToman.toLocaleString()} Toman`,
+      );
+      console.log(
+        `Previous close:    ${r.previousCloseToman?.toLocaleString() ?? "—"} Toman`,
+      );
+      console.log(
+        `Daily change:      ${r.changeToman != null ? (r.changeToman >= 0 ? "+" : "") + r.changeToman.toLocaleString() + " Toman" : "—"} (${r.changePercent != null ? (r.changePercent >= 0 ? "+" : "") + r.changePercent.toFixed(2) + "%" : "—"})`,
+      );
+      console.log(
+        `Today's bounds:    Low ${r.lowToman?.toLocaleString() ?? "—"} ... High ${r.highToman?.toLocaleString() ?? "—"} Toman`,
+      );
       console.log(`Source time label: «${r.sourceTimeLabel}»`);
-      console.log(`Source timestamp:  ${r.sourceTimestamp ?? "null (unverified trade time label)"}`);
+      console.log(
+        `Source timestamp:  ${r.sourceTimestamp ?? "null (unverified trade time label)"}`,
+      );
       console.log(`Stale flag:        ${r.stale}`);
       console.log(`Status:            ✅ OK`);
     } else {
@@ -151,32 +173,44 @@ async function verifyMarket() {
   }
 
   // Summary Table
-  console.log("======================================================================");
-  console.log("                        AUDIT SUMMARY TABLE                           ");
-  console.log("======================================================================");
   console.log(
-    "| Currency | TGJU Raw (Rial) | Quote Size | ArzMan Price (Toman) | Status |"
+    "======================================================================",
   );
   console.log(
-    "|----------|-----------------|------------|----------------------|--------|"
+    "                        AUDIT SUMMARY TABLE                           ",
+  );
+  console.log(
+    "======================================================================",
+  );
+  console.log(
+    "| Currency | TGJU Raw (Rial) | Quote Size | ArzMan Price (Toman) | Status |",
+  );
+  console.log(
+    "|----------|-----------------|------------|----------------------|--------|",
   );
   for (const r of results) {
-    const rawStr = r.status === "OK" ? `${r.rawValue.toLocaleString()} IRR` : "ERROR";
+    const rawStr =
+      r.status === "OK" ? `${r.rawValue.toLocaleString()} IRR` : "ERROR";
     const sizeStr = `${r.quoteSize} unit`;
-    const tomanStr = r.status === "OK" ? `${r.normalizedToman.toLocaleString()} Toman` : "—";
+    const tomanStr =
+      r.status === "OK" ? `${r.normalizedToman.toLocaleString()} Toman` : "—";
     const statusStr = r.status === "OK" ? "✅ OK" : "❌ FAIL";
     console.log(
-      `| ${r.currency.padEnd(8)} | ${rawStr.padEnd(15)} | ${sizeStr.padEnd(10)} | ${tomanStr.padEnd(20)} | ${statusStr.padEnd(6)} |`
+      `| ${r.currency.padEnd(8)} | ${rawStr.padEnd(15)} | ${sizeStr.padEnd(10)} | ${tomanStr.padEnd(20)} | ${statusStr.padEnd(6)} |`,
     );
   }
-  console.log("======================================================================\n");
+  console.log(
+    "======================================================================\n",
+  );
 
   const allOk = results.every((r) => r.status === "OK");
   if (!allOk) {
     console.error("❌ Some currencies failed verification. Check logs above.");
     process.exitCode = 1;
   } else {
-    console.log("✨ All 4 Iranian market currencies successfully verified against live TGJU!");
+    console.log(
+      "✨ All 4 Iranian market currencies successfully verified against live TGJU!",
+    );
   }
 }
 
