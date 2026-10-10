@@ -2,6 +2,16 @@
 
 Nothing here runs automatically; every step needs the owner's accounts.
 
+## Deploy from GitHub (no terminal)
+
+1. Cloudflare dashboard → My Profile → API Tokens → Create Token → template
+   **Edit Cloudflare Workers** → create and copy the token.
+2. GitHub repo → Settings → Secrets and variables → Actions → New repository secret:
+   name `CLOUDFLARE_API_TOKEN`, value the token.
+3. Actions tab → **Deploy** → Run workflow. It runs `npm run check`, deploys the
+   Worker, checks `/api/market` returns exactly 4 quotes, builds the web app against
+   that Worker and deploys it.
+
 ## Market API (Cloudflare Worker)
 
 No market-data secret exists. Log in once, then deploy:
