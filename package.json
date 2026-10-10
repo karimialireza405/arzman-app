@@ -43,8 +43,10 @@
     "lint": "eslint .",
     "test": "vitest run",
     "verify": "npx tsx scripts/verify-market.ts",
-    "check": "npm run typecheck && npm run lint && npm test",
-    "build:web": "npm run build:web -w @arzman/mobile"
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm test",
+    "build:web": "npm run build:web -w @arzman/mobile",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
