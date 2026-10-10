@@ -15,7 +15,7 @@
       haptics, history, local persistence, offline restart and recovery.
 - [ ] Clarify source trade-time uncertainty beside retrieval freshness.
 - [ ] Foreground refresh for mounted sparklines with five-minute cache.
-- [ ] Measure long-range history rows read and review compatible dependency security fixes.
+- [ ] Review compatible dependency security fixes. (Long-range history now reads the hourly/daily rollups; after deploy, check rows read in the Cloudflare dashboard.)
 
 Earlier milestone and outage notes below are retained as history; current deployed
 backend returned healthy responses on 2026-10-04. Do not infer a deployment need
