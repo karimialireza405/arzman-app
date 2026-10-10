@@ -4,7 +4,7 @@
  * Form-first layout: pick currency → pick condition → enter threshold → save.
  * The honesty notice stays: alerts are evaluated only while the app is open.
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { View } from "react-native";
 import {
@@ -19,6 +19,7 @@ import {
   type PriceAlert,
 } from "@arzman/shared";
 import { useApp } from "../src/store";
+import { browserPermission, requestBrowserPermission } from "../src/alert-notice";
 import {
   AmountInput,
   AppIcon,
@@ -67,6 +68,9 @@ export default function Alerts() {
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
 
+  const [permission, setPermission] = useState(browserPermission());
+  useEffect(() => setPermission(browserPermission()), []);
+
   const kinds = ["above", "below", "percent", "rapid"] as const;
 
   const handleCreate = () => {
@@ -105,9 +109,29 @@ export default function Alerts() {
             نحوهٔ عملکرد هشدارها
           </Label>
           <Label secondary size={12} style={{ lineHeight: 18 }}>
-            هشدارها هنگام باز بودن برنامه بررسی می‌شوند. اعلان پس از بستن برنامه
-            به زیرساخت پوش سرور نیاز دارد و در این نسخه فعال نیست.
+            هشدارها فقط وقتی برنامه باز است (و روی صفحه یا در پس‌زمینهٔ نزدیک) بررسی
+            می‌شوند و با یک بنر داخل برنامه نشان داده می‌شوند. اگر برنامه بسته
+            باشد هیچ اعلانی نمی‌رسد؛ اعلان پس از بستن برنامه به سرور پوش نیاز دارد
+            و هنوز فعال نیست.
           </Label>
+          {permission === "default" && (
+            <Button
+              title="فعال‌سازی اعلان مرورگر"
+              variant="plain"
+              size="small"
+              onPress={() => void requestBrowserPermission().then(setPermission)}
+            />
+          )}
+          {permission === "granted" && (
+            <Label secondary size={12}>
+              اعلان مرورگر فعال است (باز هم فقط تا وقتی برنامه باز است).
+            </Label>
+          )}
+          {permission === "denied" && (
+            <Label secondary size={12}>
+              اعلان مرورگر مسدود است؛ از تنظیمات مرورگر می‌توانید آن را باز کنید.
+            </Label>
+          )}
         </View>
       </Surface>
 

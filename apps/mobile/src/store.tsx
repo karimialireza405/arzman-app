@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { AppState, Alert, Platform } from "react-native";
+import { AppState, Platform } from "react-native";
 import * as Haptics from "expo-haptics";
 import { z } from "zod";
 import {
@@ -20,6 +20,7 @@ import {
   type MarketSnapshot,
   type HistoricalPoint,
 } from "@arzman/shared";
+import { makeNotice, notifyBrowser, type AlertNotice } from "./alert-notice";
 import { readLocal, writeLocal, clearMarketCache } from "./storage";
 
 export const apiUrl = (process.env.EXPO_PUBLIC_API_URL ?? "").replace(
@@ -68,6 +69,7 @@ function useAppStore() {
   const [storageError, setStorageError] = useState<string | null>(null);
   const [online, setOnline] = useState(false);
   const [clock, setClock] = useState(Date.now());
+  const [notice, setNotice] = useState<AlertNotice | null>(null);
   const userRef = useRef(user);
   userRef.current = user;
   const active = useRef(true);
@@ -174,12 +176,13 @@ function useAppStore() {
                 : a,
             ),
           }));
-          Alert.alert(
-            "هشدار ارز من",
-            triggered
-              .map((a) => `${a.currency} · شرط هشدار برقرار شد`)
-              .join("\n"),
+          const next = makeNotice(
+            triggered,
+            now,
+            userRef.current.settings.persian,
           );
+          setNotice(next);
+          notifyBrowser(next);
         }
         for (const q of data.quotes)
           previous.current[q.currency] = observationOf(q, now);
@@ -221,6 +224,7 @@ function useAppStore() {
       inFlight.current?.abort();
     };
   }, [ready, refresh]);
+  const dismissNotice = useCallback(() => setNotice(null), []);
   const haptic = () => {
     if (user.settings.haptics && Platform.OS !== "web")
       void Haptics.selectionAsync().catch(() => undefined);
@@ -237,6 +241,8 @@ function useAppStore() {
     clock,
     refresh,
     haptic,
+    notice,
+    dismissNotice,
     clearCache: async () => {
       await clearMarketCache();
       setSnapshot(null);

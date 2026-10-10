@@ -21,7 +21,7 @@ import { Vazirmatn_600SemiBold } from "@expo-google-fonts/vazirmatn/600SemiBold"
 import { Vazirmatn_700Bold } from "@expo-google-fonts/vazirmatn/700Bold";
 import { Vazirmatn_800ExtraBold } from "@expo-google-fonts/vazirmatn/800ExtraBold";
 import { AppProvider, useApp } from "../src/store";
-import { radii, useTheme } from "../src/ui";
+import { AlertBanner, radii, useTheme } from "../src/ui";
 import { setFontsAvailable } from "../src/design-system";
 
 // ArzMan lays Persian out right-to-left *by hand*: every row is an explicit
@@ -82,6 +82,7 @@ function Navigation() {
           }}
         />
       </Stack>
+      <AlertBanner />
     </>
   );
 }
