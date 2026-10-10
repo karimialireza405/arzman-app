@@ -1,6 +1,6 @@
 {
   "name": "arzman",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "ArzMan (ارز من) — Persian-first live currency dashboard for the Iranian open market",
   "author": "Alireza Karimi <alirezkarimi0021@gmail.com>",
@@ -49,6 +49,7 @@
   "devDependencies": {
     "@types/node": "^24.0.0",
     "eslint": "^9.39.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "prettier": "^3.9.8",
     "react-native-reanimated": "4.5.1",
     "react-native-worklets": "0.10.1",

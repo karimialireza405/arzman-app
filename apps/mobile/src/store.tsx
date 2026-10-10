@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -68,7 +69,6 @@ function useAppStore() {
   const [error, setError] = useState<string | null>(null);
   const [storageError, setStorageError] = useState<string | null>(null);
   const [online, setOnline] = useState(false);
-  const [clock, setClock] = useState(Date.now());
   const [notice, setNotice] = useState<AlertNotice | null>(null);
   const userRef = useRef(user);
   userRef.current = user;
@@ -201,7 +201,6 @@ function useAppStore() {
         clearTimeout(timeout);
         inFlight.current = null;
         setBusy(false);
-        setClock(Date.now());
       }
     },
     [updateUser],
@@ -210,7 +209,6 @@ function useAppStore() {
     if (!ready) return;
     void refresh();
     const timer = setInterval(() => {
-      setClock(Date.now());
       void refresh();
     }, 15000);
     const sub = AppState.addEventListener("change", (state) => {
@@ -225,36 +223,73 @@ function useAppStore() {
     };
   }, [ready, refresh]);
   const dismissNotice = useCallback(() => setNotice(null), []);
-  const haptic = () => {
-    if (user.settings.haptics && Platform.OS !== "web")
+  const haptics = user.settings.haptics;
+  const haptic = useCallback(() => {
+    if (haptics && Platform.OS !== "web")
       void Haptics.selectionAsync().catch(() => undefined);
-  };
-  return {
-    user,
-    updateUser,
-    snapshot,
-    busy,
-    ready,
-    error,
-    storageError,
-    online,
-    clock,
-    refresh,
-    haptic,
-    notice,
-    dismissNotice,
-    clearCache: async () => {
-      await clearMarketCache();
-      setSnapshot(null);
-    },
-    stale:
-      !online || !snapshot || snapshot.quotes.some((q) => isStale(q, clock)),
-  };
+  }, [haptics]);
+  const clearCache = useCallback(async () => {
+    await clearMarketCache();
+    setSnapshot(null);
+  }, []);
+  // The value is memoised so a tick that changes nothing re-renders nobody.
+  // Anything that ticks on a timer (the age clock) lives in `ClockProvider`.
+  return useMemo(
+    () => ({
+      user,
+      updateUser,
+      snapshot,
+      busy,
+      ready,
+      error,
+      storageError,
+      online,
+      refresh,
+      haptic,
+      clearCache,
+      notice,
+      dismissNotice,
+    }),
+    [
+      user,
+      updateUser,
+      snapshot,
+      busy,
+      ready,
+      error,
+      storageError,
+      online,
+      refresh,
+      haptic,
+      clearCache,
+      notice,
+      dismissNotice,
+    ],
+  );
 }
 type Store = ReturnType<typeof useAppStore>;
 const Context = createContext<Store | null>(null);
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  return <Context.Provider value={useAppStore()}>{children}</Context.Provider>;
+  return (
+    <Context.Provider value={useAppStore()}>
+      <ClockProvider>{children}</ClockProvider>
+    </Context.Provider>
+  );
+}
+// A wall clock that ticks every 15 s. It has its own context so that only the
+// components that show an age (`useClock`) re-render on each tick, not the
+// whole app.
+const ClockContext = createContext(0);
+function ClockProvider({ children }: { children: React.ReactNode }) {
+  const [clock, setClock] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setClock(Date.now()), 15000);
+    return () => clearInterval(timer);
+  }, []);
+  return <ClockContext.Provider value={clock}>{children}</ClockContext.Provider>;
+}
+export function useClock() {
+  return useContext(ClockContext);
 }
 export function useApp() {
   const value = useContext(Context);

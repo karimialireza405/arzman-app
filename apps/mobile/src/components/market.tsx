@@ -22,7 +22,7 @@ import { router } from "expo-router";
 import { formatNumber, names, type Currency, type CurrencyQuote } from "@arzman/shared";
 import { curve, radii, spacing } from "../design-system";
 import { CurrencyBadge } from "../design-system/currency-icons";
-import { useApp } from "../store";
+import { useApp, useClock } from "../store";
 import { IconButton } from "./controls";
 import { AppIcon, Divider, Label } from "./primitives";
 import { Surface } from "./surfaces";
@@ -273,6 +273,7 @@ export const SpreadBar = RangeMeter;
  */
 export function MarketStatus() {
   const app = useApp();
+  const clock = useClock();
   const t = useTheme();
 
   // What the app can truthfully say is *when it received* the rates. TGJU
@@ -280,7 +281,7 @@ export function MarketStatus() {
   // ("زمان منبع"), not in an amber warning on every screen.
   const source = app.snapshot?.quotes[0]?.source ?? "TGJU";
   const fetchedAt = app.snapshot ? Date.parse(app.snapshot.fetchedAt) : null;
-  const ageMs = fetchedAt === null ? null : app.clock - fetchedAt;
+  const ageMs = fetchedAt === null ? null : clock - fetchedAt;
   const fresh = ageMs !== null && ageMs <= 3 * 60_000;
   const time =
     fetchedAt === null
