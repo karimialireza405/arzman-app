@@ -1,0 +1,66 @@
+name: Deploy
+
+# Manual only: Actions tab → Deploy → Run workflow.
+# Needs the repository secret CLOUDFLARE_API_TOKEN (see docs/DEPLOYMENT.md).
+on:
+  workflow_dispatch:
+    inputs:
+      api_url:
+        description: "Worker URL for the web build (leave empty to use the one just deployed)"
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+
+      - name: Deploy market Worker
+        id: api
+        working-directory: server
+        run: |
+          npx wrangler deploy 2>&1 | tee deploy.log
+          url="${{ github.event.inputs.api_url }}"
+          if [ -z "$url" ]; then
+            url=$(grep -oE 'https://[A-Za-z0-9.-]+\.workers\.dev' deploy.log | head -1)
+          fi
+          if [ -z "$url" ]; then echo "Could not find the Worker URL" >&2; exit 1; fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke test the Worker
+        run: |
+          url="${{ steps.api.outputs.url }}"
+          sleep 5
+          n=$(curl -fsS "$url/api/market" | jq '.quotes | length')
+          echo "/api/market quotes: $n"
+          test "$n" = "4"
+          curl -fsS "$url/api/v2/market" | jq '.quotes | length'
+
+      - name: Build web
+        working-directory: apps/mobile
+        env:
+          EXPO_PUBLIC_API_URL: ${{ steps.api.outputs.url }}
+        run: |
+          npx expo export --platform web --output-dir dist --clear
+          if grep -l "127.0.0.1" dist/_expo/static/js/web/*.js; then
+            echo "Bundle points at localhost" >&2; exit 1
+          fi
+
+      - name: Deploy web
+        working-directory: apps/mobile
+        run: npx wrangler deploy
