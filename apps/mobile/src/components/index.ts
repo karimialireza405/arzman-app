@@ -15,6 +15,7 @@ export * from "./skeleton";
 export * from "./brand-header";
 export * from "./screen";
 export * from "./tab-bar";
+export * from "./alert-banner";
 
 export {
   ArzManDesignSystem,
