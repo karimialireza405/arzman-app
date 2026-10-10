@@ -12,7 +12,12 @@ import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 import { useTheme } from "./theme";
 
 /** Line and area paths for `values`, padded so a flat series sits mid-box. */
-export function sparklinePaths(values: number[], width: number, height: number, inset = 2) {
+export function sparklinePaths(
+  values: number[],
+  width: number,
+  height: number,
+  inset = 2,
+) {
   if (values.length < 2) return null;
   const min = Math.min(...values);
   const max = Math.max(...values);
@@ -26,11 +31,14 @@ export function sparklinePaths(values: number[], width: number, height: number, 
     inset + usableH - ((v - lo) / span) * usableH,
   ]);
   const f = (n: number) => Math.round(n * 100) / 100;
-  const line = pts.map(([x, y], i) => `${i ? "L" : "M"}${f(x)} ${f(y)}`).join(" ");
+  const line = pts
+    .map(([x, y], i) => `${i ? "L" : "M"}${f(x)} ${f(y)}`)
+    .join(" ");
   const area = `${line} L${f(pts[pts.length - 1][0])} ${height} L${f(pts[0][0])} ${height} Z`;
   const first = values[0];
   const last = values[values.length - 1];
-  const trend: "up" | "down" | "flat" = last > first ? "up" : last < first ? "down" : "flat";
+  const trend: "up" | "down" | "flat" =
+    last > first ? "up" : last < first ? "down" : "flat";
   return { line, area, trend };
 }
 
@@ -51,7 +59,12 @@ export function Sparkline({
   if (!paths) return <View style={{ width, height }} />;
 
   const stroke =
-    color ?? (paths.trend === "up" ? t.green : paths.trend === "down" ? t.red : t.textTertiary);
+    color ??
+    (paths.trend === "up"
+      ? t.green
+      : paths.trend === "down"
+        ? t.red
+        : t.textTertiary);
   const id = `spark-${paths.trend}-${width}`;
 
   return (
@@ -59,7 +72,11 @@ export function Sparkline({
       style={{ width, height }}
       accessible
       accessibilityLabel={
-        paths.trend === "up" ? "روند افزایشی" : paths.trend === "down" ? "روند کاهشی" : "بدون تغییر"
+        paths.trend === "up"
+          ? "روند افزایشی"
+          : paths.trend === "down"
+            ? "روند کاهشی"
+            : "بدون تغییر"
       }
     >
       <Svg width={width} height={height}>
@@ -70,7 +87,9 @@ export function Sparkline({
           </LinearGradient>
         </Defs>
         {/* A flat series gets no area: filled, it reads as a solid slab. */}
-        {paths.trend === "flat" ? null : <Path d={paths.area} fill={`url(#${id})`} />}
+        {paths.trend === "flat" ? null : (
+          <Path d={paths.area} fill={`url(#${id})`} />
+        )}
         <Path
           d={paths.line}
           stroke={stroke}

@@ -19,7 +19,12 @@ import Reanimated, {
 } from "react-native-reanimated";
 import { ActivityIndicator, Animated, Pressable, View } from "react-native";
 import { router } from "expo-router";
-import { formatNumber, names, type Currency, type CurrencyQuote } from "@arzman/shared";
+import {
+  formatNumber,
+  names,
+  type Currency,
+  type CurrencyQuote,
+} from "@arzman/shared";
 import { curve, radii, spacing } from "../design-system";
 import { CurrencyBadge } from "../design-system/currency-icons";
 import { useApp, useClock } from "../store";
@@ -69,7 +74,9 @@ export function Price({
   // ("۲۳۴٬۶۱۵ تومان"); a unit stacked on its own line reads as a caption.
   return (
     <View style={[{ alignItems: align }, style]}>
-      <View style={{ flexDirection: "row-reverse", alignItems: "baseline", gap: 6 }}>
+      <View
+        style={{ flexDirection: "row-reverse", alignItems: "baseline", gap: 6 }}
+      >
         <Label
           numberOfLines={1}
           allowFontScaling={false}
@@ -119,7 +126,11 @@ export function ChangePill({
   const positive = known && (value as number) > 0;
   const negative = known && (value as number) < 0;
 
-  const background = positive ? t.greenFill : negative ? t.redFill : t.fillTertiary;
+  const background = positive
+    ? t.greenFill
+    : negative
+      ? t.redFill
+      : t.fillTertiary;
   const color = positive ? t.greenText : negative ? t.redText : t.textSecondary;
 
   const metrics = {
@@ -286,10 +297,13 @@ export function MarketStatus() {
   const time =
     fetchedAt === null
       ? null
-      : new Date(fetchedAt).toLocaleTimeString(app.user.settings.persian ? "fa-IR" : "en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
+      : new Date(fetchedAt).toLocaleTimeString(
+          app.user.settings.persian ? "fa-IR" : "en-US",
+          {
+            hour: "2-digit",
+            minute: "2-digit",
+          },
+        );
 
   const statusColor = !app.online ? t.red : fresh ? t.green : t.amber;
   const statusLabel = app.busy
@@ -317,10 +331,20 @@ export function MarketStatus() {
         <View
           accessible
           accessibilityLabel={`${statusLabel}، منبع ${source}`}
-          style={{ flex: 1, flexDirection: "row-reverse", alignItems: "center", gap: spacing.xxs }}
+          style={{
+            flex: 1,
+            flexDirection: "row-reverse",
+            alignItems: "center",
+            gap: spacing.xxs,
+          }}
         >
           <View
-            style={{ width: 7, height: 7, borderRadius: 3.5, backgroundColor: statusColor }}
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: 3.5,
+              backgroundColor: statusColor,
+            }}
           />
           <Label secondary size={13} numberOfLines={1} style={{ flex: 1 }}>
             {statusLabel} · {source}
@@ -370,9 +394,22 @@ export function MarketHero({ style }: { style?: StyleProp<ViewStyle> }) {
       subtitle="شاخص اصلی بازار آزاد · USD"
       style={style}
       actions={[
-        { title: "مبدل", icon: "swap-horizontal", primary: true, onPress: () => router.push("/converter") },
-        { title: "هشدار", icon: "notifications-outline", onPress: () => router.push("/alerts") },
-        { title: "نرخ من", icon: "pricetag-outline", onPress: () => router.push("/custom-rates") },
+        {
+          title: "مبدل",
+          icon: "swap-horizontal",
+          primary: true,
+          onPress: () => router.push("/converter"),
+        },
+        {
+          title: "هشدار",
+          icon: "notifications-outline",
+          onPress: () => router.push("/alerts"),
+        },
+        {
+          title: "نرخ من",
+          icon: "pricetag-outline",
+          onPress: () => router.push("/custom-rates"),
+        },
       ]}
     />
   );
@@ -403,7 +440,10 @@ function usePriceTick(value: number | null | undefined) {
     previous.current = value;
     if (before == null || value == null || before === value) return;
     direction.value = value > before ? 1 : -1;
-    flash.value = withSequence(withTiming(1, { duration: 140 }), withTiming(0, { duration: 900 }));
+    flash.value = withSequence(
+      withTiming(1, { duration: 140 }),
+      withTiming(0, { duration: 900 }),
+    );
   }, [value, flash, direction]);
   const up = t.green;
   const down = t.red;
@@ -450,7 +490,9 @@ export function CurrencyRow({
   // The favourite toggle is a *sibling* of the row's tap target, never a child:
   // a button nested in a button is invalid on the web and ambiguous to VoiceOver.
   return (
-    <View style={[{ flexDirection: "row-reverse", alignItems: "center" }, style]}>
+    <View
+      style={[{ flexDirection: "row-reverse", alignItems: "center" }, style]}
+    >
       <Animated.View style={[press.style, { flex: 1 }]}>
         <Pressable
           accessibilityRole="button"
@@ -476,14 +518,28 @@ export function CurrencyRow({
             backgroundColor: pressed ? t.pressedOverlay : "transparent",
           })}
         >
-          <CurrencyBadge code={code} size={featured ? "lg" : 40} dark={t.dark} />
+          <CurrencyBadge
+            code={code}
+            size={featured ? "lg" : 40}
+            dark={t.dark}
+          />
 
           {/* Leading column: what it is. */}
           <View style={{ flex: 1, gap: 2 }}>
-            <Label size={17} weight="600" numberOfLines={1} style={{ lineHeight: 22 }}>
+            <Label
+              size={17}
+              weight="600"
+              numberOfLines={1}
+              style={{ lineHeight: 22 }}
+            >
               {names[code]}
             </Label>
-            <Label secondary size={13} numberOfLines={1} allowFontScaling={false}>
+            <Label
+              secondary
+              size={13}
+              numberOfLines={1}
+              allowFontScaling={false}
+            >
               {code}
             </Label>
           </View>
@@ -496,7 +552,13 @@ export function CurrencyRow({
           />
 
           {/* Trailing column: what it costs. One number, one delta. */}
-          <View style={{ alignItems: "flex-start", gap: 4, minWidth: showFavorite ? 74 : 84 }}>
+          <View
+            style={{
+              alignItems: "flex-start",
+              gap: 4,
+              minWidth: showFavorite ? 74 : 84,
+            }}
+          >
             {waiting ? (
               <>
                 <Skeleton width={78} height={18} />
@@ -508,23 +570,30 @@ export function CurrencyRow({
                   <Reanimated.View
                     pointerEvents="none"
                     style={[
-                      { position: "absolute", top: 0, bottom: 0, left: -6, right: -6, borderRadius: 8 },
+                      {
+                        position: "absolute",
+                        top: 0,
+                        bottom: 0,
+                        left: -6,
+                        right: -6,
+                        borderRadius: 8,
+                      },
                       tick,
                     ]}
                   />
                   <Label
-                  numberOfLines={1}
-                  allowFontScaling={false}
-                  style={{
-                    fontSize: 17,
-                    lineHeight: 22,
-                    fontWeight: "600",
-                    fontVariant: ["tabular-nums"],
-                    writingDirection: "ltr",
-                    color: t.text,
-                  }}
-                >
-                  {fmt(quote?.priceToman)}
+                    numberOfLines={1}
+                    allowFontScaling={false}
+                    style={{
+                      fontSize: 17,
+                      lineHeight: 22,
+                      fontWeight: "600",
+                      fontVariant: ["tabular-nums"],
+                      writingDirection: "ltr",
+                      color: t.text,
+                    }}
+                  >
+                    {fmt(quote?.priceToman)}
                   </Label>
                 </View>
                 <ChangePill value={quote?.changePercent} size="small" />
@@ -544,7 +613,9 @@ export function CurrencyRow({
             activeColor={t.amber}
             color={t.textTertiary}
             accessibilityLabel={
-              isFavorite ? `حذف ${names[code]} از دنبال‌شده‌ها` : `افزودن ${names[code]} به دنبال‌شده‌ها`
+              isFavorite
+                ? `حذف ${names[code]} از دنبال‌شده‌ها`
+                : `افزودن ${names[code]} به دنبال‌شده‌ها`
             }
             onPress={toggleFavorite}
           />

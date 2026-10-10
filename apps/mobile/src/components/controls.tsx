@@ -19,10 +19,22 @@ import {
   View,
   type LayoutChangeEvent,
 } from "react-native";
-import { curve, radii, spacing, springs, fontFamilies, appFont } from "../design-system";
+import {
+  curve,
+  radii,
+  spacing,
+  springs,
+  fontFamilies,
+  appFont,
+} from "../design-system";
 import { AppIcon, Label } from "./primitives";
 import { Glass } from "./surfaces";
-import { useFeedback, usePressFeedback, useReduceMotion, useTheme } from "./theme";
+import {
+  useFeedback,
+  usePressFeedback,
+  useReduceMotion,
+  useTheme,
+} from "./theme";
 import type { StyleProp, TextStyle, ViewStyle } from "react-native";
 
 export type ButtonVariant =
@@ -201,7 +213,9 @@ export function Button({
           onPress();
         }}
         hitSlop={
-          size === "small" ? { top: 5, bottom: 5, left: 6, right: 6 } : undefined
+          size === "small"
+            ? { top: 5, bottom: 5, left: 6, right: 6 }
+            : undefined
         }
         style={{
           minHeight: m.height,
@@ -222,7 +236,13 @@ export function Button({
             glassEffectStyle="regular"
             interactive
             radius={corner}
-            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
           />
         ) : null}
         {content}
@@ -300,7 +320,13 @@ export function IconButton({
             interactive
             tintColor={active ? t.accentFill : undefined}
             radius={radii.pill}
-            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
           />
         ) : null}
         <AppIcon
@@ -368,7 +394,9 @@ export function SegmentedControl<T extends string | number>({
 
   return (
     <View
-      onLayout={(event: LayoutChangeEvent) => setWidth(event.nativeEvent.layout.width)}
+      onLayout={(event: LayoutChangeEvent) =>
+        setWidth(event.nativeEvent.layout.width)
+      }
       style={[
         {
           height,
@@ -430,7 +458,10 @@ export function SegmentedControl<T extends string | number>({
               weight={selected ? "600" : "500"}
               numberOfLines={1}
               align="center"
-              style={{ color: selected ? t.text : t.textSecondary, lineHeight: 17 }}
+              style={{
+                color: selected ? t.text : t.textSecondary,
+                lineHeight: 17,
+              }}
             >
               {label ? label(item) : item}
             </Label>
@@ -600,7 +631,11 @@ export function ChipRow<T extends string>({
               borderCurve: curve.continuous,
               borderWidth: 1,
               borderColor: active ? t.accent : t.separator,
-              backgroundColor: active ? t.accentFill : pressed ? t.fillSecondary : t.fillTertiary,
+              backgroundColor: active
+                ? t.accentFill
+                : pressed
+                  ? t.fillSecondary
+                  : t.fillTertiary,
             })}
           >
             {leading?.(item)}

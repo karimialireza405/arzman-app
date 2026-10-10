@@ -13,12 +13,16 @@ const now = Date.parse("2026-09-27T12:00:00.000Z");
 describe("refresh cadence", () => {
   it("refreshes every 45 s while someone is using the app", () => {
     expect(nextRefreshDelayMs(now, now - 5_000, 0)).toBe(ACTIVE_INTERVAL_MS);
-    expect(nextRefreshDelayMs(now, now - ACTIVE_WINDOW_MS + 1, 0)).toBe(ACTIVE_INTERVAL_MS);
+    expect(nextRefreshDelayMs(now, now - ACTIVE_WINDOW_MS + 1, 0)).toBe(
+      ACTIVE_INTERVAL_MS,
+    );
   });
 
   it("falls back to every 10 min when nobody is looking", () => {
     expect(nextRefreshDelayMs(now, null, 0)).toBe(IDLE_INTERVAL_MS);
-    expect(nextRefreshDelayMs(now, now - ACTIVE_WINDOW_MS, 0)).toBe(IDLE_INTERVAL_MS);
+    expect(nextRefreshDelayMs(now, now - ACTIVE_WINDOW_MS, 0)).toBe(
+      IDLE_INTERVAL_MS,
+    );
   });
 
   it("backs off after failures regardless of visitors", () => {
@@ -43,7 +47,9 @@ describe("alarm writes", () => {
     expect(alarmToWrite(null, now)).toBe(now);
   });
   it("pulls a far idle alarm in when a visitor arrives", () => {
-    expect(alarmToWrite(now + IDLE_INTERVAL_MS, now + 45_000)).toBe(now + 45_000);
+    expect(alarmToWrite(now + IDLE_INTERVAL_MS, now + 45_000)).toBe(
+      now + 45_000,
+    );
   });
   it("never rewrites an alarm that is already due as soon or sooner", () => {
     expect(alarmToWrite(now + 30_000, now + 45_000)).toBeNull();

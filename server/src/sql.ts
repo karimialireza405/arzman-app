@@ -70,4 +70,3 @@ const rollupRetention = (table: string) =>
   `DELETE FROM ${table} WHERE currency IN (${fiatCodes.map(() => "?").join(", ")}) AND bucket < ?`;
 export const HOURLY_RETENTION_DELETE = rollupRetention(HOURLY_TABLE);
 export const DAILY_RETENTION_DELETE = rollupRetention(DAILY_TABLE);
-

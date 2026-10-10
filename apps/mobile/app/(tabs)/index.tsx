@@ -43,12 +43,14 @@ export default function Home() {
 
   return (
     <Screen title="ArzMan" largeTitle={false} refresh>
-      <BrandHeader tagline="نبض بازار آزاد، در دستان شما" onSearch={() => router.push("/market")} />
+      <BrandHeader
+        tagline="نبض بازار آزاد، در دستان شما"
+        onSearch={() => router.push("/market")}
+      />
 
       <MarketStatus />
 
       <MarketHero />
-
 
       {/* Secondary markets in a single grouped list */}
       <Section

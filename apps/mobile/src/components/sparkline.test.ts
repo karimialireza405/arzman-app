@@ -3,7 +3,13 @@ import { describe, expect, it, vi } from "vitest";
 // The component module imports react-native; only the pure path builder is
 // under test, so stub the renderer-facing imports.
 vi.mock("react-native", () => ({ View: () => null }));
-vi.mock("react-native-svg", () => ({ default: () => null, Defs: () => null, LinearGradient: () => null, Path: () => null, Stop: () => null }));
+vi.mock("react-native-svg", () => ({
+  default: () => null,
+  Defs: () => null,
+  LinearGradient: () => null,
+  Path: () => null,
+  Stop: () => null,
+}));
 vi.mock("./theme", () => ({ useTheme: () => ({}) }));
 
 const { sparklinePaths } = await import("./sparkline");
@@ -22,7 +28,9 @@ describe("sparkline paths", () => {
 
   it("centres a flat series instead of drawing it on an edge", () => {
     const { line } = sparklinePaths([230_800, 230_800], 58, 28)!;
-    const ys = [...line.matchAll(/[ML][\d.]+ ([\d.]+)/g)].map((m) => Number(m[1]));
+    const ys = [...line.matchAll(/[ML][\d.]+ ([\d.]+)/g)].map((m) =>
+      Number(m[1]),
+    );
     for (const y of ys) expect(Math.abs(y - 14)).toBeLessThan(0.5);
   });
 

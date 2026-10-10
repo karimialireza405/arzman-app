@@ -1,21 +1,35 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="%LANG_ISO_CODE%">
   <head>
     <meta charset="utf-8" />
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
     <!-- viewport-fit=cover lets the app draw under the notch; safe-area insets keep content clear of it. -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+    />
     <title>%WEB_TITLE%</title>
 
     <!-- "Add to Home Screen" on iPhone: full-screen launch, home-screen name and icon. -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
     <meta name="apple-mobile-web-app-title" content="ارز من" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#07080E" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F4F5FA" />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: dark)"
+      content="#07080E"
+    />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: light)"
+      content="#F4F5FA"
+    />
     <meta name="color-scheme" content="dark light" />
 
     <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
@@ -27,14 +41,14 @@
       body {
         overflow: hidden;
         /* Matches the app background so launch never flashes white. */
-        background-color: #F4F5FA;
+        background-color: #f4f5fa;
         -webkit-tap-highlight-color: transparent;
         -webkit-touch-callout: none;
         overscroll-behavior: none;
       }
       @media (prefers-color-scheme: dark) {
         body {
-          background-color: #07080E;
+          background-color: #07080e;
         }
       }
       #root {

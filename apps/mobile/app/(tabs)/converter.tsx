@@ -8,7 +8,16 @@
  * screen. The conversion itself is unchanged: `convert` over the market quotes.
  */
 import { useRef, useState } from "react";
-import { Alert, Animated, Modal, Pressable, ScrollView, TextInput, View, useWindowDimensions } from "react-native";
+import {
+  Alert,
+  Animated,
+  Modal,
+  Pressable,
+  ScrollView,
+  TextInput,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Clipboard from "expo-clipboard";
@@ -45,7 +54,6 @@ import {
 } from "../../src/ui";
 
 const codes = [...fiatCodes, "IRT", "IRR"] as const;
-
 
 const QUICK_AMOUNTS = [1, 10, 100, 1000];
 
@@ -102,7 +110,13 @@ function ExchangeCard({
       <Label secondary size={13} weight="500">
         {label}
       </Label>
-      <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: spacing.xs }}>
+      <View
+        style={{
+          flexDirection: "row-reverse",
+          alignItems: "center",
+          gap: spacing.xs,
+        }}
+      >
         <View style={{ flex: 1 }}>{children}</View>
         <CurrencyPill code={code} onPress={onPickCurrency} label={label} />
       </View>
@@ -143,7 +157,8 @@ function CurrencySheet({
       ? 1
       : code === "IRR"
         ? 0.1
-        : (app.snapshot?.quotes.find((q) => q.currency === code)?.priceToman ?? null);
+        : (app.snapshot?.quotes.find((q) => q.currency === code)?.priceToman ??
+          null);
 
   return (
     <Modal
@@ -167,9 +182,16 @@ function CurrencySheet({
           <Label size={20} weight="700">
             {title}
           </Label>
-          <IconButton icon="close-outline" size={34} accessibilityLabel="بستن" onPress={onClose} />
+          <IconButton
+            icon="close-outline"
+            size={34}
+            accessibilityLabel="بستن"
+            onPress={onClose}
+          />
         </View>
-        <View style={{ paddingHorizontal: spacing.sm, paddingBottom: spacing.xs }}>
+        <View
+          style={{ paddingHorizontal: spacing.sm, paddingBottom: spacing.xs }}
+        >
           <SearchField
             value={search}
             onChangeText={setSearch}
@@ -182,7 +204,12 @@ function CurrencySheet({
           contentContainerStyle={{ padding: spacing.sm, paddingTop: 0 }}
         >
           {listed.length === 0 ? (
-            <Label secondary size={14} align="center" style={{ paddingVertical: spacing.lg }}>
+            <Label
+              secondary
+              size={14}
+              align="center"
+              style={{ paddingVertical: spacing.lg }}
+            >
               ارزی با «{search}» پیدا نشد.
             </Label>
           ) : null}
@@ -206,7 +233,9 @@ function CurrencySheet({
                       gap: spacing.xs,
                       minHeight: 64,
                       paddingHorizontal: spacing.sm,
-                      backgroundColor: pressed ? t.pressedOverlay : "transparent",
+                      backgroundColor: pressed
+                        ? t.pressedOverlay
+                        : "transparent",
                     })}
                   >
                     <CurrencyBadge code={code} size={40} dark={t.dark} />
@@ -218,11 +247,19 @@ function CurrencySheet({
                         {code}
                       </Label>
                     </View>
-                    <Label secondary size={14} style={{ writingDirection: "rtl" }}>
-                      {rate === null ? "—" : `${fmt(rate)} ${names[app.user.settings.unit]}`}
+                    <Label
+                      secondary
+                      size={14}
+                      style={{ writingDirection: "rtl" }}
+                    >
+                      {rate === null
+                        ? "—"
+                        : `${fmt(rate)} ${names[app.user.settings.unit]}`}
                     </Label>
                     <View style={{ width: 22, alignItems: "center" }}>
-                      {active ? <AppIcon name="check" size={18} color={t.accent} /> : null}
+                      {active ? (
+                        <AppIcon name="check" size={18} color={t.accent} />
+                      ) : null}
                     </View>
                   </Pressable>
                   {index < listed.length - 1 ? <Divider inset={68} /> : null}
@@ -251,7 +288,9 @@ export default function Converter() {
       : "USD",
   );
   // Never open on an X → X conversion when arriving with ?from=IRT.
-  const [to, setTo] = useState<ConversionCurrency>(from === "IRT" ? "USD" : "IRT");
+  const [to, setTo] = useState<ConversionCurrency>(
+    from === "IRT" ? "USD" : "IRT",
+  );
   const [amount, setAmount] = useState(persian ? "۱" : "1");
   const [picking, setPicking] = useState<"from" | "to" | null>(null);
 
@@ -274,17 +313,21 @@ export default function Converter() {
   const rotation = useRef(new Animated.Value(0)).current;
   const swap = () => {
     feedback.press();
-    if (!reducedMotion) Animated.spring(rotation, {
-      toValue: 1,
-      useNativeDriver: true,
-      damping: 16,
-      stiffness: 220,
-      mass: 0.8,
-    }).start(() => rotation.setValue(0));
+    if (!reducedMotion)
+      Animated.spring(rotation, {
+        toValue: 1,
+        useNativeDriver: true,
+        damping: 16,
+        stiffness: 220,
+        mass: 0.8,
+      }).start(() => rotation.setValue(0));
     setFrom(to);
     setTo(from);
   };
-  const spin = rotation.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "180deg"] });
+  const spin = rotation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "180deg"],
+  });
 
   // Picking the currency that is already on the other side swaps them, rather
   // than leaving a pointless X → X conversion.
@@ -322,7 +365,11 @@ export default function Converter() {
       <MarketStatus />
 
       <View>
-        <ExchangeCard label="مبلغ" code={from} onPickCurrency={() => setPicking("from")}>
+        <ExchangeCard
+          label="مبلغ"
+          code={from}
+          onPickCurrency={() => setPicking("from")}
+        >
           <TextInput
             accessibilityLabel={`مبلغ به ${names[from]}`}
             value={amount}
@@ -370,7 +417,11 @@ export default function Converter() {
           </Animated.View>
         </View>
 
-        <ExchangeCard label="معادل" code={to} onPickCurrency={() => setPicking("to")}>
+        <ExchangeCard
+          label="معادل"
+          code={to}
+          onPickCurrency={() => setPicking("to")}
+        >
           <Label
             size={width < 360 ? 24 : 32}
             weight="700"
@@ -406,12 +457,20 @@ export default function Converter() {
                 borderCurve: curve.continuous,
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: selected ? t.accentFill : pressed ? t.fillSecondary : t.fillTertiary,
+                backgroundColor: selected
+                  ? t.accentFill
+                  : pressed
+                    ? t.fillSecondary
+                    : t.fillTertiary,
                 borderWidth: 1,
                 borderColor: selected ? t.accent : "transparent",
               })}
             >
-              <Label size={14} weight="600" style={{ color: selected ? t.accent : t.text }}>
+              <Label
+                size={14}
+                weight="600"
+                style={{ color: selected ? t.accent : t.text }}
+              >
                 {quick(n)}
               </Label>
             </Pressable>
@@ -432,7 +491,12 @@ export default function Converter() {
             <Label tertiary size={13}>
               نرخ پایه
             </Label>
-            <Label secondary size={13} weight="600" style={{ writingDirection: "rtl" }}>
+            <Label
+              secondary
+              size={13}
+              weight="600"
+              style={{ writingDirection: "rtl" }}
+            >
               ۱ {names[from]} = {formatAmount(singleRate, persian)} {names[to]}
             </Label>
           </View>

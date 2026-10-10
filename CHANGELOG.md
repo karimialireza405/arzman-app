@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Changed
+
 - **History reads rollups, not raw rows.** 1W/1M/3M read `observations_hourly`
   and 1Y reads `observations_daily` (last observation per hour/day, PK
   `(currency, bucket)`), so a 1Y request reads ~365 rows instead of ~700k. Existing
@@ -15,6 +16,7 @@ All notable changes to this project will be documented in this file.
 ## [0.2.0 app] - 2026-10-06 — 24 currencies, Android glass tab bar
 
 ### Added
+
 - **20 more currencies** (GBP, TRY, CNY, CAD, AUD, CHF, JPY, SAR, QAR, OMR,
   KWD, BHD, RUB, INR, AFN, AZN, AMD, GEL, MYR, THB), with round flags. They are
   read from TGJU's currency overview in one request every 4 minutes, anchored
@@ -27,6 +29,7 @@ All notable changes to this project will be documented in this file.
   short names. Converter sheet: search. Alerts: flag chips for 24 currencies.
 
 ### Fixed
+
 - **Android light mode**: the bottom navigation stayed black and flat because
   Material's native tabs follow the device theme. Android (and the web) now use
   ArzMan's floating glass tab bar, themed from the app's own setting, hidden
@@ -55,6 +58,7 @@ All notable changes to this project will be documented in this file.
 ## [0.5.1] - 2026-09-27 — second design pass
 
 ### Changed
+
 - **Converter**: two compact one-row cards with currency pills, a native
   currency sheet with live rates, a brand swap button and quick-amount chips.
 - **Currency detail chart**: period change as a pill, compact scrub readout,
@@ -64,6 +68,7 @@ All notable changes to this project will be documented in this file.
 - **Loading**: skeleton placeholders instead of bare dashes.
 
 ### Fixed
+
 - The converter showed small results as **۰** (1 Toman = 0.0000043 USD);
   `formatAmount` keeps four significant digits.
 - A failed font load rendered text in a serif / unknown family; the app now
@@ -77,6 +82,7 @@ References: Dribbble currency-exchange shots (Kites Design dark exchange UI,
 card-per-row rate lists, Lumina) and the ui-ux-pro-max fintech guidance.
 
 ### Added
+
 - **Vazirmatn** typography (OFL), applied to every string through `Label`.
 - **Brand hero card** (`QuoteHero`) on Home and currency detail: indigo→violet
   gradient, today's trend, daily range, glass action chips.
@@ -85,6 +91,7 @@ card-per-row rate lists, Lumina) and the ui-ux-pro-max fintech guidance.
   shift transition. All respect Reduce Motion.
 
 ### Fixed
+
 - **Text overflowing its frame («ارز من»)**: Persian needs 1.5625× line height
   (measured from the font files); the scale gave 1.2–1.35×. Enforced centrally.
 - Letter-spacing on Persian text broke letter joins — dropped for Persian.
@@ -93,6 +100,7 @@ card-per-row rate lists, Lumina) and the ui-ux-pro-max fintech guidance.
 - «درهم امارات» truncated on the market list.
 
 ### Design tokens
+
 - Dark: base `#07080E`, surface `#11131E`, accent `#A78BFA` (text) /
   `#6D4AFF` (fills), gold `#F5B84B`. Light: base `#F4F5FA`, accent `#6D28D9`.
   All text pairs verified ≥ 4.5:1.
@@ -100,6 +108,7 @@ card-per-row rate lists, Lumina) and the ui-ux-pro-max fintech guidance.
 ## [0.4.1] - 2026-09-27 — backend: stop exhausting the free Cloudflare budget
 
 ### Fixed
+
 - **Root cause of the daily 503 outage, measured.** Every refresh ran
   `DELETE FROM observations WHERE timestamp < ?`, which cannot use the
   `(currency, timestamp)` primary key and scans the whole table. Measured in
@@ -114,9 +123,11 @@ card-per-row rate lists, Lumina) and the ui-ux-pro-max fintech guidance.
 - No alarm rewrite on every request; no redundant writes after a success.
 
 ### Estimated daily use afterwards
+
 - App open 24/7: ~26k rows read (0.5 % of limit), ~21k rows written (21 %).
 
 ### Not done
+
 - **Not deployed.** Deploying ships this and the earlier parser fixes. Today's
   budget is already spent, so the deployed API recovers at 00:00 UTC
   (03:30 Tehran) and should then stay up.
@@ -124,6 +135,7 @@ card-per-row rate lists, Lumina) and the ui-ux-pro-max fintech guidance.
 ## [0.4.0] - 2026-09-27 — portfolio removed
 
 ### Removed (owner's request: «بخش دارایی من رو کامل حذف کن»)
+
 - The «دارایی من» tab, the portfolio screen, the transaction sheet, the home
   portfolio summary and the «ثبت تراکنش در دارایی من» action on currency detail.
 - The biometric privacy lock (it existed only to guard the portfolio) and its
@@ -137,15 +149,18 @@ card-per-row rate lists, Lumina) and the ui-ux-pro-max fintech guidance.
 - Everything is recoverable from git (`41adbc9` is the last version with it).
 
 ### Changed
+
 - «نرخ من» now describes what it does without a portfolio: compare a personal
   rate with the market; a USDT rate is a note only.
 
 ### Not removed, deliberately
+
 - Transactions an owner already entered on a phone stay dormant in that app's
   Keychain; nothing reads or shows them. They are not deleted automatically,
   because deletion cannot be undone.
 
 ### Found during verification — not caused by this change
+
 - The **deployed** Worker answers `/health` but every Durable Object call,
   including the trivial `/api/market/XXX` → 404 path, returns
   `503 SERVICE_UNAVAILABLE`. TGJU itself is fine (`npm run verify` 4/4). This
@@ -160,6 +175,7 @@ The app ran on the owner's iPhone in Expo Go for the first time. Every issue
 below was seen there, then reproduced and fixed at 393×852 in the web runtime.
 
 ### Added
+
 - **Round country flags** for every currency (🇺🇸 USD, 🇪🇺 EUR, 🇦🇪 AED, 🇮🇶 IQD,
   🇮🇷 IRT/IRR; USDT keeps a Tether-green ₮ disc). `CurrencyBadge` renders them,
   so every screen picked them up without call-site changes. Five 1×1 SVGs are
@@ -167,6 +183,7 @@ below was seen there, then reproduced and fixed at 393×852 in the web runtime.
   drawn with `react-native-svg`'s `SvgXml` — no new dependency, Expo Go safe.
 
 ### Fixed
+
 - Currency rows: three cluttered lines → two (flag · name · code | price · change).
 - Units stacked under big numbers → one baseline ("۲۳۴٬۶۱۵ تومان") for prices,
   the portfolio total and the converter result; hero price leading-aligned.
@@ -187,6 +204,7 @@ below was seen there, then reproduced and fixed at 393×852 in the web runtime.
 - Home's portfolio and quick-converter rows now sit on grouped surfaces.
 
 ### Not changed
+
 - `expo-doctor` now reports 20/21: Expo shipped new patch releases (e.g.
   `expo` 57.0.25) after the last check. Nothing installed changed; upgrading is
   left as a separate, deliberate step.
@@ -199,6 +217,7 @@ Continues and completes the previous agent's unfinished audit. Full detail in
 [`docs/engineering-audit.md`](docs/engineering-audit.md).
 
 ### Fixed
+
 - **P0 — live quotes were being rejected.** The TGJU parser required the page's FAQ
   sentence to quote exactly the same number as the live quote table. TGJU renders that FAQ
   from a slower cache, so during trading hours it legitimately lags — and the parser threw,
@@ -232,6 +251,7 @@ Continues and completes the previous agent's unfinished audit. Full detail in
 - **P3** — Persian digits for the quote size on the currency detail screen.
 
 ### Added
+
 - `docs/engineering-audit.md` — findings by severity, the parser's validation model, live
   TGJU readings, the portfolio lifecycle walk-through, local-vs-deployed backend parity, the
   Expo Go compatibility matrix, network topology, security review and verification results.
@@ -243,6 +263,7 @@ Continues and completes the previous agent's unfinished audit. Full detail in
   **35 tests** in total, up from 24.
 
 ### Documentation
+
 - **The README's iPhone instructions were wrong and are corrected.** It told the reader to
   point the app at a LAN backend on `:8787`, which the deployed HTTPS Worker makes
   unnecessary. It now gives two routes: Expo Go first (free App Store install, whose current
@@ -251,10 +272,11 @@ Continues and completes the previous agent's unfinished audit. Full detail in
   `ios.enableSceneSupport` or a native extension is needed. That second route does require a
   paid Apple Developer account for signing, on Windows as much as on macOS.
 
-  *A revision of this entry published on 2026-09-22 claimed Expo Go for iOS was no longer a
+  _A revision of this entry published on 2026-09-22 claimed Expo Go for iOS was no longer a
   free App Store install. That was wrong — it came from the `set-up-your-environment` docs
   page, which describes building a private Expo Go with `npx eas-cli@latest go`, not the
-  App Store build. Corrected 2026-09-26; `docs/engineering-audit.md` §5 records both sources.*
+  App Store build. Corrected 2026-09-26; `docs/engineering-audit.md` §5 records both sources._
+
 - The compatibility matrix was rebuilt from each library's own SDK 57 page. Previous claims
   that Expo Go lacks Keychain, Face ID and SF Symbols were wrong; all three are included.
   What Expo Go really cannot do for this project is apply `ios.enableSceneSupport` or carry
@@ -263,6 +285,7 @@ Continues and completes the previous agent's unfinished audit. Full detail in
   costs. Nothing was deployed.
 
 ### Known and deliberate
+
 - The market status pill reads «متصل · تازگی منبع تأیید نشده» even for seconds-old data.
   TGJU publishes no trade timestamp, so ArzMan refuses to claim one. This is honesty, not a
   bug; `sourceTimestamp` stays `null` and `stale` stays `true`.
@@ -270,6 +293,7 @@ Continues and completes the previous agent's unfinished audit. Full detail in
 ## [0.3.0] - 2026-09-21 — Apple HIG / Liquid Glass UI redesign
 
 ### Added
+
 - **Currency icon system (`apps/mobile/src/design-system/currency-icons.ts`):**
   one consistent squircle badge family for USD `$`, EUR `€`, AED `د.إ`, IQD `ع.د`
   (plus USDT/IRT/IRR) — four sizes, three tones (tint/filled/neutral), Apple
@@ -299,6 +323,7 @@ Continues and completes the previous agent's unfinished audit. Full detail in
   visible labels, quiet accent selection, selection haptics, RTL-mirrored order.
 
 ### Changed
+
 - All screens rebuilt on the new kit: Home, Markets, Converter, Portfolio, More,
   Currency Detail, Alerts, Custom Rates, Transaction, plus chart polish.
 - Market content is now rendered on **opaque** surfaces; Liquid Glass is used only
@@ -308,16 +333,19 @@ Continues and completes the previous agent's unfinished audit. Full detail in
 - Lists use iOS inset-grouped rows with inset separators instead of per-item cards.
 
 ### Removed
+
 - The decorative, **fabricated sparkline** in the Home hero. It was replaced by
   `RangeMeter`, which plots only the source-reported daily low/high/current.
 
 ### Fixed
+
 - The broken uncommitted token refactor from the previous session (21 TypeScript
   errors) — reconciled without discarding any of the intended architecture.
 - Content could previously collide with the floating tab bar; `Screen` now reserves
   exactly `TAB_BAR.clearance(insetBottom)`.
 
 ### Verified
+
 - `npm run check` — typecheck 0 errors, ESLint 0 errors/0 warnings, Vitest 22/22.
 - `npx expo-doctor` — 21/21 checks passed.
 - `npx expo export --platform all` — clean Web, iOS Hermes and Android Hermes bundles.
@@ -325,6 +353,7 @@ Continues and completes the previous agent's unfinished audit. Full detail in
 ## [0.2.0] - 2026-09-21
 
 ### Added
+
 - **ArzManDesignSystem (`apps/mobile/src/design-system/`):**
   - Apple iOS 27 Liquid Glass token architecture with OLED true black palette (`#000000`) and Apple system grouped light mode (`#F2F2F7`).
   - Concentric geometry utility (`concentricRadius`) ensuring parent and child components visually share related curvature.
@@ -355,11 +384,13 @@ Continues and completes the previous agent's unfinished audit. Full detail in
 - **Dependencies:** Added `"expo-symbols": "~57.0.3"` to `apps/mobile/package.json`.
 
 ### Fixed
+
 - Fixed 4 unused variable lint errors in `apps/mobile/app/(tabs)/portfolio.tsx` (`removeId`, `setRemoveId`, `removeError`, `setRemoveError`).
 - Implemented interactive transaction removal with native confirmation dialog and error handling.
 - Fixed style prop types across UI components to support `StyleProp<ViewStyle>` and `StyleProp<TextStyle>`.
 
 ### Verified
+
 - `npm run typecheck` (zero TypeScript errors across packages/shared, server, and apps/mobile).
 - `npm run lint` (zero ESLint errors or warnings).
 - `npm test` (18/18 tests passing in Vitest).

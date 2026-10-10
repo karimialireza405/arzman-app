@@ -10,14 +10,15 @@ import React from "react";
 import { Platform, Text, View, StyleSheet } from "react-native";
 import { SymbolView, type SFSymbol } from "expo-symbols";
 import { Ionicons } from "@expo/vector-icons";
-import { curve, iconSizes, persianText, radii, spacing } from "../design-system";
+import {
+  curve,
+  iconSizes,
+  persianText,
+  radii,
+  spacing,
+} from "../design-system";
 import { textStyle, useTheme } from "./theme";
-import type {
-  ColorValue,
-  StyleProp,
-  TextStyle,
-  ViewStyle,
-} from "react-native";
+import type { ColorValue, StyleProp, TextStyle, ViewStyle } from "react-native";
 import type { TextStyleName } from "../design-system";
 
 /** Icon resolver: Apple SF Symbols on iOS, Ionicons everywhere else. */
@@ -29,7 +30,10 @@ export const iconMapping: Record<
   "home-outline": { sf: "house", ion: "home-outline" },
   market: { sf: "chart.line.uptrend.xyaxis", ion: "stats-chart" },
   "stats-chart": { sf: "chart.line.uptrend.xyaxis", ion: "stats-chart" },
-  "stats-chart-outline": { sf: "chart.xyaxis.line", ion: "stats-chart-outline" },
+  "stats-chart-outline": {
+    sf: "chart.xyaxis.line",
+    ion: "stats-chart-outline",
+  },
   swap: { sf: "arrow.left.arrow.right", ion: "swap-horizontal" },
   "swap-horizontal": { sf: "arrow.left.arrow.right", ion: "swap-horizontal" },
   "swap-vertical": { sf: "arrow.up.arrow.down", ion: "swap-vertical" },

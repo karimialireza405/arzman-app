@@ -46,6 +46,9 @@ export function nextRefreshDelayMs(
  * earlier (a visitor during idle cadence) and never rewrites an equal or
  * earlier one — the old code rewrote it on every single request.
  */
-export function alarmToWrite(existing: number | null, desired: number): number | null {
+export function alarmToWrite(
+  existing: number | null,
+  desired: number,
+): number | null {
   return existing === null || existing > desired ? desired : null;
 }

@@ -31,13 +31,13 @@ magnitude, and a move of more than 2× against the previous close is rejected.
 most every 4 minutes, stopping once every row has arrived (~250 KB). The overview has
 no unit row, so each value is anchored instead:
 
-1. *Unit* — the page's USD row must match the core USD quote (verified from its
+1. _Unit_ — the page's USD row must match the core USD quote (verified from its
    profile page moments earlier). Same page, same unit (Rial).
-2. *Lot size* — only the stated «(100 ین)» for JPY is accepted; any other number in
+2. _Lot size_ — only the stated «(100 ین)» for JPY is accepted; any other number in
    a currency's name drops that currency rather than guessing a divisor.
-3. *Magnitude* — each currency's implied USD cross rate must be within a factor of
+3. _Magnitude_ — each currency's implied USD cross rate must be within a factor of
    three of its long-run value, which catches a 10× or 100× regression.
-4. *Change* — the signed change and the rounded percentage must agree.
+4. _Change_ — the signed change and the rounded percentage must agree.
 
 A row that fails is dropped and logged; the rest stand. A page that fails the anchor
 is rejected whole and the last good extras are kept.
@@ -47,13 +47,13 @@ size are kept on the quote.
 
 ## API
 
-| Endpoint | Returns |
-|---|---|
-| `GET /health` | `{ service, ok }` |
-| `GET /api/market` | **v1** — exactly the 4 core quotes |
-| `GET /api/v2/market` | **v2** — all 24 quotes |
-| `GET /api/market/:code` | one quote (any of the 24) |
-| `GET /api/history/:code?range=1H\|1D\|1W\|1M\|3M\|1Y` | real observations, bucketed |
+| Endpoint                                              | Returns                            |
+| ----------------------------------------------------- | ---------------------------------- |
+| `GET /health`                                         | `{ service, ok }`                  |
+| `GET /api/market`                                     | **v1** — exactly the 4 core quotes |
+| `GET /api/v2/market`                                  | **v2** — all 24 quotes             |
+| `GET /api/market/:code`                               | one quote (any of the 24)          |
+| `GET /api/history/:code?range=1H\|1D\|1W\|1M\|3M\|1Y` | real observations, bucketed        |
 
 > **v1 must stay at exactly four quotes.** App installs from before 0.2.0 parse the
 > snapshot with a four-quote schema; widening v1 would blank their screens. New
@@ -73,12 +73,12 @@ the API down. `server/test/sql.test.ts` checks the query plans; keep it green.
 
 ## Platforms
 
-| | iOS | Android | Web |
-|---|---|---|---|
-| Tab bar | system `UITabBarController` (Liquid Glass) via `NativeTabs` | ArzMan floating glass bar | the same floating bar |
-| File | `app/(tabs)/_layout.tsx` | `_layout.android.tsx` | `_layout.web.tsx` → android |
+|         | iOS                                                         | Android                   | Web                         |
+| ------- | ----------------------------------------------------------- | ------------------------- | --------------------------- |
+| Tab bar | system `UITabBarController` (Liquid Glass) via `NativeTabs` | ArzMan floating glass bar | the same floating bar       |
+| File    | `app/(tabs)/_layout.tsx`                                    | `_layout.android.tsx`     | `_layout.web.tsx` → android |
 
-Material's native bottom navigation follows the *device* theme, not the app's own
+Material's native bottom navigation follows the _device_ theme, not the app's own
 setting, which is why Android uses its own bar. The app's appearance choice is also
 handed to the platform with `Appearance.setColorScheme`.
 

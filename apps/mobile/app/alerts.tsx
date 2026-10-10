@@ -19,7 +19,10 @@ import {
   type PriceAlert,
 } from "@arzman/shared";
 import { useApp } from "../src/store";
-import { browserPermission, requestBrowserPermission } from "../src/alert-notice";
+import {
+  browserPermission,
+  requestBrowserPermission,
+} from "../src/alert-notice";
 import {
   AmountInput,
   AppIcon,
@@ -93,7 +96,11 @@ export default function Alerts() {
   };
 
   return (
-    <Screen title="هشدارهای قیمت" eyebrow="نظارت لحظه‌ای بر بازار" largeTitle={false}>
+    <Screen
+      title="هشدارهای قیمت"
+      eyebrow="نظارت لحظه‌ای بر بازار"
+      largeTitle={false}
+    >
       {/* Honest capability note — apple-style inline notice, not a banner card */}
       <Surface
         style={{
@@ -103,23 +110,30 @@ export default function Alerts() {
           backgroundColor: t.amberFill,
         }}
       >
-        <AppIcon name="info" size={18} color={t.amber} style={{ marginTop: 2 }} />
+        <AppIcon
+          name="info"
+          size={18}
+          color={t.amber}
+          style={{ marginTop: 2 }}
+        />
         <View style={{ flex: 1, gap: 2 }}>
           <Label size={13} weight="600" style={{ color: t.amberText }}>
             نحوهٔ عملکرد هشدارها
           </Label>
           <Label secondary size={12} style={{ lineHeight: 18 }}>
-            هشدارها فقط وقتی برنامه باز است (و روی صفحه یا در پس‌زمینهٔ نزدیک) بررسی
-            می‌شوند و با یک بنر داخل برنامه نشان داده می‌شوند. اگر برنامه بسته
-            باشد هیچ اعلانی نمی‌رسد؛ اعلان پس از بستن برنامه به سرور پوش نیاز دارد
-            و هنوز فعال نیست.
+            هشدارها فقط وقتی برنامه باز است (و روی صفحه یا در پس‌زمینهٔ نزدیک)
+            بررسی می‌شوند و با یک بنر داخل برنامه نشان داده می‌شوند. اگر برنامه
+            بسته باشد هیچ اعلانی نمی‌رسد؛ اعلان پس از بستن برنامه به سرور پوش
+            نیاز دارد و هنوز فعال نیست.
           </Label>
           {permission === "default" && (
             <Button
               title="فعال‌سازی اعلان مرورگر"
               variant="plain"
               size="small"
-              onPress={() => void requestBrowserPermission().then(setPermission)}
+              onPress={() =>
+                void requestBrowserPermission().then(setPermission)
+              }
             />
           )}
           {permission === "granted" && (
@@ -129,7 +143,8 @@ export default function Alerts() {
           )}
           {permission === "denied" && (
             <Label secondary size={12}>
-              اعلان مرورگر مسدود است؛ از تنظیمات مرورگر می‌توانید آن را باز کنید.
+              اعلان مرورگر مسدود است؛ از تنظیمات مرورگر می‌توانید آن را باز
+              کنید.
             </Label>
           )}
         </View>
@@ -139,19 +154,25 @@ export default function Alerts() {
       <Section title="هشدار جدید">
         <Surface style={{ gap: spacing.sm }}>
           <View style={{ gap: spacing.xxs }}>
-            <Label secondary size={13} weight="600">انتخاب ارز</Label>
+            <Label secondary size={13} weight="600">
+              انتخاب ارز
+            </Label>
             <ChipRow
               values={fiatCodes}
               value={currency}
               onChange={setCurrency}
               label={(c) => shortNames[c]}
-              leading={(c) => <CurrencyBadge code={c} size={28} dark={t.dark} />}
+              leading={(c) => (
+                <CurrencyBadge code={c} size={28} dark={t.dark} />
+              )}
               accessibilityLabel="انتخاب ارز"
             />
           </View>
 
           <View style={{ gap: spacing.xxs }}>
-            <Label secondary size={13} weight="600">شرط فعال‌سازی</Label>
+            <Label secondary size={13} weight="600">
+              شرط فعال‌سازی
+            </Label>
             <SegmentedControl
               values={kinds}
               value={kind}
@@ -168,7 +189,11 @@ export default function Alerts() {
             unit={kind === "above" || kind === "below" ? "تومان" : "٪"}
           />
 
-          {!!error && <Label red size={13}>{error}</Label>}
+          {!!error && (
+            <Label red size={13}>
+              {error}
+            </Label>
+          )}
 
           <Button
             title="افزودن هشدار"
@@ -227,8 +252,11 @@ export default function Alerts() {
                         {names[a.currency]}
                       </Label>
                       <Label secondary size={12} allowFontScaling={false}>
-                        {labels[a.kind]} {formatNumber(a.threshold, app.user.settings.persian)}{" "}
-                        {a.kind === "above" || a.kind === "below" ? "تومان" : "٪"}
+                        {labels[a.kind]}{" "}
+                        {formatNumber(a.threshold, app.user.settings.persian)}{" "}
+                        {a.kind === "above" || a.kind === "below"
+                          ? "تومان"
+                          : "٪"}
                       </Label>
                     </View>
                     <View
@@ -243,8 +271,16 @@ export default function Alerts() {
                             : t.fillTertiary,
                       }}
                     >
-                      <Label size={11} weight="600" style={{ color: statusColor }}>
-                        {isTriggered ? "فعال‌شده" : isEnabled ? "در حال پایش" : "متوقف"}
+                      <Label
+                        size={11}
+                        weight="600"
+                        style={{ color: statusColor }}
+                      >
+                        {isTriggered
+                          ? "فعال‌شده"
+                          : isEnabled
+                            ? "در حال پایش"
+                            : "متوقف"}
                       </Label>
                     </View>
                   </View>
@@ -257,7 +293,13 @@ export default function Alerts() {
                     }}
                   >
                     <Button
-                      title={isTriggered ? "فعال‌سازی مجدد" : isEnabled ? "توقف موقت" : "فعال‌سازی"}
+                      title={
+                        isTriggered
+                          ? "فعال‌سازی مجدد"
+                          : isEnabled
+                            ? "توقف موقت"
+                            : "فعال‌سازی"
+                      }
                       variant="plain"
                       size="small"
                       onPress={() =>
@@ -265,7 +307,11 @@ export default function Alerts() {
                           ...u,
                           alerts: u.alerts.map((item) =>
                             item.id === a.id
-                              ? { ...item, enabled: isTriggered ? true : !item.enabled, triggeredAt: null }
+                              ? {
+                                  ...item,
+                                  enabled: isTriggered ? true : !item.enabled,
+                                  triggeredAt: null,
+                                }
                               : item,
                           ),
                         }))

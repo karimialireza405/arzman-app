@@ -82,7 +82,10 @@ function useAppStore() {
     let mounted = true;
     (async () => {
       try {
-        const [u, m] = await Promise.all([readLocal("user"), readLocal("market")]);
+        const [u, m] = await Promise.all([
+          readLocal("user"),
+          readLocal("market"),
+        ]);
         const parsedUser = u ? UserSchema.parse(JSON.parse(u)) : initial;
         if (mounted) {
           setUser(parsedUser);
@@ -286,7 +289,9 @@ function ClockProvider({ children }: { children: React.ReactNode }) {
     const timer = setInterval(() => setClock(Date.now()), 15000);
     return () => clearInterval(timer);
   }, []);
-  return <ClockContext.Provider value={clock}>{children}</ClockContext.Provider>;
+  return (
+    <ClockContext.Provider value={clock}>{children}</ClockContext.Provider>
+  );
 }
 export function useClock() {
   return useContext(ClockContext);

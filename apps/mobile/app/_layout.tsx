@@ -41,7 +41,9 @@ function Navigation() {
   // choice to the platform; «خودکار» gives control back to the system.
   useEffect(() => {
     if (Platform.OS === "web") return;
-    Appearance.setColorScheme(appearance === "system" ? "unspecified" : appearance);
+    Appearance.setColorScheme(
+      appearance === "system" ? "unspecified" : appearance,
+    );
   }, [appearance]);
 
   return (

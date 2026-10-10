@@ -9,9 +9,26 @@
  * CSS gradients need a custom build and would not render in Expo Go.
  */
 import { useState } from "react";
-import { Animated, Pressable, View, type StyleProp, type ViewStyle } from "react-native";
-import Svg, { Defs, LinearGradient, RadialGradient, Rect, Stop } from "react-native-svg";
-import { formatNumber, names, type Currency, type CurrencyQuote } from "@arzman/shared";
+import {
+  Animated,
+  Pressable,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
+import Svg, {
+  Defs,
+  LinearGradient,
+  RadialGradient,
+  Rect,
+  Stop,
+} from "react-native-svg";
+import {
+  formatNumber,
+  names,
+  type Currency,
+  type CurrencyQuote,
+} from "@arzman/shared";
 import { CurrencyBadge } from "../design-system/currency-icons";
 import { curve, spacing } from "../design-system";
 import { useHistory } from "../history";
@@ -50,7 +67,15 @@ function BrandBackground({ width, height }: { width: number; height: number }) {
           <Stop offset="0.55" stopColor="#4530B8" />
           <Stop offset="1" stopColor="#24175E" />
         </LinearGradient>
-        <RadialGradient id="heroGlow" cx="0.85" cy="0" rx="0.9" ry="0.75" fx="0.85" fy="0">
+        <RadialGradient
+          id="heroGlow"
+          cx="0.85"
+          cy="0"
+          rx="0.9"
+          ry="0.75"
+          fx="0.85"
+          fy="0"
+        >
           <Stop offset="0" stopColor="#C4B5FD" stopOpacity={0.55} />
           <Stop offset="1" stopColor="#C4B5FD" stopOpacity={0} />
         </RadialGradient>
@@ -81,10 +106,21 @@ function BrandChange({ value }: { value: number | null | undefined }) {
       }}
     >
       {up || down ? (
-        <AppIcon name={up ? "trendUp" : "trendDown"} size={12} color={ON_BRAND} weight="bold" />
+        <AppIcon
+          name={up ? "trendUp" : "trendDown"}
+          size={12}
+          color={ON_BRAND}
+          weight="bold"
+        />
       ) : null}
-      <Label size={13} weight="600" style={{ color: ON_BRAND, writingDirection: "ltr" }}>
-        {known ? `${up ? "+" : ""}${formatNumber(value, user.settings.persian, 2, 2)}٪` : "—"}
+      <Label
+        size={13}
+        weight="600"
+        style={{ color: ON_BRAND, writingDirection: "ltr" }}
+      >
+        {known
+          ? `${up ? "+" : ""}${formatNumber(value, user.settings.persian, 2, 2)}٪`
+          : "—"}
       </Label>
     </View>
   );
@@ -93,11 +129,24 @@ function BrandChange({ value }: { value: number | null | undefined }) {
 function BrandRange({ quote }: { quote: CurrencyQuote }) {
   const fmt = usePrice();
   const { lowToman: low, highToman: high, priceToman: current } = quote;
-  if (low == null || high == null || high <= low || current < low || current > high) return null;
+  if (
+    low == null ||
+    high == null ||
+    high <= low ||
+    current < low ||
+    current > high
+  )
+    return null;
   const fraction = (current - low) / (high - low);
   return (
     <View style={{ gap: 8 }}>
-      <View style={{ height: 4, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.18)" }}>
+      <View
+        style={{
+          height: 4,
+          borderRadius: 2,
+          backgroundColor: "rgba(255,255,255,0.18)",
+        }}
+      >
         {/* Right-to-left: the low end sits on the right, as the labels read. */}
         <View
           style={{
@@ -124,9 +173,18 @@ function BrandRange({ quote }: { quote: CurrencyQuote }) {
           }}
         />
       </View>
-      <View style={{ flexDirection: "row-reverse", justifyContent: "space-between" }}>
-        <Label size={12} style={{ color: ON_BRAND_MUTED }}>پایین‌ترین {fmt(low)}</Label>
-        <Label size={12} style={{ color: ON_BRAND_MUTED }}>بالاترین {fmt(high)}</Label>
+      <View
+        style={{
+          flexDirection: "row-reverse",
+          justifyContent: "space-between",
+        }}
+      >
+        <Label size={12} style={{ color: ON_BRAND_MUTED }}>
+          پایین‌ترین {fmt(low)}
+        </Label>
+        <Label size={12} style={{ color: ON_BRAND_MUTED }}>
+          بالاترین {fmt(high)}
+        </Label>
       </View>
     </View>
   );
@@ -161,7 +219,11 @@ function ActionChip({ action }: { action: HeroAction }) {
           alignItems: "center",
           justifyContent: "center",
           gap: 6,
-          backgroundColor: pressed ? GLASS_STRONG : action.primary ? GLASS_STRONG : GLASS,
+          backgroundColor: pressed
+            ? GLASS_STRONG
+            : action.primary
+              ? GLASS_STRONG
+              : GLASS,
           borderWidth: 1,
           borderColor: GLASS_RIM,
         })}
@@ -205,14 +267,17 @@ export function QuoteHero({
   // Only real, drawable history earns space; otherwise the card closes up
   // instead of showing an empty band (offline, or a new server).
   const trendValues =
-    trend && history && history.length >= 2 ? history.map((p) => p.priceToman) : null;
+    trend && history && history.length >= 2
+      ? history.map((p) => p.priceToman)
+      : null;
 
   return (
     <View
       onLayout={(e) => {
         const { width, height } = e.nativeEvent.layout;
         setSize((prev) =>
-          Math.abs(prev.width - width) < 0.5 && Math.abs(prev.height - height) < 0.5
+          Math.abs(prev.width - width) < 0.5 &&
+          Math.abs(prev.height - height) < 0.5
             ? prev
             : { width, height },
         );
@@ -234,13 +299,28 @@ export function QuoteHero({
     >
       <BrandBackground width={size.width} height={size.height} />
       <View style={{ padding: spacing.md, gap: spacing.sm }}>
-        <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: spacing.xs }}>
+        <View
+          style={{
+            flexDirection: "row-reverse",
+            alignItems: "center",
+            gap: spacing.xs,
+          }}
+        >
           <CurrencyBadge code={code} size={46} dark />
           <View style={{ flex: 1 }}>
-            <Label size={18} weight="700" numberOfLines={1} style={{ color: ON_BRAND }}>
+            <Label
+              size={18}
+              weight="700"
+              numberOfLines={1}
+              style={{ color: ON_BRAND }}
+            >
               {names[code]}
             </Label>
-            <Label size={12} numberOfLines={1} style={{ color: ON_BRAND_MUTED }}>
+            <Label
+              size={12}
+              numberOfLines={1}
+              style={{ color: ON_BRAND_MUTED }}
+            >
               {subtitle ?? `${code} · بازار آزاد ایران`}
             </Label>
           </View>
@@ -249,11 +329,25 @@ export function QuoteHero({
 
         <View
           accessible
-          accessibilityLabel={quote ? `${fmt(quote.priceToman, 2)} ${names[user.settings.unit]}` : "در انتظار نرخ"}
-          style={{ flexDirection: "row-reverse", alignItems: "baseline", gap: 8 }}
+          accessibilityLabel={
+            quote
+              ? `${fmt(quote.priceToman, 2)} ${names[user.settings.unit]}`
+              : "در انتظار نرخ"
+          }
+          style={{
+            flexDirection: "row-reverse",
+            alignItems: "baseline",
+            gap: 8,
+          }}
         >
           {waiting ? (
-            <Skeleton width={190} height={46} radius={12} color={GLASS_STRONG} style={{ marginVertical: 12 }} />
+            <Skeleton
+              width={190}
+              height={46}
+              radius={12}
+              color={GLASS_STRONG}
+              style={{ marginVertical: 12 }}
+            />
           ) : (
             <Label
               size={46}
@@ -262,7 +356,12 @@ export function QuoteHero({
               allowFontScaling={false}
               adjustsFontSizeToFit
               minimumFontScale={0.65}
-              style={{ color: ON_BRAND, writingDirection: "ltr", letterSpacing: -1, flexShrink: 1 }}
+              style={{
+                color: ON_BRAND,
+                writingDirection: "ltr",
+                letterSpacing: -1,
+                flexShrink: 1,
+              }}
             >
               {fmt(quote?.priceToman)}
             </Label>
@@ -274,7 +373,12 @@ export function QuoteHero({
 
         {/* Today's real observations, not a decoration. */}
         {trendValues ? (
-          <View onLayout={(e) => setChartWidth(Math.floor(e.nativeEvent.layout.width))} style={{ height: 52 }}>
+          <View
+            onLayout={(e) =>
+              setChartWidth(Math.floor(e.nativeEvent.layout.width))
+            }
+            style={{ height: 52 }}
+          >
             {chartWidth > 0 ? (
               <Sparkline
                 values={trendValues}
@@ -303,7 +407,13 @@ export function QuoteHero({
         ) : null}
 
         {actions?.length ? (
-          <View style={{ flexDirection: "row-reverse", gap: spacing.xxs, marginTop: 2 }}>
+          <View
+            style={{
+              flexDirection: "row-reverse",
+              gap: spacing.xxs,
+              marginTop: 2,
+            }}
+          >
             {actions.map((action) => (
               <ActionChip key={action.title} action={action} />
             ))}

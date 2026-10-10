@@ -74,7 +74,11 @@ export function capCenterFromTop(fontSize: number): number {
 
 export function fontFamilyFor(weight: TextStyle["fontWeight"]): string {
   const w =
-    weight === "bold" ? 700 : weight === "normal" || weight == null ? 400 : Number(weight);
+    weight === "bold"
+      ? 700
+      : weight === "normal" || weight == null
+        ? 400
+        : Number(weight);
   if (!Number.isFinite(w)) return fontFamilies.regular;
   if (w <= 350) return fontFamilies.light;
   if (w < 450) return fontFamilies.regular;
@@ -106,6 +110,7 @@ export function persianText(style: TextStyle, content?: unknown): TextStyle {
     fontWeight: fontsAvailable ? undefined : style.fontWeight,
     lineHeight: Math.max(style.lineHeight ?? 0, minimum),
   };
-  if (next.letterSpacing && hasPersianLetters(content)) next.letterSpacing = undefined;
+  if (next.letterSpacing && hasPersianLetters(content))
+    next.letterSpacing = undefined;
   return next;
 }

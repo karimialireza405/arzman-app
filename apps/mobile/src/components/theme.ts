@@ -5,7 +5,12 @@
  * importing from a single path.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AccessibilityInfo, Animated, Platform, useColorScheme } from "react-native";
+import {
+  AccessibilityInfo,
+  Animated,
+  Platform,
+  useColorScheme,
+} from "react-native";
 import * as Haptics from "expo-haptics";
 import { useApp } from "../store";
 import {

@@ -29,18 +29,30 @@ const plan = (db: DatabaseSync, sql: string, params: (string | number)[]) =>
 
 describe("observation SQL stays on the primary key", () => {
   it("never scans the table to enforce retention", () => {
-    const detail = plan(fresh(), RETENTION_DELETE, retentionParams("2025-09-26T00:00:00.000Z"));
+    const detail = plan(
+      fresh(),
+      RETENTION_DELETE,
+      retentionParams("2025-09-26T00:00:00.000Z"),
+    );
     expect(detail).not.toMatch(/SCAN observations/);
     expect(detail).toMatch(/SEARCH observations USING INDEX/);
   });
 
   it("the old retention statement did scan, which is what this guards against", () => {
-    const detail = plan(fresh(), "DELETE FROM observations WHERE timestamp < ?", ["2025-09-26"]);
+    const detail = plan(
+      fresh(),
+      "DELETE FROM observations WHERE timestamp < ?",
+      ["2025-09-26"],
+    );
     expect(detail).toMatch(/SCAN observations/);
   });
 
   it("reads history through the index", () => {
-    const detail = plan(fresh(), HISTORY_QUERY, ["USD", "2026-09-25T00:00:00.000Z", 360_000]);
+    const detail = plan(fresh(), HISTORY_QUERY, [
+      "USD",
+      "2026-09-25T00:00:00.000Z",
+      360_000,
+    ]);
     expect(detail).not.toMatch(/SCAN observations/);
     expect(detail).toMatch(/SEARCH observations USING INDEX/);
   });
@@ -52,9 +64,17 @@ describe("observation SQL stays on the primary key", () => {
       insert.run(currency, "2025-01-01T00:00:00.000Z", 1, 0);
       insert.run(currency, "2026-09-26T00:00:00.000Z", 1, 0);
     }
-    db.prepare(RETENTION_DELETE).run(...retentionParams("2025-09-26T00:00:00.000Z"));
-    const left = db.prepare("SELECT currency, timestamp FROM observations ORDER BY currency").all();
+    db.prepare(RETENTION_DELETE).run(
+      ...retentionParams("2025-09-26T00:00:00.000Z"),
+    );
+    const left = db
+      .prepare("SELECT currency, timestamp FROM observations ORDER BY currency")
+      .all();
     expect(left).toHaveLength(4);
-    expect(left.every((r) => String((r as { timestamp: string }).timestamp).startsWith("2026"))).toBe(true);
+    expect(
+      left.every((r) =>
+        String((r as { timestamp: string }).timestamp).startsWith("2026"),
+      ),
+    ).toBe(true);
   });
 });

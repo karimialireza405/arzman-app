@@ -52,7 +52,12 @@ export function AlertBanner() {
           backgroundColor: t.accentSolid,
         }}
       >
-        <AppIcon name="notifications" size={20} color="#FFFFFF" style={{ marginTop: 2 }} />
+        <AppIcon
+          name="notifications"
+          size={20}
+          color="#FFFFFF"
+          style={{ marginTop: 2 }}
+        />
         <View style={{ flex: 1, gap: 2 }}>
           <Label size={14} weight="700" style={{ color: "#FFFFFF" }}>
             {notice.title}

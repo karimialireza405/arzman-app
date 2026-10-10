@@ -24,42 +24,42 @@ export const colors = {
   // --- Dark Mode (OLED True Black) ---
   dark: {
     // Base surfaces
-    background: "#07080E",              // OLED true black
-    backgroundSecondary: "#0B0D16",     // Subtle elevation
-    surface: "#11131E",                 // Apple systemBackground (dark)
-    surfaceElevated: "#171A28",         // Apple secondarySystemBackground
-    surfaceOverlay: "#20243A",          // Apple tertiarySystemBackground
+    background: "#07080E", // OLED true black
+    backgroundSecondary: "#0B0D16", // Subtle elevation
+    surface: "#11131E", // Apple systemBackground (dark)
+    surfaceElevated: "#171A28", // Apple secondarySystemBackground
+    surfaceOverlay: "#20243A", // Apple tertiarySystemBackground
 
     // Semantic text (vibrancy-ready)
-    text: "#F5F6FA",                    // .primary - vibrant on glass
-    textSecondary: "rgba(235, 237, 250, 0.64)",         // .secondary - 60% opacity white
-    textTertiary: "rgba(235, 237, 250, 0.46)",          // .tertiary - 40% opacity white
-    textQuaternary: "rgba(235, 237, 250, 0.24)",        // .quaternary - 20% opacity white
+    text: "#F5F6FA", // .primary - vibrant on glass
+    textSecondary: "rgba(235, 237, 250, 0.64)", // .secondary - 60% opacity white
+    textTertiary: "rgba(235, 237, 250, 0.46)", // .tertiary - 40% opacity white
+    textQuaternary: "rgba(235, 237, 250, 0.24)", // .quaternary - 20% opacity white
 
     // System accent colors (exact iOS values)
-    accent: "#A78BFA",                  // iOS Blue
-    accentSolid: "#6D4AFF",             // brand fill behind white text (5.15:1)
-    accentSecondary: "#7C5CFF",         // iOS Purple
-    accentTertiary: "#F5B84B",          // iOS Orange
+    accent: "#A78BFA", // iOS Blue
+    accentSolid: "#6D4AFF", // brand fill behind white text (5.15:1)
+    accentSecondary: "#7C5CFF", // iOS Purple
+    accentTertiary: "#F5B84B", // iOS Orange
 
     // Directional (with vibrancy)
-    green: "#30D158",                   // iOS Green
+    green: "#30D158", // iOS Green
     greenBackground: "rgba(48, 209, 88, 0.15)",
-    red: "#FF6B61",                     // iOS Red
+    red: "#FF6B61", // iOS Red
     redBackground: "rgba(255, 69, 58, 0.15)",
-    amber: "#F5B84B",                   // iOS Orange/Amber
+    amber: "#F5B84B", // iOS Orange/Amber
     amberBackground: "rgba(245, 184, 75, 0.15)",
 
     // Glass Materials (matching iOS material recipes)
-    glassRegular: "rgba(17, 19, 30, 0.72)",      // .regularMaterial
-    glassThick: "rgba(17, 19, 30, 0.88)",        // .thickMaterial
-    glassThin: "rgba(17, 19, 30, 0.52)",         // .thinMaterial
-    glassUltraThin: "rgba(17, 19, 30, 0.32)",    // .ultraThinMaterial
+    glassRegular: "rgba(17, 19, 30, 0.72)", // .regularMaterial
+    glassThick: "rgba(17, 19, 30, 0.88)", // .thickMaterial
+    glassThin: "rgba(17, 19, 30, 0.52)", // .thinMaterial
+    glassUltraThin: "rgba(17, 19, 30, 0.32)", // .ultraThinMaterial
 
     // Glass borders & highlights
-    glassRim: "rgba(255, 255, 255, 0.10)",       // Inner stroke
-    glassSpecular: "rgba(255, 255, 255, 0.25)",  // Top-edge highlight
-    glassSeparator: "rgba(255, 255, 255, 0.1)",  // Hairline separator
+    glassRim: "rgba(255, 255, 255, 0.10)", // Inner stroke
+    glassSpecular: "rgba(255, 255, 255, 0.25)", // Top-edge highlight
+    glassSeparator: "rgba(255, 255, 255, 0.1)", // Hairline separator
 
     // Dividers
     separator: "rgba(255, 255, 255, 0.08)",
@@ -79,10 +79,10 @@ export const colors = {
     lineSubtle: "rgba(255, 255, 255, 0.05)",
 
     // Control fills (Apple fill colors, dark)
-    fillPrimary: "rgba(120, 122, 150, 0.30)",     // systemFill
-    fillSecondary: "rgba(120, 122, 150, 0.24)",   // secondarySystemFill
-    fillTertiary: "rgba(120, 122, 150, 0.18)",    // tertiarySystemFill
-    fillQuaternary: "rgba(120, 122, 150, 0.12)",  // quaternarySystemFill
+    fillPrimary: "rgba(120, 122, 150, 0.30)", // systemFill
+    fillSecondary: "rgba(120, 122, 150, 0.24)", // secondarySystemFill
+    fillTertiary: "rgba(120, 122, 150, 0.18)", // tertiarySystemFill
+    fillQuaternary: "rgba(120, 122, 150, 0.12)", // quaternarySystemFill
 
     // Legacy aliases (kept so partially migrated screens keep compiling)
     muted: "#8E8E93",
@@ -107,30 +107,30 @@ export const colors = {
   // --- Light Mode (Apple System Grouped) ---
   light: {
     // Base surfaces
-    background: "#F4F5FA",              // Apple systemGroupedBackground
-    backgroundSecondary: "#FFFFFF",     // White
-    surface: "#FFFFFF",                 // Apple systemBackground
-    surfaceElevated: "#F4F5FA",         // Apple secondarySystemBackground
-    surfaceOverlay: "#EBEDF5",          // Apple tertiarySystemBackground
+    background: "#F4F5FA", // Apple systemGroupedBackground
+    backgroundSecondary: "#FFFFFF", // White
+    surface: "#FFFFFF", // Apple systemBackground
+    surfaceElevated: "#F4F5FA", // Apple secondarySystemBackground
+    surfaceOverlay: "#EBEDF5", // Apple tertiarySystemBackground
 
     // Semantic text
-    text: "#0B0D17",                    // .primary
-    textSecondary: "rgba(11, 13, 23, 0.62)",         // .secondary - 60% opacity black
-    textTertiary: "rgba(11, 13, 23, 0.48)",          // .tertiary - 40% opacity black
-    textQuaternary: "rgba(11, 13, 23, 0.24)",        // .quaternary - 20% opacity black
+    text: "#0B0D17", // .primary
+    textSecondary: "rgba(11, 13, 23, 0.62)", // .secondary - 60% opacity black
+    textTertiary: "rgba(11, 13, 23, 0.48)", // .tertiary - 40% opacity black
+    textQuaternary: "rgba(11, 13, 23, 0.24)", // .quaternary - 20% opacity black
 
     // System accent colors
-    accent: "#6D28D9",                  // iOS Blue
-    accentSolid: "#6D28D9",             // brand fill behind white text (7.10:1)
-    accentSecondary: "#7C3AED",         // iOS Purple
-    accentTertiary: "#B7791F",          // iOS Orange
+    accent: "#6D28D9", // iOS Blue
+    accentSolid: "#6D28D9", // brand fill behind white text (7.10:1)
+    accentSecondary: "#7C3AED", // iOS Purple
+    accentTertiary: "#B7791F", // iOS Orange
 
     // Directional
-    green: "#177A34",                   // iOS Green
+    green: "#177A34", // iOS Green
     greenBackground: "rgba(52, 199, 89, 0.12)",
-    red: "#D92D20",                     // iOS Red
+    red: "#D92D20", // iOS Red
     redBackground: "rgba(255, 59, 48, 0.12)",
-    amber: "#B7791F",                   // iOS Orange
+    amber: "#B7791F", // iOS Orange
     amberBackground: "rgba(255, 149, 0, 0.12)",
 
     // Glass Materials
@@ -195,32 +195,32 @@ export const colors = {
 export const spacing = {
   // Base unit = 4pt, but all layout uses 8pt multiples
   none: 0,
-  xxxs: 4,   // 0.5x - micro adjustments
-  xxs: 8,    // 1x - base unit
-  xs: 12,    // 1.5x
-  sm: 16,    // 2x - standard padding
-  md: 20,    // 2.5x
-  lg: 24,    // 3x
-  xl: 28,    // 3.5x
-  xxl: 32,   // 4x
-  xxxl: 40,  // 5x
-  huge: 48,  // 6x
+  xxxs: 4, // 0.5x - micro adjustments
+  xxs: 8, // 1x - base unit
+  xs: 12, // 1.5x
+  sm: 16, // 2x - standard padding
+  md: 20, // 2.5x
+  lg: 24, // 3x
+  xl: 28, // 3.5x
+  xxl: 32, // 4x
+  xxxl: 40, // 5x
+  huge: 48, // 6x
   massive: 56, // 7x
 } as const;
 
 // Semantic spacing aliases
 export const semanticSpacing = {
-  screenPadding: spacing.sm,           // 16
-  screenPaddingLarge: spacing.md,      // 20
-  sectionGap: spacing.lg,              // 24
-  cardPadding: spacing.sm,             // 16
-  cardPaddingLarge: spacing.md,        // 20
-  itemGap: spacing.xs,                 // 12
-  itemGapSmall: spacing.xxs,           // 8
-  controlPadding: spacing.xs,          // 12
-  controlPaddingLarge: spacing.sm,     // 16
-  inlineGap: spacing.xxs,              // 8
-  groupGap: spacing.md,                // 20
+  screenPadding: spacing.sm, // 16
+  screenPaddingLarge: spacing.md, // 20
+  sectionGap: spacing.lg, // 24
+  cardPadding: spacing.sm, // 16
+  cardPaddingLarge: spacing.md, // 20
+  itemGap: spacing.xs, // 12
+  itemGapSmall: spacing.xxs, // 8
+  controlPadding: spacing.xs, // 12
+  controlPaddingLarge: spacing.sm, // 16
+  inlineGap: spacing.xxs, // 8
+  groupGap: spacing.md, // 20
 } as const;
 
 // ============================================================================
@@ -264,7 +264,8 @@ export const radii = {
 
   // Concentric radius helper
   // inner = outer - padding (clamped to minimum 6)
-  concentric: (outer: number, padding: number, min = 6): number => Math.max(min, outer - padding),
+  concentric: (outer: number, padding: number, min = 6): number =>
+    Math.max(min, outer - padding),
 } as const;
 
 // ============================================================================
@@ -460,7 +461,7 @@ export const shadows = {
     dark: {
       shadowColor: "#000000",
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.20,
+      shadowOpacity: 0.2,
       shadowRadius: 8,
       elevation: 4,
     },
@@ -496,7 +497,7 @@ export const shadows = {
     dark: {
       shadowColor: "#000000",
       shadowOffset: { width: 0, height: 12 },
-      shadowOpacity: 0.30,
+      shadowOpacity: 0.3,
       shadowRadius: 24,
       elevation: 12,
     },
@@ -586,10 +587,10 @@ export const iconSizes = {
 // ============================================================================
 
 export const borders = {
-  hairline: 0.5,        // StyleSheet.hairlineWidth
-  thin: 1,              // Standard border
-  medium: 1.5,          // Emphasized
-  focus: 2,             // Focus ring
+  hairline: 0.5, // StyleSheet.hairlineWidth
+  thin: 1, // Standard border
+  medium: 1.5, // Emphasized
+  focus: 2, // Focus ring
 } as const;
 
 // ============================================================================
@@ -598,11 +599,11 @@ export const borders = {
 
 export const opacity = {
   disabled: 0.38,
-  pressed: 0.08,        // Overlay on press
-  hover: 0.04,          // Overlay on hover (web)
-  selected: 0.12,       // Selected overlay
-  glassOverlay: 0.08,   // Glass press overlay
-  backdrop: 0.4,        // Modal backdrop
+  pressed: 0.08, // Overlay on press
+  hover: 0.04, // Overlay on hover (web)
+  selected: 0.12, // Selected overlay
+  glassOverlay: 0.08, // Glass press overlay
+  backdrop: 0.4, // Modal backdrop
 } as const;
 
 // ============================================================================
@@ -625,10 +626,10 @@ export const zIndex = {
 // ============================================================================
 
 export const breakpoints = {
-  compact: 375,    // iPhone SE / mini
-  regular: 390,    // iPhone 14/15/16 Pro
-  large: 428,      // iPhone 14/15/16 Pro Max
-  ipad: 768,       // iPad
+  compact: 375, // iPhone SE / mini
+  regular: 390, // iPhone 14/15/16 Pro
+  large: 428, // iPhone 14/15/16 Pro Max
+  ipad: 768, // iPad
 } as const;
 
 // ============================================================================

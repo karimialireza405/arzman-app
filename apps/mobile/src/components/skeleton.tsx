@@ -47,7 +47,12 @@ export function Skeleton({
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
       style={[
-        { width, height, borderRadius: radius, backgroundColor: color ?? t.fillTertiary },
+        {
+          width,
+          height,
+          borderRadius: radius,
+          backgroundColor: color ?? t.fillTertiary,
+        },
         animated,
         style,
       ]}

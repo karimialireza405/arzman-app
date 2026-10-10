@@ -16,7 +16,9 @@ export function staleAfterMs(minutes: string | undefined): number {
 }
 
 /** The newest successful fetch from any source, or null if there never was one. */
-export function lastGoodAt(...fetchedAt: (string | undefined)[]): number | null {
+export function lastGoodAt(
+  ...fetchedAt: (string | undefined)[]
+): number | null {
   const times = fetchedAt
     .map((s) => (s ? Date.parse(s) : NaN))
     .filter(Number.isFinite);
@@ -31,7 +33,8 @@ export function decideAlert(input: {
   staleAfterMs: number;
 }): AlertAction {
   const stale =
-    input.lastGoodAt === null || input.now - input.lastGoodAt > input.staleAfterMs;
+    input.lastGoodAt === null ||
+    input.now - input.lastGoodAt > input.staleAfterMs;
   if (!stale) return input.alertedAt === null ? "none" : "recover";
   if (input.alertedAt === null) return "alert";
   return input.now - input.alertedAt >= ALERT_REPEAT_MS ? "repeat" : "none";

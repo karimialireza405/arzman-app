@@ -57,7 +57,6 @@ export default function Detail() {
     }));
   };
 
-
   return (
     <Screen title={names[code]} largeTitle={false} refresh>
       <Stack.Screen
@@ -70,7 +69,9 @@ export default function Detail() {
               variant="plain"
               active={isFavorite}
               activeColor={t.amber}
-              accessibilityLabel={isFavorite ? "حذف از دنبال‌شده‌ها" : "افزودن به دنبال‌شده‌ها"}
+              accessibilityLabel={
+                isFavorite ? "حذف از دنبال‌شده‌ها" : "افزودن به دنبال‌شده‌ها"
+              }
               onPress={toggleFavorite}
             />
           ),
@@ -97,17 +98,29 @@ export default function Detail() {
           <SettingsRow
             title="بالاترین نرخ روز"
             accessory="none"
-            value={q && q.highToman != null ? `${fmt(q.highToman)} ${names[app.user.settings.unit]}` : "—"}
+            value={
+              q && q.highToman != null
+                ? `${fmt(q.highToman)} ${names[app.user.settings.unit]}`
+                : "—"
+            }
           />
           <SettingsRow
             title="پایین‌ترین نرخ روز"
             accessory="none"
-            value={q && q.lowToman != null ? `${fmt(q.lowToman)} ${names[app.user.settings.unit]}` : "—"}
+            value={
+              q && q.lowToman != null
+                ? `${fmt(q.lowToman)} ${names[app.user.settings.unit]}`
+                : "—"
+            }
           />
           <SettingsRow
             title="نرخ روز گذشته"
             accessory="none"
-            value={q?.previousToman != null ? `${fmt(q.previousToman)} ${names[app.user.settings.unit]}` : "—"}
+            value={
+              q?.previousToman != null
+                ? `${fmt(q.previousToman)} ${names[app.user.settings.unit]}`
+                : "—"
+            }
           />
           <SettingsRow
             title="تغییر روزانه"
@@ -130,7 +143,9 @@ export default function Detail() {
           variant="prominent"
           size="large"
           fullWidth
-          onPress={() => router.push({ pathname: "/converter", params: { from: code } })}
+          onPress={() =>
+            router.push({ pathname: "/converter", params: { from: code } })
+          }
         />
         <Button
           title="تنظیم هشدار قیمت"
@@ -138,7 +153,9 @@ export default function Detail() {
           variant="tinted"
           size="medium"
           fullWidth
-          onPress={() => router.push({ pathname: "/alerts", params: { currency: code } })}
+          onPress={() =>
+            router.push({ pathname: "/alerts", params: { currency: code } })
+          }
         />
         <Button
           title={isFavorite ? "حذف از دنبال‌شده‌ها" : "افزودن به دنبال‌شده‌ها"}

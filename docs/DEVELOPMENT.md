@@ -23,12 +23,12 @@ To develop the backend itself, run `npm run server` (Worker on `:8787`) and poin
 
 ## Running the app
 
-| Target | How |
-|---|---|
-| Browser | `npm run start`, press `w` |
-| iPhone | Expo Go from the App Store: `npm run start -w @arzman/mobile -- --go`, scan the QR code. Expo Go and the CLI must use the same Expo account. |
-| Android | Expo Go the same way, or install the APK — see [android-install.md](android-install.md) |
-| Web build | `npm run build:web -w @arzman/mobile`, then serve `apps/mobile/dist` |
+| Target    | How                                                                                                                                          |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Browser   | `npm run start`, press `w`                                                                                                                   |
+| iPhone    | Expo Go from the App Store: `npm run start -w @arzman/mobile -- --go`, scan the QR code. Expo Go and the CLI must use the same Expo account. |
+| Android   | Expo Go the same way, or install the APK — see [android-install.md](android-install.md)                                                      |
+| Web build | `npm run build:web -w @arzman/mobile`, then serve `apps/mobile/dist`                                                                         |
 
 A development build (EAS) is only needed for the app's own icon and identity or native
 extensions, and iOS builds need a paid Apple Developer account.

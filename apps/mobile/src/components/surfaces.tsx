@@ -8,9 +8,20 @@
  * prices stay legible.
  */
 import React from "react";
-import { Animated, Platform, Pressable, StyleSheet, Switch, View } from "react-native";
+import {
+  Animated,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Switch,
+  View,
+} from "react-native";
 import { BlurView } from "expo-blur";
-import { GlassContainer as NativeGlassContainer, GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
+import {
+  GlassContainer as NativeGlassContainer,
+  GlassView,
+  isLiquidGlassAvailable,
+} from "expo-glass-effect";
 import { curve, iconSizes, materials, radii, spacing } from "../design-system";
 import { useFeedback, usePressFeedback, useTheme } from "./theme";
 import { AppIcon, Divider, IconTile, Label } from "./primitives";
@@ -80,7 +91,9 @@ export function Glass({
               left: spacing.md,
               right: spacing.md,
               height: materials.specularHeight,
-              backgroundColor: t.dark ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.9)",
+              backgroundColor: t.dark
+                ? "rgba(255,255,255,0.28)"
+                : "rgba(255,255,255,0.9)",
             }}
           />
         )}
@@ -131,7 +144,9 @@ export function Glass({
             left: spacing.md,
             right: spacing.md,
             height: materials.specularHeight,
-            backgroundColor: t.dark ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.9)",
+            backgroundColor: t.dark
+              ? "rgba(255,255,255,0.22)"
+              : "rgba(255,255,255,0.9)",
           }}
         />
       )}
@@ -224,7 +239,10 @@ export function Card({
   style?: StyleProp<ViewStyle>;
 }) {
   return (
-    <Surface elevated={elevated} style={[{ padding: spacing.md, gap: spacing.xs }, style]}>
+    <Surface
+      elevated={elevated}
+      style={[{ padding: spacing.md, gap: spacing.xs }, style]}
+    >
       {children}
     </Surface>
   );
@@ -306,7 +324,12 @@ export function SettingsRow({
         paddingVertical: spacing.xxs,
       }}
     >
-      {icon ? <IconTile name={icon} color={iconColor ?? (destructive ? t.red : t.accent)} /> : null}
+      {icon ? (
+        <IconTile
+          name={icon}
+          color={iconColor ?? (destructive ? t.red : t.accent)}
+        />
+      ) : null}
 
       <View style={{ flex: 1, gap: 2 }}>
         <Label
@@ -340,10 +363,20 @@ export function SettingsRow({
       {trailing}
 
       {accessory === "chevron" && interactive ? (
-        <AppIcon name="chevron" size={iconSizes.inline} color={t.textTertiary} weight="semibold" />
+        <AppIcon
+          name="chevron"
+          size={iconSizes.inline}
+          color={t.textTertiary}
+          weight="semibold"
+        />
       ) : null}
       {accessory === "checkmark" ? (
-        <AppIcon name="check" size={iconSizes.inline} color={t.accent} weight="semibold" />
+        <AppIcon
+          name="check"
+          size={iconSizes.inline}
+          color={t.accent}
+          weight="semibold"
+        />
       ) : null}
     </View>
   );
@@ -416,4 +449,3 @@ export function SwitchRow({
     />
   );
 }
-

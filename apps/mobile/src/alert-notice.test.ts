@@ -21,9 +21,15 @@ afterEach(() => vi.unstubAllGlobals());
 describe("alert notice", () => {
   it("describes each condition", () => {
     expect(alertLine(base, false)).toContain("بالاتر از 100,000 تومان");
-    expect(alertLine({ ...base, kind: "below" }, false)).toContain("پایین‌تر از");
-    expect(alertLine({ ...base, kind: "percent", threshold: 2 }, false)).toContain("2٪");
-    expect(alertLine({ ...base, kind: "rapid", threshold: 1 }, false)).toContain("۵ دقیقه");
+    expect(alertLine({ ...base, kind: "below" }, false)).toContain(
+      "پایین‌تر از",
+    );
+    expect(
+      alertLine({ ...base, kind: "percent", threshold: 2 }, false),
+    ).toContain("2٪");
+    expect(
+      alertLine({ ...base, kind: "rapid", threshold: 1 }, false),
+    ).toContain("۵ دقیقه");
   });
 
   it("builds one line per alert", () => {
@@ -37,10 +43,16 @@ describe("alert notice", () => {
 
   it("only notifies once permission is granted", () => {
     const ctor = vi.fn();
-    vi.stubGlobal("Notification", Object.assign(ctor, { permission: "default" }));
+    vi.stubGlobal(
+      "Notification",
+      Object.assign(ctor, { permission: "default" }),
+    );
     notifyBrowser(makeNotice([base], 1));
     expect(ctor).not.toHaveBeenCalled();
-    vi.stubGlobal("Notification", Object.assign(ctor, { permission: "granted" }));
+    vi.stubGlobal(
+      "Notification",
+      Object.assign(ctor, { permission: "granted" }),
+    );
     notifyBrowser(makeNotice([base], 1));
     expect(ctor).toHaveBeenCalledOnce();
   });

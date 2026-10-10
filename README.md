@@ -36,11 +36,11 @@ price alerts and real price history. Built with Expo, React Native and Cloudflar
 ArzMan is a calm, fast and trustworthy way to follow the open market. It is built
 around three promises:
 
-|  |  |
-|---|---|
-| **Honest data** | Prices are never generated, interpolated or guessed. Every quote is validated for unit, lot size and magnitude before it is stored; anything uncertain is dropped, not shown. Charts contain only observed samples. |
-| **Persian-first design** | Vazirmatn typography with measured Persian line heights, a hand-built RTL layout, Toman/Rial and Persian/Latin digit switching, dark/light/system appearance. |
-| **Zero cost to run** | No paid market-data API, no accounts, no ads. One small Cloudflare Worker reads public [TGJU](https://www.tgju.org) pages and fits inside the free plan. |
+|                          |                                                                                                                                                                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Honest data**          | Prices are never generated, interpolated or guessed. Every quote is validated for unit, lot size and magnitude before it is stored; anything uncertain is dropped, not shown. Charts contain only observed samples. |
+| **Persian-first design** | Vazirmatn typography with measured Persian line heights, a hand-built RTL layout, Toman/Rial and Persian/Latin digit switching, dark/light/system appearance.                                                       |
+| **Zero cost to run**     | No paid market-data API, no accounts, no ads. One small Cloudflare Worker reads public [TGJU](https://www.tgju.org) pages and fits inside the free plan.                                                            |
 
 ## Features
 
@@ -53,7 +53,7 @@ around three promises:
 - **Personal rates** — your exchange's or USDT rate, compared against the open market.
 - **Native feel on every platform** — the iOS system tab bar with Liquid Glass, a floating
   glass tab bar on Android and the web, haptics and Reduce Motion support.
-- **Installable on iPhone from Safari** (*Add to Home Screen*) — no Apple Developer account.
+- **Installable on iPhone from Safari** (_Add to Home Screen_) — no Apple Developer account.
 
 ## How it works
 
@@ -87,12 +87,12 @@ scripts            API audit and live-source verification
 
 ### Tech stack
 
-| Layer | Technology |
-|---|---|
-| App | Expo SDK 57 · React Native 0.86 · Expo Router · TypeScript (strict) |
-| Shared logic | Zod schemas, pure TypeScript — one implementation for app and server |
-| Backend | Cloudflare Workers · Durable Objects (SQLite) |
-| Quality | Vitest · ESLint · `tsc` · GitHub Actions (typecheck, lint, tests, Android + web export) |
+| Layer        | Technology                                                                              |
+| ------------ | --------------------------------------------------------------------------------------- |
+| App          | Expo SDK 57 · React Native 0.86 · Expo Router · TypeScript (strict)                     |
+| Shared logic | Zod schemas, pure TypeScript — one implementation for app and server                    |
+| Backend      | Cloudflare Workers · Durable Objects (SQLite)                                           |
+| Quality      | Vitest · ESLint · `tsc` · GitHub Actions (typecheck, lint, tests, Android + web export) |
 
 ## Getting started
 
@@ -117,23 +117,23 @@ Running on a physical phone, building an APK or a web bundle, and deploying the 
 are covered in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) and
 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
-| Command | What it does |
-|---|---|
-| `npm run start` | Expo dev server for the mobile app |
-| `npm run server` | Worker on `localhost:8787` (`wrangler dev`) |
-| `npm run check` | Typecheck, lint and tests — what CI runs |
-| `npm run verify` | Fetch the live TGJU sources and validate them |
-| `npm run build:web -w @arzman/mobile` | Static web build in `apps/mobile/dist` |
+| Command                               | What it does                                  |
+| ------------------------------------- | --------------------------------------------- |
+| `npm run start`                       | Expo dev server for the mobile app            |
+| `npm run server`                      | Worker on `localhost:8787` (`wrangler dev`)   |
+| `npm run check`                       | Typecheck, lint and tests — what CI runs      |
+| `npm run verify`                      | Fetch the live TGJU sources and validate them |
+| `npm run build:web -w @arzman/mobile` | Static web build in `apps/mobile/dist`        |
 
 ## API
 
-| Endpoint | Returns |
-|---|---|
-| `GET /health` | `{ service, ok }` |
-| `GET /api/market` | **v1** — exactly the 4 core quotes (kept stable for older installs) |
-| `GET /api/v2/market` | **v2** — all 24 quotes |
-| `GET /api/market/:code` | One quote, any of the 24 |
-| `GET /api/history/:code?range=1H\|1D\|1W\|1M\|3M\|1Y` | Real observations, bucketed |
+| Endpoint                                              | Returns                                                             |
+| ----------------------------------------------------- | ------------------------------------------------------------------- |
+| `GET /health`                                         | `{ service, ok }`                                                   |
+| `GET /api/market`                                     | **v1** — exactly the 4 core quotes (kept stable for older installs) |
+| `GET /api/v2/market`                                  | **v2** — all 24 quotes                                              |
+| `GET /api/market/:code`                               | One quote, any of the 24                                            |
+| `GET /api/history/:code?range=1H\|1D\|1W\|1M\|3M\|1Y` | Real observations, bucketed                                         |
 
 > [!IMPORTANT]
 > `GET /api/market` (v1) must keep returning exactly four quotes — installs from before
@@ -151,7 +151,7 @@ are covered in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) and
 
 Prices come from public TGJU pages and are shown **for information only**; they can
 differ between exchanges and across the day. TGJU publishes no trade timestamp, so the
-app reports *retrieval* freshness and never presents it as the trade time. Alerts run
+app reports _retrieval_ freshness and never presents it as the trade time. Alerts run
 while the app is open; there is no push delivery. ArzMan is not affiliated with TGJU.
 Review TGJU's terms before any broad redistribution.
 

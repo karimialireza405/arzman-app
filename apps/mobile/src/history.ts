@@ -7,7 +7,11 @@
  * and the free plan's daily budget is exactly what took the API down before.
  */
 import { useEffect, useState } from "react";
-import { HistorySchema, type Currency, type HistoricalPoint } from "@arzman/shared";
+import {
+  HistorySchema,
+  type Currency,
+  type HistoricalPoint,
+} from "@arzman/shared";
 import { apiUrl } from "./store";
 
 export type HistoryRange = "1H" | "1D" | "1W" | "1M" | "3M" | "1Y";
@@ -24,7 +28,10 @@ const TTL_MS: Record<HistoryRange, number> = {
 const cache = new Map<string, { at: number; points: HistoricalPoint[] }>();
 const inFlight = new Map<string, Promise<HistoricalPoint[] | null>>();
 
-async function load(currency: Currency, range: HistoryRange): Promise<HistoricalPoint[] | null> {
+async function load(
+  currency: Currency,
+  range: HistoryRange,
+): Promise<HistoricalPoint[] | null> {
   const key = `${currency}:${range}`;
   const hit = cache.get(key);
   if (hit && Date.now() - hit.at < TTL_MS[range]) return hit.points;
@@ -34,9 +41,12 @@ async function load(currency: Currency, range: HistoryRange): Promise<Historical
 
   const request = (async () => {
     try {
-      const response = await fetch(`${apiUrl}/api/history/${currency}?range=${range}`, {
-        signal: AbortSignal.timeout(20_000),
-      });
+      const response = await fetch(
+        `${apiUrl}/api/history/${currency}?range=${range}`,
+        {
+          signal: AbortSignal.timeout(20_000),
+        },
+      );
       if (!response.ok) return null;
       const { points } = HistorySchema.parse(await response.json());
       cache.set(key, { at: Date.now(), points });
@@ -72,7 +82,11 @@ export function useHistoryResult(
     key: string;
     points: HistoricalPoint[] | null;
     done: boolean;
-  }>(() => ({ key, points: cache.get(key)?.points ?? null, done: cache.has(key) }));
+  }>(() => ({
+    key,
+    points: cache.get(key)?.points ?? null,
+    done: cache.has(key),
+  }));
   useEffect(() => {
     if (!enabled) return;
     let current = true;
@@ -92,6 +106,10 @@ export function useHistoryResult(
 }
 
 /** Observation series for a currency, or null while unknown/unavailable. */
-export function useHistory(currency: Currency, range: HistoryRange = "1D", enabled = true) {
+export function useHistory(
+  currency: Currency,
+  range: HistoryRange = "1D",
+  enabled = true,
+) {
   return useHistoryResult(currency, range, enabled).points;
 }

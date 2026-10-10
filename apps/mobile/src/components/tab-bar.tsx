@@ -15,17 +15,36 @@
  *
  * Tabs are declared in mirrored order by the layouts, so خانه sits on the right.
  */
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
-import { Keyboard, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import {
+  Keyboard,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Reanimated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import Reanimated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 import type { Tabs } from "expo-router";
 import { curve, persianText } from "../design-system";
 import { AppIcon } from "./primitives";
 import { useFeedback, useReduceMotion, useTheme } from "./theme";
 
 /** Props the navigator passes to `tabBar`, derived from the public Tabs API. */
-type TabBarProps = Parameters<NonNullable<React.ComponentProps<typeof Tabs>["tabBar"]>>[0];
+type TabBarProps = Parameters<
+  NonNullable<React.ComponentProps<typeof Tabs>["tabBar"]>
+>[0];
 
 export interface TabSpec {
   name: string;
@@ -68,8 +87,12 @@ export function FloatingTabBar({
   // up over the converter's input. Step aside while typing, as the system does.
   useEffect(() => {
     if (Platform.OS !== "android") return;
-    const show = Keyboard.addListener("keyboardDidShow", () => setKeyboard(true));
-    const hide = Keyboard.addListener("keyboardDidHide", () => setKeyboard(false));
+    const show = Keyboard.addListener("keyboardDidShow", () =>
+      setKeyboard(true),
+    );
+    const hide = Keyboard.addListener("keyboardDidHide", () =>
+      setKeyboard(false),
+    );
     return () => {
       show.remove();
       hide.remove();
@@ -91,7 +114,9 @@ export function FloatingTabBar({
       x.value = withSpring(target, { damping: 19, stiffness: 230, mass: 0.9 });
     }
   }, [state.index, itemWidth, reducedMotion, x]);
-  const capsule = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
+  const capsule = useAnimatedStyle(() => ({
+    transform: [{ translateX: x.value }],
+  }));
 
   if (keyboard) return null;
 
@@ -131,12 +156,17 @@ export function FloatingTabBar({
             overflow: "hidden",
             backgroundColor: fill,
             borderWidth: StyleSheet.hairlineWidth,
-            borderColor: t.dark ? "rgba(255, 255, 255, 0.14)" : "rgba(28, 22, 70, 0.10)",
+            borderColor: t.dark
+              ? "rgba(255, 255, 255, 0.14)"
+              : "rgba(28, 22, 70, 0.10)",
           },
           // React Native's types don't know backdrop-filter; react-native-web
           // passes it through to CSS.
           web
-            ? ({ backdropFilter: "blur(24px) saturate(180%)", WebkitBackdropFilter: "blur(24px) saturate(180%)" } as object)
+            ? ({
+                backdropFilter: "blur(24px) saturate(180%)",
+                WebkitBackdropFilter: "blur(24px) saturate(180%)",
+              } as object)
             : null,
         ]}
       >
@@ -148,7 +178,9 @@ export function FloatingTabBar({
             left: TAB_BAR.radius,
             right: TAB_BAR.radius,
             height: 1,
-            backgroundColor: t.dark ? "rgba(255, 255, 255, 0.22)" : "rgba(255, 255, 255, 1)",
+            backgroundColor: t.dark
+              ? "rgba(255, 255, 255, 0.22)"
+              : "rgba(255, 255, 255, 1)",
           }}
         />
       </View>
@@ -172,7 +204,9 @@ export function FloatingTabBar({
                 borderCurve: curve.continuous,
                 backgroundColor: t.accentFill,
                 borderWidth: 1,
-                borderColor: t.dark ? "rgba(167, 139, 250, 0.28)" : "rgba(109, 40, 217, 0.14)",
+                borderColor: t.dark
+                  ? "rgba(167, 139, 250, 0.28)"
+                  : "rgba(109, 40, 217, 0.14)",
               },
               capsule,
             ]}
@@ -187,8 +221,13 @@ export function FloatingTabBar({
           const onPress = () => {
             feedback.tap();
             // tabPress lets a screen react to (or veto) the switch, like the default bar.
-            const event = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
-            if (!focused && !event.defaultPrevented) navigation.navigate(route.name, route.params);
+            const event = navigation.emit({
+              type: "tabPress",
+              target: route.key,
+              canPreventDefault: true,
+            });
+            if (!focused && !event.defaultPrevented)
+              navigation.navigate(route.name, route.params);
           };
           return (
             <Pressable
@@ -197,8 +236,14 @@ export function FloatingTabBar({
               accessibilityState={{ selected: focused }}
               accessibilityLabel={tab.title}
               onPress={onPress}
-              onLongPress={() => navigation.emit({ type: "tabLongPress", target: route.key })}
-              android_ripple={{ color: t.accentFill, borderless: true, radius: 30 }}
+              onLongPress={() =>
+                navigation.emit({ type: "tabLongPress", target: route.key })
+              }
+              android_ripple={{
+                color: t.accentFill,
+                borderless: true,
+                radius: 30,
+              }}
               style={({ pressed }) => ({
                 flex: 1,
                 alignItems: "center",
@@ -207,7 +252,11 @@ export function FloatingTabBar({
                 opacity: pressed && Platform.OS !== "android" ? 0.7 : 1,
               })}
             >
-              <AppIcon name={focused ? tab.activeIcon : tab.icon} size={23} color={color} />
+              <AppIcon
+                name={focused ? tab.activeIcon : tab.icon}
+                size={23}
+                color={color}
+              />
               <Text
                 allowFontScaling={false}
                 numberOfLines={1}

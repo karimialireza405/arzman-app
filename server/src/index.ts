@@ -105,7 +105,8 @@ export class MarketStore extends DurableObject<Env> {
   }
   private async update() {
     const attempt = (await this.ctx.storage.get<number>("lastAttempt")) ?? 0;
-    const failures = (await this.ctx.storage.get<number>("consecutiveFailures")) ?? 0;
+    const failures =
+      (await this.ctx.storage.get<number>("consecutiveFailures")) ?? 0;
     const cooldown = cooldownMs(failures);
 
     if (Date.now() - attempt < cooldown) {
@@ -182,18 +183,42 @@ export class MarketStore extends DurableObject<Env> {
     const fallback = await this.ctx.storage.get<MarketSnapshot>("fallback");
     return {
       at: lastGoodAt(primary?.fetchedAt, fallback?.fetchedAt),
-      primaryAgeS: primary ? Math.round((now - Date.parse(primary.fetchedAt)) / 1000) : null,
-      fallbackAgeS: fallback ? Math.round((now - Date.parse(fallback.fetchedAt)) / 1000) : null,
+      primaryAgeS: primary
+        ? Math.round((now - Date.parse(primary.fetchedAt)) / 1000)
+        : null,
+      fallbackAgeS: fallback
+        ? Math.round((now - Date.parse(fallback.fetchedAt)) / 1000)
+        : null,
     };
   }
   private record(quotes: CurrencyQuote[]) {
     const sql = this.ctx.storage.sql;
     for (const q of quotes) {
       const stale = q.stale ? 1 : 0;
-      sql.exec(INSERT_OBSERVATION, q.currency, q.fetchedAt, q.priceToman, stale);
+      sql.exec(
+        INSERT_OBSERVATION,
+        q.currency,
+        q.fetchedAt,
+        q.priceToman,
+        stale,
+      );
       const iso = new Date(q.fetchedAt).toISOString();
-      sql.exec(UPSERT_HOURLY, q.currency, iso.slice(0, HOUR_LENGTH), q.fetchedAt, q.priceToman, stale);
-      sql.exec(UPSERT_DAILY, q.currency, iso.slice(0, DAY_LENGTH), q.fetchedAt, q.priceToman, stale);
+      sql.exec(
+        UPSERT_HOURLY,
+        q.currency,
+        iso.slice(0, HOUR_LENGTH),
+        q.fetchedAt,
+        q.priceToman,
+        stale,
+      );
+      sql.exec(
+        UPSERT_DAILY,
+        q.currency,
+        iso.slice(0, DAY_LENGTH),
+        q.fetchedAt,
+        q.priceToman,
+        stale,
+      );
     }
   }
   /** Drops expired rows, at most once an hour: nothing expires faster than that. */
@@ -204,8 +229,14 @@ export class MarketStore extends DurableObject<Env> {
     const sql = this.ctx.storage.sql;
     const cutoff = (ms: number) => new Date(now - ms).toISOString();
     sql.exec(RETENTION_DELETE, ...retentionParams(cutoff(RAW_RETENTION_MS)));
-    sql.exec(HOURLY_RETENTION_DELETE, ...retentionParams(cutoff(HOURLY_RETENTION_MS).slice(0, HOUR_LENGTH)));
-    sql.exec(DAILY_RETENTION_DELETE, ...retentionParams(cutoff(DAILY_RETENTION_MS).slice(0, DAY_LENGTH)));
+    sql.exec(
+      HOURLY_RETENTION_DELETE,
+      ...retentionParams(cutoff(HOURLY_RETENTION_MS).slice(0, HOUR_LENGTH)),
+    );
+    sql.exec(
+      DAILY_RETENTION_DELETE,
+      ...retentionParams(cutoff(DAILY_RETENTION_MS).slice(0, DAY_LENGTH)),
+    );
   }
   /**
    * The 20 extra currencies come from one overview page, on a slower cadence
@@ -219,15 +250,21 @@ export class MarketStore extends DurableObject<Env> {
     if (!usd) return;
     try {
       const html = await fetchOverviewHtml((input, init) => fetch(input, init));
-      const quotes = parseOverview(html, usd.priceToman, Date.now(), (currency, message) =>
-        console.error("extra_quote_rejected", { currency, message }),
+      const quotes = parseOverview(
+        html,
+        usd.priceToman,
+        Date.now(),
+        (currency, message) =>
+          console.error("extra_quote_rejected", { currency, message }),
       );
-      if (!quotes.length) throw new Error("No extra currency passed validation");
+      if (!quotes.length)
+        throw new Error("No extra currency passed validation");
       await this.ctx.storage.put("extras", quotes);
       this.record(quotes);
     } catch (error) {
       console.error("extras_refresh_failed", {
-        message: error instanceof Error ? error.message : "Unknown provider error",
+        message:
+          error instanceof Error ? error.message : "Unknown provider error",
       });
     }
   }
@@ -318,7 +355,8 @@ export class MarketStore extends DurableObject<Env> {
         ? await this.ctx.storage.get<MarketSnapshot>("fallback")
         : undefined;
     const useFallback =
-      !!fallback && Date.now() - Date.parse(fallback.fetchedAt) <= FALLBACK_MAX_AGE_MS;
+      !!fallback &&
+      Date.now() - Date.parse(fallback.fetchedAt) <= FALLBACK_MAX_AGE_MS;
     const saved = useFallback ? fallback : primary;
     if (!saved)
       return Response.json(
@@ -330,22 +368,26 @@ export class MarketStore extends DurableObject<Env> {
       );
     const extras =
       all || code?.success
-        ? ((await this.ctx.storage.get<CurrencyQuote[]>("extras")) ?? []).map((q) =>
-            useFallback || Date.now() - Date.parse(q.fetchedAt) > EXTRAS_INTERVAL_MS * 2
-              ? { ...q, stale: true }
-              : q,
+        ? ((await this.ctx.storage.get<CurrencyQuote[]>("extras")) ?? []).map(
+            (q) =>
+              useFallback ||
+              Date.now() - Date.parse(q.fetchedAt) > EXTRAS_INTERVAL_MS * 2
+                ? { ...q, stale: true }
+                : q,
           )
         : [];
     const merged = {
       ...saved,
       ...(useFallback && {
-        message: "TGJU در دسترس نیست؛ نرخ‌های اصلی موقتاً از منبع جایگزین (BRSAPI) است",
+        message:
+          "TGJU در دسترس نیست؛ نرخ‌های اصلی موقتاً از منبع جایگزین (BRSAPI) است",
       }),
       quotes: [...saved.quotes, ...extras],
     };
     const snapshot =
       !useFallback &&
-      (failed || Date.now() - Date.parse(saved.fetchedAt) > ACTIVE_INTERVAL_MS * 2)
+      (failed ||
+        Date.now() - Date.parse(saved.fetchedAt) > ACTIVE_INTERVAL_MS * 2)
         ? staleSnapshot(merged)
         : merged;
     if (code?.success) {
