@@ -16,6 +16,7 @@ import {
   CurrencySchema,
   alertMatches,
   isStale,
+  observationOf,
   type MarketSnapshot,
   type HistoricalPoint,
 } from "@arzman/shared";
@@ -184,12 +185,7 @@ function useAppStore() {
           notifyBrowser(next);
         }
         for (const q of data.quotes)
-          previous.current[q.currency] = {
-            timestamp: q.fetchedAt,
-            priceToman: q.priceToman,
-            source: "TGJU",
-            stale: isStale(q),
-          };
+          previous.current[q.currency] = observationOf(q, now);
       } catch {
         if (active.current) {
           setOnline(false);
